@@ -86,4 +86,4 @@ Change aussi `appId` dans `capacitor.config.json` pour un identifiant à toi.
 
 ## Licence
 
-© 2026 madaratn. Tous droits réservés. Ce projet n'est pas libre de droits : voir le fichier [LICENSE](LICENSE). Toute copie, modification, redistribution ou utilisation commerciale est interdite sans autorisation écrite.
+© 2026 Ali Mezghenni. Tous droits réservés. Ce projet n'est pas libre de droits : voir le fichier [LICENSE](LICENSE). Toute copie, modification, redistribution ou utilisation commerciale est interdite sans autorisation écrite.
