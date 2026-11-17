@@ -27,8 +27,7 @@ OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 ## Police Fredoka
 
-SIL Open Font License, version 1.1. Copyright © The Fredoka Project Authors
-(https://github.com/hafontia-zz/Fredoka). La police est intégrée au jeu ; elle ne
+SIL Open Font License, version 1.1. Copyright © The Fredoka Project Authors. La police est intégrée au jeu ; elle ne
 peut pas être vendue seule. Texte de la licence : https://openfontlicense.org
 
 ## Outils de fabrication (non distribués avec le jeu)
