@@ -1,0 +1,8 @@
+# v0.22 : le joueur donne un coup de main (servir une commande prête, débarrasser une table)
+RP("let mode='play',placing=null,sel=null,ghost=null;","let mode='play',placing=null,sel=null,ghost=null,picked=null;")
+RP(" const o=j.o;\n if(o.cancel){ a.job=null; a.carry=null; return; }\n if(j.s==='pick')"," const o=j.o;\n if(o.cancel||(o.st==='served'&&j.s==='pick')||(o.st==='eat')){ a.job=null; a.carry=null; return; }\n if(o.c&&o.c.st!=='wait'&&j.s==='pick'){ a.job=null; a.carry=null; return; }\n if(j.s==='pick')")
+RP(" if(d.cancel){ if(j.st) barBusy.delete(j.st.id); a.job=null; a.carry=null; return; }"," if(d.cancel||(d.st==='served'&&j.s==='dpick')){ if(j.st) barBusy.delete(j.st.id); a.job=null; a.carry=null; return; }")
+RP(" if(j.s==='go'){ if(tableOccupied(t)){ cleaning.delete(t.id); a.tub=0; a.job=null; return; }"," if(j.s==='go'&&!(dirty.get(t.id)>0)){ cleaning.delete(t.id); a.tub=0; a.job=null; return; }\n if(j.s==='go'){ if(tableOccupied(t)){ cleaning.delete(t.id); a.tub=0; a.job=null; return; }")
+RP("Fais glisser pour te déplacer","Tu peux donner un coup de main : touche un plat prêt sur le passe-plat puis le client qui l'attend, ou touche une table sale pour la débarrasser. Fais glisser pour te déplacer")
+RP(" const NEWS=[];",""" const NEWS=[];
+ if(!state.help1){ state.help1=1; if(loaded) NEWS.push(`<div class="row"><div class="emo">👆</div><div class="info"><div class="t">Donne un coup de main</div><div class="sub">Touche un plat prêt sur le passe-plat, puis le client qui l'attend, pour le servir toi-même. Touche une table sale et vide pour la débarrasser. Chaque geste rapporte 1 XP.</div></div></div>`); }""")

@@ -1,0 +1,8 @@
+{
+  "appId": "com.bistroville.app",
+  "appName": "Bistro Ville",
+  "webDir": "www",
+  "backgroundColor": "#8fd37a",
+  "android": { "allowMixedContent": false },
+  "ios": { "contentInset": "never" }
+}

@@ -1,0 +1,1132 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#ff7a2f">
+<title>Bistro Ville</title>
+<style>
+:root{--accent:#ff7a2f;--accent2:#ffb347;--ink:#3b2a1a;--panel:#fff8ef;--good:#2f9e63;--bad:#e5484d}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;-webkit-user-select:none;user-select:none}
+html,body{margin:0;height:100%;overflow:hidden;background:#8fd37a;font-family:"Trebuchet MS","Nunito",system-ui,sans-serif;color:var(--ink);touch-action:none;overscroll-behavior:none}
+canvas{display:block;position:fixed;inset:0;width:100%;height:100%}
+#top{position:fixed;top:0;left:0;right:0;padding:calc(env(safe-area-inset-top) + 8px) 8px 6px;display:flex;gap:6px;align-items:center;z-index:5;pointer-events:none;flex-wrap:wrap}
+.pill{background:rgba(255,248,239,.96);border-radius:999px;padding:6px 11px;font-weight:800;box-shadow:0 2px 0 rgba(0,0,0,.18);display:flex;align-items:center;gap:5px;font-size:15px;pointer-events:auto;position:relative;overflow:hidden;cursor:pointer}
+#xpbar{position:absolute;left:0;bottom:0;height:4px;background:var(--accent);transition:width .3s}
+#spacer{flex:1}
+#bottom,#editbar{position:fixed;left:0;right:0;bottom:0;padding:8px 6px calc(env(safe-area-inset-bottom) + 8px);display:flex;justify-content:center;gap:5px;z-index:5;flex-wrap:wrap}
+#editbar{flex-direction:column;align-items:center;background:linear-gradient(transparent,rgba(0,0,0,.25))}
+#einfo{background:var(--panel);border-radius:12px;padding:7px 12px;font-weight:700;font-size:14px;text-align:center;box-shadow:0 2px 0 rgba(0,0,0,.18);max-width:520px}
+.erow{display:flex;gap:6px;flex-wrap:wrap;justify-content:center}
+.btn{border:none;background:var(--panel);border-radius:16px;padding:6px 4px 5px;min-width:56px;font-weight:800;font-size:11px;color:var(--ink);box-shadow:0 3px 0 rgba(0,0,0,.22);display:flex;flex-direction:column;align-items:center;gap:2px;cursor:pointer;font-family:inherit;position:relative}
+.btn span{font-size:24px;line-height:1}
+.btn:active,.b:active{transform:translateY(2px);box-shadow:0 1px 0 rgba(0,0,0,.2)}
+.dot{position:absolute;top:2px;right:4px;background:var(--bad);color:#fff;border-radius:99px;font-size:10px;padding:1px 5px}
+.b{border:none;border-radius:12px;padding:8px 12px;font-weight:800;font-size:14px;font-family:inherit;cursor:pointer;background:var(--accent);color:#fff;box-shadow:0 3px 0 #c4561a}
+.b.alt{background:#fff;color:var(--ink);box-shadow:0 3px 0 rgba(0,0,0,.18)}
+.b.green{background:var(--good);box-shadow:0 3px 0 #1f6e44}
+.b.red{background:var(--bad);box-shadow:0 3px 0 #a5282c}
+.b:disabled{opacity:.45;pointer-events:none}
+.b.sm{padding:5px 9px;font-size:12px}
+.hide{display:none!important}
+#modal{position:fixed;inset:0;background:rgba(40,25,10,.45);z-index:10;display:flex;align-items:flex-end;justify-content:center}
+.sheet{background:var(--panel);width:100%;max-width:560px;max-height:86vh;border-radius:22px 22px 0 0;display:flex;flex-direction:column;padding-bottom:env(safe-area-inset-bottom);animation:up .22s ease-out}
+@keyframes up{from{transform:translateY(40px);opacity:0}}
+@media(min-width:700px){#modal{align-items:center}.sheet{border-radius:22px;max-height:80vh}}
+.mh{display:flex;align-items:center;padding:14px 16px 6px}
+.mh h2{margin:0;font-size:20px;flex:1}
+#mx{border:none;background:#f0e2cf;border-radius:50%;width:34px;height:34px;font-size:16px;cursor:pointer;color:var(--ink)}
+#tabs{display:flex;gap:6px;padding:4px 14px 8px;overflow-x:auto;flex-shrink:0}
+#tabs button{border:none;border-radius:99px;padding:6px 12px;background:#f0e2cf;font-weight:800;font-family:inherit;color:var(--ink);white-space:nowrap;cursor:pointer}
+#tabs button.on{background:var(--accent);color:#fff}
+#mc{overflow-y:auto;padding:4px 14px 18px;-webkit-overflow-scrolling:touch;touch-action:pan-y}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(104px,1fr));gap:8px}
+.card{background:#fff;border-radius:14px;padding:8px 6px;text-align:center;box-shadow:0 2px 0 rgba(0,0,0,.08);display:flex;flex-direction:column;align-items:center;gap:3px;font-size:13px}
+.card img{width:70px;height:70px}
+.card .nm{font-weight:800;line-height:1.1;min-height:2.2em;display:flex;align-items:center}
+.card.lock{opacity:.55}
+.sub{font-size:12px;opacity:.75}
+.row{display:flex;align-items:center;gap:10px;background:#fff;border-radius:14px;padding:9px;margin-bottom:8px;box-shadow:0 2px 0 rgba(0,0,0,.07)}
+.row .emo{font-size:32px;width:42px;text-align:center}
+.row .info{flex:1;min-width:0}
+.row .t{font-weight:800}
+.ings{display:flex;flex-wrap:wrap;gap:4px;margin-top:3px}
+.ings span{font-size:12px;background:#f4ece1;border-radius:8px;padding:2px 6px}
+.ings span.no{background:#fde2e2;color:#a5282c}
+.ings span.ok{background:#dff3e6;color:#1f6e44}
+.stars{color:#f5a623;letter-spacing:1px}
+h3{margin:12px 0 6px;font-size:15px}
+.plots{display:grid;grid-template-columns:repeat(auto-fill,minmax(96px,1fr));gap:8px}
+.plot{background:#9b6a43;border-radius:14px;padding:8px;color:#fff;text-align:center;min-height:118px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;box-shadow:inset 0 -4px 0 rgba(0,0,0,.2)}
+.plot .big{font-size:34px}
+.bar{width:100%;height:7px;background:rgba(0,0,0,.25);border-radius:9px;overflow:hidden}
+.bar i{display:block;height:100%;background:#7ee08f}
+.qa{display:flex;flex-direction:column;gap:8px;margin-top:10px}
+.qa button{text-align:left}
+.qa .b.alt.okk{background:#dff3e6;box-shadow:0 3px 0 #2f9e63}
+.qa .b.alt.bad{background:#fde2e2;box-shadow:0 3px 0 #e5484d}
+#toast{position:fixed;left:50%;top:calc(env(safe-area-inset-top) + 62px);transform:translateX(-50%);background:rgba(59,42,26,.92);color:#fff;padding:8px 14px;border-radius:12px;font-weight:700;z-index:20;font-size:14px;transition:opacity .3s;pointer-events:none;max-width:90vw;text-align:center}
+input[type=text]{font-family:inherit;font-size:16px;padding:8px 10px;border-radius:10px;border:2px solid #e7d6bf;width:100%;-webkit-user-select:text;user-select:text}
+.center{text-align:center}
+.lvlup{font-size:60px;text-align:center;margin:6px 0}
+</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+
+<div id="top">
+  <div class="pill" id="pCoins">🪙 <b id="coins">0</b></div>
+  <div class="pill" id="pLvl">⭐ Niv. <b id="lvl">1</b><div id="xpbar"></div></div>
+  <div class="pill" id="pRate"><span class="stars">★</span> <b id="rate">0</b></div>
+  <div id="spacer"></div>
+  <div class="pill" id="pSet">⚙️</div>
+</div>
+
+<div id="bottom">
+  <button class="btn" data-open="shop"><span>🛒</span>Boutique</button>
+  <button class="btn" data-open="menu"><span>📖</span>Menu</button>
+  <button class="btn" data-open="garden"><span>🌱</span>Jardin<i class="dot hide" id="gDot">!</i></button>
+  <button class="btn" data-open="staff"><span>👥</span>Équipe</button>
+  <button class="btn" data-open="quiz"><span>❓</span>Quiz<i class="dot hide" id="qDot">!</i></button>
+  <button class="btn" id="bEdit"><span>✏️</span>Déco</button>
+</div>
+
+<div id="editbar" class="hide">
+  <div id="einfo"></div>
+  <div class="erow" id="ebtns"></div>
+</div>
+
+<div id="modal" class="hide">
+  <div class="sheet">
+    <div class="mh"><h2 id="mt"></h2><button id="mx">✕</button></div>
+    <div id="tabs"></div>
+    <div id="mc"></div>
+  </div>
+</div>
+<div id="toast" style="opacity:0"></div>
+
+<script>
+'use strict';
+/* =========================================================
+   BISTRO VILLE — prototype v0.1
+   Jeu de gestion de restaurant isométrique (HTML5 Canvas)
+   ========================================================= */
+const TW=64, TH=32, WH=66;
+const EMO='"Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif';
+const $=s=>document.querySelector(s);
+const rnd=(a,b)=>a+Math.random()*(b-a);
+const ri=(a,b)=>Math.floor(rnd(a,b+1));
+const pick=a=>a[Math.floor(Math.random()*a.length)];
+const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+const D4=[[1,0],[-1,0],[0,1],[0,-1]];
+const fmt=n=>Math.floor(n).toLocaleString('fr-FR');
+
+/* ---------------- DONNÉES ---------------- */
+const ING={
+ laitue:{n:'Laitue',e:'🥬',g:{c:8,t:45,y:3,u:1}},
+ tomate:{n:'Tomate',e:'🍅',g:{c:10,t:60,y:3,u:1}},
+ ble:{n:'Farine',e:'🌾',g:{c:8,t:50,y:3,u:1}},
+ carotte:{n:'Carotte',e:'🥕',g:{c:10,t:60,y:3,u:2}},
+ oignon:{n:'Oignon',e:'🧅',g:{c:12,t:80,y:3,u:2}},
+ patate:{n:'Pomme de terre',e:'🥔',g:{c:10,t:75,y:3,u:3}},
+ fraise:{n:'Fraise',e:'🍓',g:{c:18,t:120,y:3,u:3}},
+ piment:{n:'Piment',e:'🌶️',g:{c:15,t:100,y:4,u:4}},
+ pomme:{n:'Pomme',e:'🍎',g:{c:20,t:150,y:3,u:5}},
+ champi:{n:'Champignon',e:'🍄',g:{c:18,t:110,y:3,u:6}},
+ fromage:{n:'Fromage',e:'🧀',b:20},
+ oeuf:{n:'Œuf',e:'🥚',b:10},
+ lait:{n:'Lait',e:'🥛',b:10},
+ viande:{n:'Viande',e:'🍖',b:28},
+ poulet:{n:'Poulet',e:'🐔',b:26},
+ riz:{n:'Riz',e:'🍚',b:14},
+ poisson:{n:'Poisson',e:'🐟',b:32},
+};
+const DISH=[
+ {id:'salade',n:'Salade du jardin',e:'🥗',c:'Entrée',ing:['laitue','tomate'],p:12,t:4,u:1},
+ {id:'soupe',n:'Soupe de légumes',e:'🍲',c:'Entrée',ing:['carotte','oignon'],p:15,t:5,u:2},
+ {id:'omelette',n:'Omelette au fromage',e:'🍳',c:'Entrée',ing:['oeuf','fromage'],p:18,t:5,u:3},
+ {id:'pizza',n:'Pizza Margherita',e:'🍕',c:'Plat',ing:['ble','tomate','fromage'],p:28,t:7,u:1},
+ {id:'burger',n:'Burger maison',e:'🍔',c:'Plat',ing:['ble','viande','laitue'],p:34,t:8,u:2},
+ {id:'pates',n:'Pâtes bolognaise',e:'🍝',c:'Plat',ing:['ble','tomate','viande'],p:32,t:7,u:4},
+ {id:'steak',n:'Steak frites',e:'🥩',c:'Plat',ing:['viande','patate'],p:40,t:9,u:5},
+ {id:'poulet',n:'Poulet rôti',e:'🍗',c:'Plat',ing:['poulet','patate','oignon'],p:44,t:10,u:6},
+ {id:'sushi',n:'Plateau de sushis',e:'🍣',c:'Plat',ing:['riz','poisson'],p:50,t:9,u:7},
+ {id:'curry',n:'Curry épicé',e:'🍛',c:'Plat',ing:['riz','poulet','piment'],p:54,t:10,u:9},
+ {id:'ramen',n:'Ramen',e:'🍜',c:'Plat',ing:['ble','oeuf','poulet','champi'],p:62,t:11,u:11},
+ {id:'crepe',n:'Crêpe sucrée',e:'🥞',c:'Dessert',ing:['ble','oeuf','lait'],p:14,t:5,u:1},
+ {id:'glace',n:'Coupe glacée',e:'🍨',c:'Dessert',ing:['lait','fraise'],p:16,t:4,u:3},
+ {id:'tarte',n:'Tarte aux pommes',e:'🥧',c:'Dessert',ing:['ble','pomme','oeuf'],p:24,t:7,u:5},
+ {id:'gateau',n:'Fraisier',e:'🍰',c:'Dessert',ing:['ble','oeuf','lait','fraise'],p:30,t:8,u:8},
+];
+const DISHM=Object.fromEntries(DISH.map(d=>[d.id,d]));
+const FURN={
+ table:{n:'Table bistro',cat:'Tables',p:80,d:1,u:1,kind:'table',col:'#c98b52',cloth:'#ffffff'},
+ table2:{n:'Table nappe rouge',cat:'Tables',p:150,d:2,u:2,kind:'table',col:'#9b6234',cloth:'#e5484d'},
+ table3:{n:'Table nappe bleue',cat:'Tables',p:220,d:3,u:3,kind:'table',col:'#7a5a3a',cloth:'#4f8ff7'},
+ table4:{n:'Table marbre',cat:'Tables',p:380,d:5,u:6,kind:'table',col:'#8a8f98',cloth:'#eef1f5'},
+ chair:{n:'Chaise en bois',cat:'Chaises',p:40,d:.5,u:1,kind:'chair',col:'#b0743f'},
+ chair2:{n:'Chaise rouge',cat:'Chaises',p:70,d:1,u:2,kind:'chair',col:'#d9363e'},
+ chair3:{n:'Chaise menthe',cat:'Chaises',p:110,d:1.5,u:4,kind:'chair',col:'#3fbf9b'},
+ chair4:{n:'Fauteuil velours',cat:'Chaises',p:180,d:2.5,u:7,kind:'chair',col:'#6c4bd1'},
+ stove:{n:'Fourneau',cat:'Cuisine',p:200,d:0,u:1,kind:'stove',col:'#dfe3e8',speed:1},
+ stove2:{n:'Fourneau pro',cat:'Cuisine',p:650,d:1,u:4,kind:'stove',col:'#f4d35e',speed:1.6},
+ counter:{n:'Comptoir',cat:'Cuisine',p:150,d:0,u:1,kind:'counter',col:'#a8693a'},
+ plant:{n:'Plante verte',cat:'Déco',p:60,d:2,u:1,kind:'plant'},
+ flowers:{n:'Pot de fleurs',cat:'Déco',p:90,d:3,u:2,kind:'flowers'},
+ lamp:{n:'Lampadaire',cat:'Déco',p:130,d:3,u:3,kind:'lamp'},
+ jukebox:{n:'Juke-box',cat:'Déco',p:420,d:8,u:4,kind:'jukebox'},
+ aquarium:{n:'Aquarium',cat:'Déco',p:750,d:12,u:6,kind:'aquarium'},
+ fountain:{n:'Fontaine',cat:'Déco',p:1300,d:18,u:8,kind:'fountain'},
+ statue:{n:'Statue dorée',cat:'Déco',p:2600,d:30,u:10,kind:'statue'},
+};
+const FLOORS=[
+ {n:'Damier crème',a:'#f4e4c6',b:'#e8d1a8',p:0,d:0,u:1},
+ {n:'Parquet chêne',a:'#c9935e',b:'#bd8752',p:250,d:2,u:2},
+ {n:'Carreaux bleus',a:'#d4e7f7',b:'#b1d0ee',p:500,d:3,u:3},
+ {n:'Damier rétro',a:'#f7f7f2',b:'#3a3f4b',p:800,d:5,u:5},
+ {n:'Marbre rose',a:'#f6dde3',b:'#ecc6cf',p:1500,d:7,u:8},
+];
+const WALLS=[
+ {n:'Crème',c:'#f6e7c8',p:0,d:0,u:1},
+ {n:'Rayures menthe',c:'#bfe8d4',s:'#a6dcc2',p:300,d:2,u:2},
+ {n:'Brique',c:'#c8634a',brick:1,p:600,d:4,u:4},
+ {n:'Bleu nuit',c:'#3d4f7a',p:900,d:5,u:6},
+ {n:'Rose bonbon',c:'#f7c6d9',s:'#f2b0c9',p:1200,d:6,u:8},
+];
+const EXP=[{s:8,u:1,p:0},{s:9,u:3,p:800},{s:10,u:5,p:2500},{s:12,u:8,p:7000},{s:14,u:12,p:18000}];
+const ROLES={chef:{n:'Cuisinier',e:'👨‍🍳',u:1},waiter:{n:'Serveur',e:'🤵',u:1},cleaner:{n:'Agent d\'entretien',e:'🧹',u:2}};
+const NAMES=['Léa','Hugo','Chloé','Lucas','Inès','Nathan','Manon','Yanis','Camille','Théo','Sarah','Adam','Jade','Louis','Zoé','Rayan','Lina','Malik','Emma','Sami'];
+const SKINS=['#f8d5b5','#f1c27d','#e0ac69','#c68642','#8d5524','#ffe0c4'];
+const HAIRS=['#2b1b0e','#5a3a1a','#b5651d','#e6c15a','#1a1a1a','#a0522d','#d94f2b','#7a7a7a'];
+const BODIES=['#4f8ff7','#f76b8a','#4fc28f','#f7b84f','#9b6bf7','#f78f4f','#4fd1d9','#e05656','#6d7cff'];
+const QUIZ=[
+ ['De quel pays vient la paella ?',['Espagne','Italie','Portugal','Mexique']],
+ ['Quel fromage met-on sur une pizza Margherita ?',['Mozzarella','Comté','Roquefort','Cheddar']],
+ ['Le guacamole est à base de…',['Avocat','Petits pois','Concombre','Courgette']],
+ ['Quelle est l\'épice la plus chère au monde (au poids) ?',['Safran','Cannelle','Poivre','Paprika']],
+ ['Avec quel légume fait-on les frites ?',['Pomme de terre','Patate douce','Navet','Carotte']],
+ ['Quel fruit sec est à la base du massepain ?',['Amande','Noisette','Noix','Pistache']],
+ ['La ratatouille est une spécialité de quelle région ?',['Provence','Bretagne','Alsace','Normandie']],
+ ['Que signifie « al dente » pour des pâtes ?',['Cuites mais encore fermes','Très cuites','Crues','Grillées']],
+ ['Le camembert est un fromage de…',['Normandie','Savoie','Auvergne','Corse']],
+ ['Qu\'est-ce qui fait lever la pâte à pain ?',['La levure','Le sel','Le sucre','L\'huile']],
+ ['Le tiramisu est un dessert…',['Italien','Français','Espagnol','Grec']],
+ ['Quel ingrédient de base utilise-t-on pour un risotto ?',['Du riz','Du blé','De l\'orge','Du maïs']],
+ ['La choucroute est faite à partir de…',['Chou','Navet','Poireau','Céleri']],
+ ['Quel fruit sert à faire le cidre ?',['La pomme','Le raisin','La prune','La cerise']],
+ ['À quelle température l\'eau bout-elle au niveau de la mer ?',['100 °C','90 °C','80 °C','120 °C']],
+ ['La bouillabaisse est une spécialité de…',['Marseille','Lyon','Lille','Bordeaux']],
+ ['De quel arbre vient le chocolat ?',['Le cacaoyer','Le caféier','Le vanillier','Le palmier']],
+ ['Le houmous est fait à base de…',['Pois chiches','Lentilles','Haricots rouges','Fèves']],
+ ['Les macarons parisiens contiennent de la poudre de…',['Amande','Coco','Noisette','Riz']],
+ ['Quel pays produit le plus de café au monde ?',['Brésil','Colombie','Éthiopie','Italie']],
+ ['La crème chantilly, c\'est de la crème…',['Fouettée et sucrée','Cuite','Caillée','Salée']],
+ ['Le pesto genovese est surtout fait avec du…',['Basilic','Persil','Thym','Coriandre']],
+ ['Le sushi vient de quel pays ?',['Japon','Chine','Thaïlande','Corée']],
+ ['Quel légume donne sa couleur au bortsch ?',['La betterave','La tomate','Le poivron','Le chou rouge']],
+ ['La tarte Tatin est une tarte…',['Renversée aux pommes','Aux fraises','Au citron','Au chocolat']],
+];
+
+/* ---------------- ÉTAT ---------------- */
+const SAVE_KEY='bistroville_v1';
+function newState(){
+ return {v:1,name:'Chez Toi',coins:600,xp:0,level:1,size:8,floor:0,wall:0,ownF:[0],ownW:[0],
+  furn:[],nid:1,menu:['salade','pizza','crepe'],dl:{},inv:{laitue:2,tomate:3,ble:3,fromage:1,oeuf:1,lait:1},
+  garden:[null,null,null,null],staff:[],quiz:{day:'',n:0,seen:[]},sat:70,served:0,earned:0,
+  lastSave:Date.now(),tuto:false,sound:true};
+}
+let state;
+function defaultLayout(){
+ const L=[['stove',1,0],['stove',2,0],['counter',4,0],['plant',0,0],['plant',7,0],
+  ['table',2,4],['chair',1,4],['chair',3,4],['table',5,4],['chair',5,3],['chair',5,5],
+  ['table',6,6],['chair',6,5],['chair',7,6],['flowers',0,7],['plant',0,3]];
+ for(const [t,x,y] of L) state.furn.push({id:state.nid++,t,x,y});
+ state.staff.push(mkStaffData('chef'),mkStaffData('waiter'));
+}
+function mkStaffData(role){
+ const used=new Set(state.staff.map(s=>s.name));
+ const name=pick(NAMES.filter(n=>!used.has(n)))||pick(NAMES);
+ return {id:state.nid++,name,role,xp:0,skin:pick(SKINS),hair:pick(HAIRS),body:pick(BODIES)};
+}
+function save(){ if(!state) return; state.lastSave=Date.now(); try{localStorage.setItem(SAVE_KEY,JSON.stringify(state));}catch(e){} }
+function load(){ try{const s=localStorage.getItem(SAVE_KEY); if(s){const o=JSON.parse(s); if(o&&o.v===1) return Object.assign(newState(),o);}}catch(e){} return null; }
+
+/* ---------------- GRILLE & CHEMINS ---------------- */
+let S=8, DX=4, occ=new Map();
+function setSize(){ S=state.size; DX=Math.floor(S/2); rebuildOcc(); }
+function rebuildOcc(){ occ=new Map(); for(const f of state.furn) occ.set(f.x+','+f.y,f); }
+const fAt=(x,y)=>occ.get(x+','+y);
+const kindOf=f=>FURN[f.t].kind;
+const inRest=(x,y)=>x>=0&&y>=0&&x<S&&y<S;
+const inWalk=(x,y)=>x>=0&&x<S&&y>=0&&y<=S+1;
+function blocked(x,y){ if(!inWalk(x,y)) return true; return y<S && occ.has(x+','+y); }
+function doorOK(ax,ay,bx,by){ if((ay===S-1&&by===S)||(ay===S&&by===S-1)) return ax===DX&&bx===DX; return true; }
+function bfs(sx,sy,isGoal,goalPass){
+ if(!inWalk(sx,sy)) return null;
+ if(isGoal(sx,sy)) return [];
+ const Wd=S,N=S*(S+2),prev=new Int32Array(N).fill(-2),si=sy*Wd+sx; prev[si]=-1;
+ const q=[si]; let h=0;
+ while(h<q.length){
+  const ci=q[h++], cx=ci%Wd, cy=(ci/Wd)|0;
+  for(const [dx,dy] of D4){
+   const nx=cx+dx, ny=cy+dy; if(!inWalk(nx,ny)) continue;
+   const ni=ny*Wd+nx; if(prev[ni]!==-2) continue;
+   if(!doorOK(cx,cy,nx,ny)) continue;
+   const g=isGoal(nx,ny);
+   if(blocked(nx,ny)&&!(g&&goalPass)) continue;
+   prev[ni]=ci;
+   if(g){ const p=[]; let k=ni; while(k!==si){p.push([k%Wd,(k/Wd)|0]); k=prev[k];} return p.reverse(); }
+   q.push(ni);
+  }
+ }
+ return null;
+}
+function pathToFurn(a,f){ return bfs(a.x,a.y,(x,y)=>inRest(x,y)&&!blocked(x,y)&&Math.abs(x-f.x)<=1&&Math.abs(y-f.y)<=1&&!(x===f.x&&y===f.y),false); }
+function nearestFree(x,y){
+ for(let r=0;r<=S+2;r++) for(let dx=-r;dx<=r;dx++) for(let dy=-r;dy<=r;dy++){
+  if(Math.max(Math.abs(dx),Math.abs(dy))!==r) continue; const nx=x+dx, ny=y+dy;
+  if(inRest(nx,ny)&&!blocked(nx,ny)) return [nx,ny];
+ }
+ return [DX,S-1];
+}
+function seatTable(ch){ for(const [dx,dy] of D4){ const f=fAt(ch.x+dx,ch.y+dy); if(f&&kindOf(f)==='table') return f; } return null; }
+function seatCount(){ return state.furn.filter(f=>kindOf(f)==='chair'&&seatTable(f)).length; }
+// Vérifie que tout reste accessible depuis la porte
+function layoutOK(){
+ if(blocked(DX,S-1)) return false;
+ const seen=new Set([DX+','+(S-1)]), q=[[DX,S-1]];
+ while(q.length){ const [x,y]=q.pop(); for(const [dx,dy] of D4){ const nx=x+dx, ny=y+dy, k=nx+','+ny; if(inRest(nx,ny)&&!seen.has(k)&&!blocked(nx,ny)){seen.add(k);q.push([nx,ny]);} } }
+ for(const f of state.furn){
+  const k=kindOf(f); if(!['chair','stove','counter','table'].includes(k)) continue;
+  let ok=false;
+  for(let dx=-1;dx<=1&&!ok;dx++) for(let dy=-1;dy<=1&&!ok;dy++){
+   if(!dx&&!dy) continue; if(k==='chair'&&dx&&dy) continue;
+   if(seen.has((f.x+dx)+','+(f.y+dy))) ok=true;
+  }
+  if(!ok) return false;
+ }
+ return true;
+}
+
+/* ---------------- PROGRESSION ---------------- */
+const xpNeed=l=>Math.round(40*Math.pow(l,1.45));
+const lvl=id=>state.dl[id]||1;
+const dishPrice=d=>Math.round(d.p*(1+.18*(lvl(d.id)-1)));
+const menuSlots=()=>Math.min(6,3+Math.floor(state.level/3));
+const maxStaff=()=>Math.min(8,2+Math.floor(state.level/2));
+const hireCost=()=>Math.round(150*Math.pow(state.staff.length,1.3)/10)*10;
+const maxPlots=()=>Math.min(12,4+2*Math.floor(state.level/3));
+const plotCost=()=>100*(state.garden.length-3);
+const today=()=>{const d=new Date();return d.getFullYear()+'-'+(d.getMonth()+1)+'-'+d.getDate();};
+const QUIZ_PER_DAY=5;
+function quizLeft(){ if(state.quiz.day!==today()){state.quiz.day=today();state.quiz.n=0;} return QUIZ_PER_DAY-state.quiz.n; }
+function earn(n){ state.coins+=n; state.earned+=n; }
+function addXP(n){
+ state.xp+=n;
+ while(state.xp>=xpNeed(state.level)){ state.xp-=xpNeed(state.level); state.level++; levelUp(); }
+}
+function levelUp(){
+ sfx('level');
+ const L=state.level, un=[];
+ DISH.filter(d=>d.u===L).forEach(d=>un.push(d.e+' '+d.n));
+ Object.values(FURN).filter(f=>f.u===L).forEach(f=>un.push(({Tables:'🍽️',Chaises:'🪑',Cuisine:'🍳','Déco':'🪴'})[f.cat]+' '+f.n));
+ Object.values(ING).filter(i=>i.g&&i.g.u===L).forEach(i=>un.push(i.e+' Graines : '+i.n));
+ FLOORS.filter(f=>f.u===L).forEach(f=>un.push('🟫 Sol : '+f.n));
+ WALLS.filter(f=>f.u===L).forEach(f=>un.push('🧱 Mur : '+f.n));
+ EXP.filter(e=>e.u===L&&e.p).forEach(e=>un.push('📐 Agrandissement '+e.s+'×'+e.s));
+ if(L%3===0&&menuSlots()<=6) un.push('📖 Une place de plus au menu');
+ if(L%2===0) un.push('👥 Une place de plus dans l\'équipe');
+ if(L===2) un.push('🧹 Agents d\'entretien');
+ queueModal(()=>({title:'Niveau supérieur !',html:`<div class="lvlup">🎉</div><p class="center"><b>Bravo, tu passes au niveau ${L} !</b></p>`+(un.length?`<h3>Débloqué :</h3>`+un.map(u=>`<div class="row"><div class="info">${u}</div></div>`).join(''):'')+`<p class="center"><button class="b" data-a="close">Super !</button></p>`}));
+}
+
+/* ---------------- SIMULATION ---------------- */
+let custs=[],crew=[],orders=[],trash=[],items=[],floaters=[];
+let dirty=new Map(),stoveBusy=new Set(),cleaning=new Set();
+let spawnT=2,passT=3,itemT=15,rating=2.5,rParts={d:0,m:0,s:0,dirt:0},uid=1;
+let mode='play',placing=null,sel=null,ghost=null;
+
+function mkAgent(o){return Object.assign({x:0,y:0,fx:0,fy:0,path:[],speed:2.2,ph:Math.random()*6,dir:1,moving:false},o);}
+function moveAgent(a,dt){
+ if(!a.path.length) return true;
+ const n=a.path[0], dx=n[0]-a.fx, dy=n[1]-a.fy, d=Math.hypot(dx,dy), st=a.speed*dt;
+ a.moving=true; a.ph+=dt*7;
+ if(Math.abs(dx-dy)>.01) a.dir=(dx-dy)>0?1:-1;
+ if(d<=st){ a.fx=a.x=n[0]; a.fy=a.y=n[1]; a.path.shift(); return !a.path.length; }
+ a.fx+=dx/d*st; a.fy+=dy/d*st; return false;
+}
+function randLook(){return {skin:pick(SKINS),hair:pick(HAIRS),body:pick(BODIES),long:Math.random()<.45};}
+const staffLv=s=>Math.min(5,1+Math.floor(s.xp/25));
+const staffMul=a=>1+.12*(staffLv(a.s)-1);
+function mkCrew(s){ const p=nearestFree(2,1); return mkAgent({kind:'staff',s,x:p[0],y:p[1],fx:p[0],fy:p[1],look:{skin:s.skin,hair:s.hair,body:s.body},job:null,idle:0}); }
+function buildCrew(){ crew=state.staff.map(mkCrew); }
+function gainStaff(a){ const b=staffLv(a.s); a.s.xp++; if(staffLv(a.s)>b){ floatAt(a.fx,a.fy,'⬆️ '+a.s.name,'#2f9e63'); } a.speed=2.4*staffMul(a); }
+
+function takenSeats(){ return new Set(custs.filter(c=>c.seat).map(c=>c.seat.id)); }
+function tryGetSeat(c){
+ const tk=takenSeats();
+ const seats=state.furn.filter(f=>kindOf(f)==='chair'&&!tk.has(f.id)&&seatTable(f));
+ for(let i=0;i<4&&seats.length;i++){
+  const s=seats.splice(Math.floor(Math.random()*seats.length),1)[0];
+  const p=bfs(c.x,c.y,(x,y)=>x===s.x&&y===s.y,true);
+  if(p){ c.seat=s; c.sx=s.x; c.sy=s.y; c.path=p; c.st='walkIn'; return true; }
+ }
+ return false;
+}
+function spawnCust(pass){
+ const sx=Math.random()<.5?0:S-1;
+ const c=mkAgent({id:uid++,kind:'cust',look:randLook(),x:sx,y:S+1,fx:sx,fy:S+1,speed:rnd(1.8,2.4),ex:Math.random()<.5?0:S-1,pat:100});
+ if(pass||!tryGetSeat(c)){
+  const q=custs.filter(k=>k.st==='queue').length;
+  if(!pass&&q<4){ c.st='queue'; const qx=clamp(DX+ri(-2,2),0,S-1); c.path=bfs(c.x,c.y,(x,y)=>x===qx&&y===S,false)||[]; }
+  else { c.st='pass'; c.ex=S-1-sx; c.path=bfs(c.x,c.y,(x,y)=>x===c.ex&&y===S+1,false)||[]; if(!c.path.length) return; }
+ }
+ custs.push(c);
+}
+function leave(c){
+ c.st='leave'; c.sitting=false; c.seat=null;
+ c.path=bfs(c.x,c.y,(x,y)=>x===c.ex&&y===S+1,false)||[];
+ if(!c.path.length&&!(c.y===S+1)) c.dead=true;
+}
+function patRate(){ return 2.6-rating*.25; }
+function addSat(v){ state.sat=state.sat*.9+v*.1; }
+function sitDown(c){
+ c.sitting=true; c.table=seatTable(c.seat);
+ if(c.table) c.dir=((c.table.x-c.x)-(c.table.y-c.y))>=0?1:-1;
+ c.dirtyStart=c.table&&(dirty.get(c.table.id)||0)>0;
+ const o={id:uid++,c,dish:pick(state.menu),st:'wait'};
+ c.order=o; c.pat=100; c.st='wait'; orders.push(o);
+}
+function angry(c){
+ if(c.order){c.order.cancel=true;c.order=null;}
+ addSat(0); floatAt(c.fx,c.fy,'😠','#e5484d'); leave(c);
+}
+function serve(o){ const c=o.c; o.st='served'; c.st='eat'; c.t=rnd(5,7); sfx('pop'); }
+function finishMeal(c){
+ const d=DISHM[c.order.dish], L=lvl(d.id), price=dishPrice(d);
+ let sat=40+c.pat*.35+L*2.5+rParts.d*8-(c.dirtyStart?12:0); sat=clamp(sat,0,100);
+ const tip=sat>70?Math.round(price*(sat-70)/100):0;
+ earn(price+tip); addXP(3+Math.round(price/12)); addSat(sat); state.served++;
+ floatAt(c.fx,c.fy,'+'+(price+tip)+' 🪙','#d68a00');
+ floatAt(c.fx,c.fy-.6,sat>80?'😍':sat>60?'😊':sat>40?'😐':'😕');
+ sfx('coin');
+ if(c.table&&state.furn.includes(c.table)) dirty.set(c.table.id,(dirty.get(c.table.id)||0)+1);
+ if(Math.random()<.15){ const opts=D4.map(([dx,dy])=>[c.x+dx,c.y+dy]).filter(([x,y])=>inRest(x,y)&&!blocked(x,y)&&!trash.some(t=>t.x===x&&t.y===y)); if(opts.length){const [x,y]=pick(opts); trash.push({id:uid++,x,y,e:pick(['🍌','🧻','🥤','🍂'])});} }
+ c.order=null; leave(c);
+}
+function updCust(c,dt){
+ c.moving=false;
+ switch(c.st){
+  case 'pass': case 'leave': if(moveAgent(c,dt)) c.dead=true; break;
+  case 'queue':
+   moveAgent(c,dt); c.pat-=dt*2.2; c.tt=(c.tt||0)-dt;
+   if(c.tt<=0){ c.tt=.7; if(tryGetSeat(c)) break; }
+   if(c.pat<=0){ addSat(20); floatAt(c.fx,c.fy,'😤'); leave(c); }
+   break;
+  case 'walkIn':
+   if(moveAgent(c,dt)){ if(c.seat&&c.x===c.seat.x&&c.y===c.seat.y) sitDown(c); else leave(c); }
+   break;
+  case 'wait': c.pat-=dt*patRate(); if(c.pat<=0) angry(c); break;
+  case 'eat': c.t-=dt; if(c.t<=0) finishMeal(c); break;
+ }
+}
+function bestPath(a,list){ let bf=null,bp=null; for(const f of list){ const p=pathToFurn(a,f); if(p&&(!bp||p.length<bp.length)){bf=f;bp=p;} } return bf?{f:bf,p:bp}:null; }
+function faceTo(a,f){ a.dir=((f.x-a.x)-(f.y-a.y))>=0?1:-1; }
+function chefAI(a,dt){
+ const j=a.job;
+ if(!j){
+  const o=orders.find(o=>o.st==='wait'); if(!o) return;
+  const r=bestPath(a,state.furn.filter(f=>kindOf(f)==='stove'&&!stoveBusy.has(f.id))); if(!r) return;
+  o.st='cooking'; o.chef=a; stoveBusy.add(r.f.id); a.job={o,s:'go',stove:r.f,t:0,T:1}; a.path=r.p; return;
+ }
+ const o=j.o;
+ if(o.cancel){ stoveBusy.delete(j.stove.id); a.job=null; a.carry=null; return; }
+ if(j.s==='go'){ if(moveAgent(a,dt)){ j.s='cook'; j.T=j.t=DISHM[o.dish].t/(FURN[j.stove.t].speed||1)/staffMul(a); faceTo(a,j.stove);} }
+ else if(j.s==='cook'){
+  j.t-=dt;
+  if(j.t<=0){
+   stoveBusy.delete(j.stove.id); gainStaff(a);
+   const r=bestPath(a,state.furn.filter(f=>kindOf(f)==='counter'&&orders.filter(x=>x.st==='ready'&&x.at===f).length<3));
+   if(r){ j.s='bring'; j.ctr=r.f; a.path=r.p; a.carry=DISHM[o.dish].e; }
+   else { o.st='ready'; o.at=j.stove; a.job=null; }
+  }
+ }
+ else if(j.s==='bring'){ if(moveAgent(a,dt)){ o.st='ready'; o.at=j.ctr; a.carry=null; a.job=null; faceTo(a,j.ctr);} }
+}
+function dirtyJob(a){
+ for(const [id] of dirty){ if(cleaning.has(id)) continue; const f=state.furn.find(f=>f.id===id); if(!f) continue; const p=pathToFurn(a,f); if(p){ cleaning.add(id); a.job={s:'clean',table:f}; a.path=p; return true; } }
+ return false;
+}
+function finishClean(a,j){ dirty.delete(j.table.id); cleaning.delete(j.table.id); floatAt(j.table.x,j.table.y,'✨'); gainStaff(a); faceTo(a,j.table); a.job=null; }
+function waiterAI(a,dt){
+ const j=a.job;
+ if(!j){
+  const o=orders.find(o=>o.st==='ready'&&!o.waiter);
+  if(o){ const p=pathToFurn(a,o.at); if(p){ o.waiter=a; a.job={o,s:'pick'}; a.path=p; return; } }
+  if(dirtyJob(a)) return;
+  if(!crew.some(c=>c.s.role==='cleaner')&&trash.length>2) trashJob(a);
+  return;
+ }
+ if(j.s==='clean'){ if(moveAgent(a,dt)) finishClean(a,j); return; }
+ if(j.s==='trash') return doTrash(a,j,dt);
+ const o=j.o;
+ if(o.cancel){ a.job=null; a.carry=null; return; }
+ if(j.s==='pick'){ if(moveAgent(a,dt)){ o.st='carried'; a.carry=DISHM[o.dish].e; a.path=(o.c.seat&&pathToFurn(a,o.c.seat))||[]; j.s='serve'; } }
+ else if(j.s==='serve'){ if(moveAgent(a,dt)){ serve(o); faceTo(a,o.c); a.carry=null; a.job=null; gainStaff(a);} }
+}
+function trashJob(a){
+ const t=trash.find(t=>!t.tg); if(!t) return false;
+ const p=bfs(a.x,a.y,(x,y)=>x===t.x&&y===t.y,false); if(!p) return false;
+ t.tg=a; a.job={s:'trash',t}; a.path=p; return true;
+}
+function doTrash(a,j,dt){ if(!trash.includes(j.t)){a.job=null;return;} if(moveAgent(a,dt)){ trash=trash.filter(t=>t!==j.t); floatAt(a.fx,a.fy,'✨'); gainStaff(a); a.job=null; } }
+function cleanerAI(a,dt){
+ const j=a.job;
+ if(!j){
+  if(trashJob(a)) return;
+  dirtyJob(a); return;
+ }
+ if(j.s==='clean'){ if(moveAgent(a,dt)) finishClean(a,j); return; }
+ if(j.s==='trash') doTrash(a,j,dt);
+}
+function updStaff(a,dt){
+ a.moving=false; a.speed=2.4*staffMul(a);
+ const r=a.s.role;
+ if(r==='chef') chefAI(a,dt); else if(r==='waiter') waiterAI(a,dt); else cleanerAI(a,dt);
+ if(!a.job){
+  a.idle+=dt;
+  if(a.path.length) moveAgent(a,dt);
+  else if(a.idle>(r==='cleaner'?5:3)&&!a.homed){
+   a.homed=r!=='cleaner'; a.idle=0;
+   let p=null;
+   if(r==='cleaner'){ const x=ri(0,S-1),y=ri(0,S-1); if(!blocked(x,y)) p=bfs(a.x,a.y,(X,Y)=>X===x&&Y===y,false); }
+   else { const h=state.furn.find(f=>kindOf(f)===(r==='chef'?'stove':'counter')); if(h) p=pathToFurn(a,h); }
+   if(p) a.path=p;
+  }
+ } else { a.idle=0; a.homed=false; }
+}
+function spawnItem(){
+ const k=pick(Object.keys(ING));
+ items.push({id:uid++,x:ri(0,S-1),y:ri(S,S+1),k,t:25});
+}
+function update(dt){
+ spawnT-=dt;
+ if(spawnT<=0){
+  spawnT=rnd(.75,1.25)*9/(.6+rating*.4);
+  const active=custs.filter(c=>c.st!=='pass'&&c.st!=='leave').length;
+  if(state.menu.length&&active<seatCount()+3) spawnCust(false);
+ }
+ passT-=dt; if(passT<=0){ passT=rnd(5,12); spawnCust(true); }
+ itemT-=dt; if(itemT<=0){ itemT=rnd(30,55); spawnItem(); }
+ for(const c of custs) updCust(c,dt);
+ custs=custs.filter(c=>!c.dead);
+ for(const a of crew) updStaff(a,dt);
+ orders=orders.filter(o=>!o.cancel&&o.st!=='served');
+ for(const it of items) it.t-=dt; items=items.filter(i=>i.t>0);
+}
+function resetSim(){
+ stoveBusy.clear(); cleaning.clear();
+ for(const t of trash) t.tg=null;
+ for(const o of orders) if(!o.cancel){ o.st='wait'; o.chef=null; o.waiter=null; o.at=null; }
+ for(const a of crew){ a.job=null; a.carry=null; a.path=[]; a.homed=false; a.fx=a.x; a.fy=a.y; if(!inRest(a.x,a.y)||blocked(a.x,a.y)){ const n=nearestFree(a.x,a.y); a.x=a.fx=n[0]; a.y=a.fy=n[1]; } }
+ for(const id of [...dirty.keys()]) if(!state.furn.find(f=>f.id===id)) dirty.delete(id);
+ for(const c of custs){
+  c.path=[]; c.fx=c.x; c.fy=c.y;
+  const seatOK=c.seat&&state.furn.includes(c.seat)&&c.seat.x===c.sx&&c.seat.y===c.sy&&seatTable(c.seat);
+  if(!c.sitting&&c.y<S&&blocked(c.x,c.y)){ const n=nearestFree(c.x,c.y); c.x=c.fx=n[0]; c.y=c.fy=n[1]; }
+  if(c.st==='walkIn'){
+   const p=seatOK&&bfs(c.x,c.y,(x,y)=>x===c.seat.x&&y===c.seat.y,true);
+   if(p) c.path=p; else leave(c);
+  } else if(c.st==='wait'||c.st==='eat'){
+   if(!seatOK){ if(c.order){c.order.cancel=true;c.order=null;} const n=nearestFree(c.x,c.y); c.x=c.fx=n[0]; c.y=c.fy=n[1]; leave(c); }
+   else c.table=seatTable(c.seat);
+  } else if(c.st==='leave'||c.st==='pass'){ c.path=bfs(c.x,c.y,(x,y)=>x===c.ex&&y===S+1,false)||[]; if(!c.path.length) c.dead=true; }
+ }
+ orders=orders.filter(o=>!o.cancel);
+ trash=trash.filter(t=>!blocked(t.x,t.y));
+}
+function calcRating(){
+ let decor=FLOORS[state.floor].d+WALLS[state.wall].d;
+ for(const f of state.furn) decor+=FURN[f.t].d||0;
+ const d=Math.min(1.5,decor/(S*S)*4);
+ const avg=state.menu.length?state.menu.reduce((s,id)=>s+lvl(id),0)/state.menu.length:0;
+ const m=state.menu.length?Math.min(1.2,.2+(avg-1)*.12):0;
+ const s=state.sat/100*1.5;
+ let dn=0; for(const v of dirty.values()) dn+=v;
+ const dirt=Math.min(1.5,trash.length*.15+dn*.08);
+ rating=clamp(.8+d+m+s-dirt,.5,5); rParts={d,m,s,dirt};
+}
+
+/* ---------------- RENDU ---------------- */
+const cv=$('#c'); let ctx=cv.getContext('2d'); let dpr=1;
+const cam={x:0,y:0,z:1};
+function resize(){ dpr=Math.min(2.5,window.devicePixelRatio||1); cv.width=innerWidth*dpr; cv.height=innerHeight*dpr; }
+function centerCam(){ cam.z=clamp(Math.min(innerWidth/(S*64-10),(innerHeight-170)/(S*32+90)),.45,1.6); cam.x=innerWidth/2; cam.y=innerHeight/2-(S*16-20)*cam.z; }
+const iso=(x,y)=>[(x-y)*32,(x+y)*16];
+const ctr=(x,y)=>iso(x+.5,y+.5);
+const _sc={};
+function shade(hex,amt){ const k=hex+amt; if(_sc[k]) return _sc[k]; const n=parseInt(hex.slice(1),16); let r=n>>16,g=n>>8&255,b=n&255; const f=amt<0?0:255,p=Math.abs(amt); r=Math.round((f-r)*p+r); g=Math.round((f-g)*p+g); b=Math.round((f-b)*p+b); return _sc[k]=`rgb(${r},${g},${b})`; }
+function poly(pts){ ctx.beginPath(); ctx.moveTo(pts[0][0],pts[0][1]); for(let i=1;i<pts.length;i++) ctx.lineTo(pts[i][0],pts[i][1]); ctx.closePath(); ctx.fill(); }
+function ell(x,y,rx,ry){ ctx.beginPath(); ctx.ellipse(x,y,rx,ry,0,0,Math.PI*2); ctx.fill(); }
+function circ(x,y,r){ ctx.beginPath(); ctx.arc(x,y,r,0,Math.PI*2); ctx.fill(); }
+function rr(x,y,w,h,r){ ctx.beginPath(); ctx.moveTo(x+r,y); ctx.arcTo(x+w,y,x+w,y+h,r); ctx.arcTo(x+w,y+h,x,y+h,r); ctx.arcTo(x,y+h,x,y,r); ctx.arcTo(x,y,x+w,y,r); ctx.closePath(); }
+function emo(e,x,y,s){ ctx.font=s+'px '+EMO; ctx.textAlign='center'; ctx.textBaseline='middle'; ctx.fillText(e,x,y); }
+const G=(cx,cy,gx,gy,z)=>[cx+(gx-gy)*32,cy+(gx+gy)*16-z];
+function boxG(cx,cy,ax,ay,h,z,top,left,right){
+ const z1=z+h;
+ ctx.fillStyle=left; poly([G(cx,cy,-ax,ay,z),G(cx,cy,ax,ay,z),G(cx,cy,ax,ay,z1),G(cx,cy,-ax,ay,z1)]);
+ ctx.fillStyle=right; poly([G(cx,cy,ax,-ay,z),G(cx,cy,ax,ay,z),G(cx,cy,ax,ay,z1),G(cx,cy,ax,-ay,z1)]);
+ ctx.fillStyle=top; poly([G(cx,cy,-ax,-ay,z1),G(cx,cy,ax,-ay,z1),G(cx,cy,ax,ay,z1),G(cx,cy,-ax,ay,z1)]);
+}
+const boxC=(cx,cy,ax,ay,h,z,c)=>boxG(cx,cy,ax,ay,h,z,c,shade(c,-.16),shade(c,-.3));
+function tile(x,y,col){ ctx.fillStyle=col; poly([iso(x,y),iso(x+1,y),iso(x+1,y+1),iso(x,y+1)]); }
+
+let tableItems=new Map(),readyAt=new Map(),cookAt=new Map();
+function chairBackDir(f){ if(!f) return [0,-1]; const t=seatTable(f); if(!t) return [0,-1]; return [f.x-t.x,f.y-t.y]; }
+function drawChairBack(f,cx,cy,col){
+ const [bx,by]=chairBackDir(f);
+ const ax=bx?.035:.19, ay=by?.035:.19;
+ const ox=bx*.17, oy=by*.17, c2=[cx+(ox-oy)*32,cy+(ox+oy)*16];
+ boxC(c2[0],c2[1],ax,ay,17,13,col);
+}
+function drawFurn(t,cx,cy,f){
+ const F=FURN[t], T=performance.now()/1000;
+ ctx.fillStyle='rgba(0,0,0,.12)'; ell(cx,cy+1,21,10);
+ switch(F.kind){
+ case 'table':{
+  boxC(cx,cy,.2,.2,2,0,shade(F.col,-.25));
+  boxC(cx,cy,.05,.05,16,2,shade(F.col,-.1));
+  boxG(cx,cy,.4,.4,7,16,F.cloth,shade(F.cloth,-.1),shade(F.cloth,-.22));
+  if(f){ const it=tableItems.get(f.id)||[]; it.forEach((e,i)=>emo(e,cx-9+i*18*(it.length>1?1:0)+(it.length>1?0:9),cy-27,15)); const dn=Math.min(dirty.get(f.id)||0,2); for(let j=0;j<dn;j++) emo('🍽️',cx+10-j*20,cy-25,12); }
+  break;}
+ case 'chair':{
+  const [bx,by]=chairBackDir(f);
+  const dk=shade(F.col,-.35);
+  for(const [lx,ly] of [[-.14,-.14],[.14,-.14],[-.14,.14],[.14,.14]]){ const p=G(cx,cy,lx,ly,0); boxC(p[0],p[1]+0,.025,.025,11,0,dk); }
+  boxC(cx,cy,.19,.19,3,11,F.col);
+  if(!(bx>0||by>0)) drawChairBack(f,cx,cy,F.col);
+  break;}
+ case 'stove':{
+  boxC(cx,cy,.37,.37,26,0,F.col);
+  ctx.fillStyle='#2d3238'; poly([G(cx,cy,-.27,.37,5),G(cx,cy,.22,.37,5),G(cx,cy,.22,.37,17),G(cx,cy,-.27,.37,17)]);
+  ctx.fillStyle='#e5484d'; for(let i=0;i<3;i++){ const p=G(cx,cy,.37,-.2+i*.18,21); circ(p[0],p[1],1.8); }
+  ctx.fillStyle='#3a3f46'; ell(cx-9,cy-27,7,3.5); ell(cx+9,cy-25,7,3.5);
+  if(F.speed>1){ ctx.fillStyle='#c0392b'; poly([G(cx,cy,-.37,.37,22),G(cx,cy,.37,.37,22),G(cx,cy,.37,.37,24),G(cx,cy,-.37,.37,24)]); }
+  if(f&&cookAt.has(f.id)){
+   ctx.fillStyle='#c0392b'; rr(cx-9,cy-38,18,11,3); ctx.fill(); ctx.fillStyle='#9b2a1f'; ell(cx,cy-38,9,3);
+   for(let i=0;i<3;i++){ const ph=(T*.8+i/3)%1; ctx.fillStyle=`rgba(255,255,255,${.7*(1-ph)})`; circ(cx-5+i*5+Math.sin(T*3+i)*2,cy-42-ph*22,3+ph*4); }
+  }
+  if(f){ const it=readyAt.get(f.id); if(it) it.forEach((e,i)=>emo(e,cx-8+i*10,cy-32,14)); }
+  break;}
+ case 'counter':{
+  boxC(cx,cy,.42,.42,22,0,F.col);
+  boxC(cx,cy,.45,.45,3,22,'#f1ede6');
+  if(f){ const it=readyAt.get(f.id)||[]; it.forEach((e,i)=>emo(e,cx-12+i*12,cy-32-(i%2)*3,14)); }
+  break;}
+ case 'plant':{
+  boxC(cx,cy,.14,.14,12,0,'#c8643c');
+  ctx.fillStyle='#3f9b4a'; circ(cx,cy-26,11); ctx.fillStyle='#4fb35a'; circ(cx-7,cy-20,8); ctx.fillStyle='#358a40'; circ(cx+7,cy-21,8); ctx.fillStyle='#5cc466'; circ(cx+2,cy-34,7);
+  break;}
+ case 'flowers':{
+  boxC(cx,cy,.2,.2,10,0,'#e8d9c0');
+  ctx.fillStyle='#3f9b4a'; ell(cx,cy-17,15,9);
+  const cs=['#ff6b9a','#ffd23f','#ff6b6b','#c58cff','#ffffff'];
+  for(let i=0;i<7;i++){ ctx.fillStyle=cs[i%5]; circ(cx+Math.cos(i*2.4)*10,cy-19+Math.sin(i*2.4)*5,3.2); }
+  break;}
+ case 'lamp':{
+  const g=ctx.createRadialGradient(cx,cy-50,2,cx,cy-50,34); g.addColorStop(0,'rgba(255,220,120,.45)'); g.addColorStop(1,'rgba(255,220,120,0)'); ctx.fillStyle=g; circ(cx,cy-50,34);
+  ctx.fillStyle='#3a3a3a'; ell(cx,cy-1,8,4); ctx.fillRect(cx-1.5,cy-56,3,56);
+  ctx.fillStyle='#ffd36b'; poly([[cx-12,cy-50],[cx+12,cy-50],[cx+7,cy-66],[cx-7,cy-66]]);
+  break;}
+ case 'jukebox':{
+  boxC(cx,cy,.28,.22,34,0,'#8e44ad');
+  ctx.fillStyle='#f39c12'; ctx.beginPath(); ctx.ellipse(cx,cy-38,15,12,0,Math.PI,0); ctx.fill();
+  const lc=['#ff4d6d','#4dd2ff','#ffe14d','#7dff4d'];
+  for(let i=0;i<4;i++){ ctx.fillStyle=lc[(i+Math.floor(T*4))%4]; const p=G(cx,cy,-.18+i*.12,.22,10+i*4); circ(p[0],p[1],2.5); }
+  ctx.globalAlpha=.6+.4*Math.sin(T*3); emo('🎵',cx+Math.sin(T*2)*6,cy-58-(T*12%14),13); ctx.globalAlpha=1;
+  break;}
+ case 'aquarium':{
+  boxC(cx,cy,.42,.26,12,0,'#7b4a2a');
+  ctx.globalAlpha=.8; boxG(cx,cy,.42,.26,24,12,'#a6e0f7','#6cc0ea','#4aa8db'); ctx.globalAlpha=1;
+  for(let i=0;i<3;i++){ ctx.fillStyle=['#ff8c1a','#ffd23f','#ff5e7e'][i]; ell(cx-10+((T*8+i*13)%22),cy-16-i*5,3.5,2); }
+  ctx.fillStyle='rgba(255,255,255,.7)'; circ(cx+8,cy-22-(T*10%14),1.5);
+  break;}
+ case 'fountain':{
+  boxC(cx,cy,.43,.43,9,0,'#b8c2cc');
+  ctx.fillStyle='#5fb8f0'; poly([G(cx,cy,-.36,-.36,9.5),G(cx,cy,.36,-.36,9.5),G(cx,cy,.36,.36,9.5),G(cx,cy,-.36,.36,9.5)]);
+  boxC(cx,cy,.07,.07,20,9,'#d5dbe1'); ctx.fillStyle='#c8d0d8'; ell(cx,cy-30,10,4);
+  for(let i=0;i<8;i++){ const ph=(T*.9+i/8)%1, a=i*Math.PI/4; ctx.fillStyle=`rgba(120,200,255,${1-ph})`; circ(cx+Math.cos(a)*ph*16,cy-32+Math.sin(a)*ph*7-Math.sin(ph*Math.PI)*12,2); }
+  break;}
+ case 'statue':{
+  boxC(cx,cy,.26,.26,16,0,'#e8e4dc');
+  ctx.fillStyle='#e6b422'; ell(cx,cy-30,8,12); circ(cx,cy-46,6.5); ctx.fillStyle='#fff3b0'; circ(cx-2,cy-48,2); ell(cx-3,cy-32,2,5);
+  break;}
+ }
+}
+function drawPerson(a,cx,cy){
+ const L=a.look, sit=a.sitting, bob=a.moving?Math.abs(Math.sin(a.ph))*2.5:0, y=cy-(sit?9:0)-bob, d=a.dir;
+ ctx.fillStyle='rgba(0,0,0,.18)'; ell(cx,cy+1,10,4);
+ if(!sit){ ctx.fillStyle='#3a3a4a'; const sw=a.moving?Math.sin(a.ph)*2.5:0; ctx.fillRect(cx-5,y-9+sw*.3,4,9-sw*.3); ctx.fillRect(cx+1,y-9-sw*.3,4,9+sw*.3); }
+ const role=a.s?a.s.role:null;
+ ctx.fillStyle=L.body; rr(cx-8,y-25,16,18,6); ctx.fill();
+ if(role==='chef'){ ctx.fillStyle='#fff'; rr(cx-6,y-21,12,14,3); ctx.fill(); }
+ if(role==='waiter'){ ctx.fillStyle='#222'; rr(cx-8,y-25,16,18,6); ctx.fill(); ctx.fillStyle='#fff'; poly([[cx-3,y-25],[cx+3,y-25],[cx,y-14]]); ctx.fillStyle='#e5484d'; poly([[cx-4,y-25],[cx,y-23],[cx-4,y-21]]); poly([[cx+4,y-25],[cx,y-23],[cx+4,y-21]]); }
+ if(role==='cleaner'){ ctx.fillStyle='#2f7ad9'; rr(cx-8,y-17,16,10,4); ctx.fill(); }
+ ctx.fillStyle=L.skin; circ(cx,y-32,8.5);
+ ctx.fillStyle=L.hair; ctx.beginPath(); ctx.arc(cx,y-33,9,Math.PI*1.02,Math.PI*1.98); ctx.fill();
+ if(L.long){ ctx.fillRect(cx-9,y-34,3.5,10); ctx.fillRect(cx+5.5,y-34,3.5,10); }
+ ctx.fillStyle='#222'; circ(cx-3+d*1.6,y-31,1.25); circ(cx+3+d*1.6,y-31,1.25);
+ ctx.fillStyle='rgba(255,120,120,.45)'; circ(cx-5+d,y-28,1.8); circ(cx+5+d,y-28,1.8);
+ if(role==='chef'){ ctx.fillStyle='#fff'; ctx.fillRect(cx-6,y-46,12,7); circ(cx-4,y-47,4.5); circ(cx+4,y-47,4.5); circ(cx,y-50,5); }
+ if(role==='cleaner'){ ctx.fillStyle='#2f7ad9'; ctx.beginPath(); ctx.arc(cx,y-36,9,Math.PI,0); ctx.fill(); ctx.fillRect(cx+d*4-5,y-37,10,2.5); }
+ if(a.carry){ ctx.fillStyle='#fff'; ell(cx+d*10,y-18,8,3); emo(a.carry,cx+d*10,y-23,14); }
+}
+function bubble(x,y,e,pat){
+ ctx.fillStyle='rgba(0,0,0,.15)'; rr(x-15,y-31,32,28,10); ctx.fill();
+ ctx.fillStyle='#fff'; rr(x-16,y-33,32,28,10); ctx.fill(); poly([[x-4,y-6],[x+4,y-6],[x,y]]);
+ emo(e,x,y-19,17);
+ if(pat!=null){ ctx.fillStyle='rgba(0,0,0,.2)'; ctx.fillRect(x-13,y-9,26,3.5); ctx.fillStyle=`hsl(${pat*1.2},75%,45%)`; ctx.fillRect(x-13,y-9,26*pat/100,3.5); }
+}
+function drawTree(cx,cy){ ctx.fillStyle='rgba(0,0,0,.15)'; ell(cx,cy+2,18,8); ctx.fillStyle='#7a4f2a'; ctx.fillRect(cx-3,cy-22,6,22); ctx.fillStyle='#2f8a3e'; circ(cx,cy-40,18); ctx.fillStyle='#3fa34d'; circ(cx-9,cy-32,12); circ(cx+10,cy-34,12); ctx.fillStyle='#56bb60'; circ(cx-3,cy-48,10); }
+const TREES=[[-3,1],[-2.5,4.5],[-3.5,7],[-2,-1.5]];
+function drawGround(){
+ for(let y=S;y<=S+3;y++) for(let x=-14;x<S+14;x++){
+  if(y<=S+1) tile(x,y,y===S?((x+y)%2?'#ddd7cd':'#d3ccc0'):((x+y)%2?'#cfc8bb':'#c7c0b2'));
+  else tile(x,y,'#5c6068');
+ }
+ ctx.fillStyle='#f5f1e6';
+ for(let x=-14;x<S+14;x+=2){ const a=iso(x+.2,S+3),b=iso(x+1,S+3); poly([[a[0],a[1]-1.5],[b[0],b[1]-1.5],[b[0],b[1]+1.5],[a[0],a[1]+1.5]]); }
+ ctx.fillStyle='#a49d90'; poly([iso(-14,S+2),iso(S+14,S+2),[iso(S+14,S+2)[0],iso(S+14,S+2)[1]+3],[iso(-14,S+2)[0],iso(-14,S+2)[1]+3]]);
+}
+function drawFloor(){
+ const F=FLOORS[state.floor];
+ for(let y=0;y<S;y++) for(let x=0;x<S;x++) tile(x,y,(x+y)%2?F.a:F.b);
+ const p=ctr(DX,S-1); ctx.fillStyle='#b8423a'; poly([[p[0],p[1]-11],[p[0]+22,p[1]],[p[0],p[1]+11],[p[0]-22,p[1]]]);
+}
+function wallFace(p0,p1,col,dark){ ctx.fillStyle=col; poly([p0,p1,[p1[0],p1[1]-WH],[p0[0],p0[1]-WH]]); ctx.fillStyle=dark; poly([p0,p1,[p1[0],p1[1]-7],[p0[0],p0[1]-7]]); }
+function windowAt(gxa,gya,gxb,gyb,z0,z1){
+ const a=iso(gxa,gya),b=iso(gxb,gyb);
+ ctx.fillStyle='#fff'; poly([[a[0],a[1]-z0+2],[b[0],b[1]-z0+2],[b[0],b[1]-z1-2],[a[0],a[1]-z1-2]]);
+ ctx.fillStyle='#9fd8f5'; poly([[a[0]+(b[0]>a[0]?2:-2),a[1]-z0],[b[0]-(b[0]>a[0]?2:-2),b[1]-z0],[b[0]-(b[0]>a[0]?2:-2),b[1]-z1],[a[0]+(b[0]>a[0]?2:-2),a[1]-z1]]);
+}
+function drawWalls(){
+ const W=WALLS[state.wall], c1=W.c, c2=shade(W.c,-.12);
+ const o=iso(0,0), r=iso(S,0), l=iso(0,S);
+ wallFace(o,r,c1,shade(c1,-.35)); wallFace(o,l,c2,shade(c2,-.35));
+ if(W.s){ ctx.fillStyle=W.s; for(let i=0;i<S*2;i+=2){ const a=iso(i/2,0),b=iso(i/2+.25,0); poly([[a[0],a[1]-7],[b[0],b[1]-7],[b[0],b[1]-WH],[a[0],a[1]-WH]]); const c=iso(0,i/2),d=iso(0,i/2+.25); ctx.fillStyle=shade(W.s,-.1); poly([[c[0],c[1]-7],[d[0],d[1]-7],[d[0],d[1]-WH],[c[0],c[1]-WH]]); ctx.fillStyle=W.s; } }
+ if(W.brick){ ctx.strokeStyle='rgba(255,255,255,.25)'; ctx.lineWidth=1; for(let h=14;h<WH;h+=9){ ctx.beginPath(); ctx.moveTo(o[0],o[1]-h); ctx.lineTo(r[0],r[1]-h); ctx.moveTo(o[0],o[1]-h); ctx.lineTo(l[0],l[1]-h); ctx.stroke(); } }
+ ctx.fillStyle=shade(c1,.25); poly([[o[0],o[1]-WH-4],[r[0],r[1]-WH-4],[r[0],r[1]-WH],[o[0],o[1]-WH]]); ctx.fillStyle=shade(c2,.2); poly([[o[0],o[1]-WH-4],[l[0],l[1]-WH-4],[l[0],l[1]-WH],[o[0],o[1]-WH]]);
+ const mid=Math.floor(S/2);
+ for(let i=1;i<S-1;i+=2){ if(Math.abs(i-mid)<=1) continue; windowAt(i+.15,0,i+.85,0,24,52); }
+ for(let i=1;i<S-1;i+=2){ if(i>=2&&i<=4) continue; windowAt(0,i+.15,0,i+.85,24,52); }
+ // enseigne
+ ctx.save(); const sp=iso(mid,0); ctx.translate(sp[0],sp[1]-40); ctx.transform(1,.5,0,1,0,0);
+ ctx.fillStyle='#5b3a22'; rr(-58,-14,116,26,7); ctx.fill(); ctx.fillStyle='#ffcf6b'; ctx.font='bold 15px "Trebuchet MS",sans-serif'; ctx.textAlign='center'; ctx.textBaseline='middle'; ctx.fillText(state.name.slice(0,16),0,0); ctx.restore();
+ // ardoise menu
+ ctx.save(); const mp=iso(0,3); ctx.translate(mp[0],mp[1]-38); ctx.transform(1,-.5,0,1,0,0);
+ ctx.fillStyle='#7a4f2a'; rr(-30,-18,60,36,4); ctx.fill(); ctx.fillStyle='#2f3a33'; rr(-27,-15,54,30,3); ctx.fill();
+ ctx.fillStyle='#fff'; ctx.font='bold 8px sans-serif'; ctx.textAlign='center'; ctx.fillText('MENU',0,-9);
+ state.menu.slice(0,6).forEach((id,i)=>emo(DISHM[id].e,-18+(i%3)*18,2+Math.floor(i/3)*10,9));
+ ctx.restore();
+}
+function hedgeX(x){ const p=iso(x+.5,S); boxG(p[0],p[1],.5,.08,13,0,'#4caf50','#3d9142','#2f7a35'); }
+function hedgeY(y){ const p=iso(S,y+.5); boxG(p[0],p[1],.08,.5,13,0,'#4caf50','#3d9142','#2f7a35'); }
+function drawDoor(){ for(const gx of [DX,DX+1]){ const p=iso(gx,S); boxC(p[0],p[1],.06,.06,34,0,'#8a5a3b'); } const a=iso(DX,S),b=iso(DX+1,S); ctx.fillStyle='#e5484d'; poly([[a[0],a[1]-34],[b[0],b[1]-34],[b[0],b[1]-42],[a[0],a[1]-42]]); ctx.fillStyle='#fff'; for(let i=0;i<4;i++){const p=iso(DX+.12+i*.25,S); poly([[p[0],p[1]-34],[p[0]+5,p[1]-34+2.5],[p[0]+5,p[1]-42+2.5],[p[0],p[1]-42]]);} }
+
+function render(){
+ const w=innerWidth,h=innerHeight;
+ ctx.setTransform(dpr,0,0,dpr,0,0);
+ const g=ctx.createLinearGradient(0,0,0,h); g.addColorStop(0,'#9adf84'); g.addColorStop(1,'#7cc76a'); ctx.fillStyle=g; ctx.fillRect(0,0,w,h);
+ ctx.setTransform(dpr*cam.z,0,0,dpr*cam.z,cam.x*dpr,cam.y*dpr);
+ // états d'affichage
+ tableItems=new Map(); readyAt=new Map(); cookAt=new Map();
+ for(const c of custs) if(c.st==='eat'&&c.table&&c.order){ const a=tableItems.get(c.table.id)||[]; a.push(DISHM[c.order.dish].e); tableItems.set(c.table.id,a); }
+ for(const o of orders) if(o.st==='ready'&&o.at){ const a=readyAt.get(o.at.id)||[]; a.push(DISHM[o.dish].e); readyAt.set(o.at.id,a); }
+ for(const a of crew) if(a.job&&a.job.s==='cook') cookAt.set(a.job.stove.id,1-a.job.t/a.job.T);
+ drawGround(); drawFloor(); drawWalls();
+ if(mode==='edit'){
+  ctx.strokeStyle='rgba(0,0,0,.12)'; ctx.lineWidth=1;
+  for(let i=0;i<=S;i++){ ctx.beginPath(); let a=iso(i,0),b=iso(i,S); ctx.moveTo(a[0],a[1]); ctx.lineTo(b[0],b[1]); a=iso(0,i); b=iso(S,i); ctx.moveTo(a[0],a[1]); ctx.lineTo(b[0],b[1]); ctx.stroke(); }
+  if(sel){ ctx.globalAlpha=.6; tile(sel.x,sel.y,'#ffd23f'); ctx.globalAlpha=1; }
+ }
+ for(const t of trash){ const p=ctr(t.x,t.y); emo(t.e,p[0],p[1]-4,15); }
+ const L=[];
+ for(const f of state.furn){
+  const p=ctr(f.x,f.y), k=f.x+f.y;
+  if(sel===f&&ghost) continue;
+  L.push([k,()=>drawFurn(f.t,p[0],p[1],f)]);
+  if(kindOf(f)==='chair'){ const [bx,by]=chairBackDir(f); if(bx>0||by>0) L.push([k+.04,()=>drawChairBack(f,p[0],p[1],FURN[f.t].col)]); }
+ }
+ for(const a of crew) L.push([a.fx+a.fy+.05,()=>{const p=ctr(a.fx,a.fy); drawPerson(a,p[0],p[1]);}]);
+ for(const c of custs) L.push([c.fx+c.fy+(c.sitting?.02:.05),()=>{const p=ctr(c.fx,c.fy); drawPerson(c,p[0],p[1]);}]);
+ for(const it of items) L.push([it.x+it.y,()=>{const p=ctr(it.x,it.y), b=Math.sin(performance.now()/250+it.id)*3; ctx.globalAlpha=it.t<5?(Math.sin(it.t*10)>0?1:.4):1; ctx.fillStyle='rgba(255,230,120,.6)'; ell(p[0],p[1],14,7); emo(ING[it.k].e,p[0],p[1]-14+b,20); emo('✨',p[0]+12,p[1]-26+b,10); ctx.globalAlpha=1;}]);
+ for(let x=0;x<S;x++) if(x!==DX) L.push([x+S-.45,()=>hedgeX(x)]);
+ for(let y=0;y<S;y++) L.push([S+y-.45,()=>hedgeY(y)]);
+ L.push([DX+S-.4,drawDoor]);
+ for(const [tx,ty] of TREES) L.push([tx+ty,()=>{const p=ctr(tx,ty); drawTree(p[0],p[1]);}]);
+ L.push([S+1+S*.5,()=>{const p=ctr(S+1.5,2); drawTree(p[0],p[1]);}]);
+ L.push([S+3+5,()=>{const p=ctr(S+2.5,5); drawTree(p[0],p[1]);}]);
+ L.sort((a,b)=>a[0]-b[0]); for(const [,fn] of L) fn();
+ // fantôme de placement
+ if(mode==='edit'&&ghost){
+  const t=placing||(sel&&sel.t); if(t){ const ok=canPlace(ghost.x,ghost.y,sel); ctx.globalAlpha=.5; tile(ghost.x,ghost.y,ok?'#3bd16f':'#ff4d4d'); ctx.globalAlpha=.75; const p=ctr(ghost.x,ghost.y); drawFurn(t,p[0],p[1],null); ctx.globalAlpha=1; }
+ }
+ // bulles
+ for(const c of custs){ const p=ctr(c.fx,c.fy), y=p[1]-(c.sitting?9:0)-44; if(c.st==='wait'&&c.order) bubble(p[0],y,DISHM[c.order.dish].e,c.pat); else if(c.st==='queue') bubble(p[0],y,'⏳',c.pat); }
+ for(const a of crew) if(a.job&&a.job.s==='cook'){ const s=a.job.stove, p=ctr(s.x,s.y), pr=1-a.job.t/a.job.T; ctx.fillStyle='rgba(255,255,255,.9)'; circ(p[0],p[1]-64,9); ctx.strokeStyle='#ff7a2f'; ctx.lineWidth=3.5; ctx.beginPath(); ctx.arc(p[0],p[1]-64,7,-Math.PI/2,-Math.PI/2+pr*Math.PI*2); ctx.stroke(); }
+ for(const f of floaters){ const p=ctr(f.x,f.y); ctx.globalAlpha=clamp(f.t,0,1); ctx.font='bold 15px "Trebuchet MS",'+EMO; ctx.textAlign='center'; ctx.lineWidth=4; ctx.strokeStyle='rgba(255,255,255,.95)'; const y=p[1]-58-(1.6-f.t)*26; ctx.strokeText(f.s,p[0],y); ctx.fillStyle=f.c||'#3b2a1a'; ctx.fillText(f.s,p[0],y); ctx.globalAlpha=1; }
+}
+function floatAt(x,y,s,c){ floaters.push({x,y,s,c,t:1.6}); }
+
+/* ---------------- ENTRÉES ---------------- */
+const ptrs=new Map(); let drag=null,pinch=null,moved=false;
+const pd=()=>{const [a,b]=[...ptrs.values()]; return Math.hypot(a.x-b.x,a.y-b.y);};
+cv.addEventListener('pointerdown',e=>{
+ audioInit();
+ try{cv.setPointerCapture(e.pointerId);}catch(_){}
+ ptrs.set(e.pointerId,{x:e.clientX,y:e.clientY});
+ if(ptrs.size===1){ drag={x:e.clientX,y:e.clientY,cx:cam.x,cy:cam.y}; moved=false; }
+ else if(ptrs.size===2){ const [a,b]=[...ptrs.values()]; pinch={d:pd(),z:cam.z,mx:(a.x+b.x)/2,my:(a.y+b.y)/2,cx:cam.x,cy:cam.y}; moved=true; drag=null; }
+});
+cv.addEventListener('pointermove',e=>{
+ if(!ptrs.has(e.pointerId)){ if(mode==='edit'&&(placing||sel)&&e.pointerType==='mouse'){ const g=screenToGrid(e.clientX,e.clientY); ghost=inRest(g[0],g[1])?{x:g[0],y:g[1]}:ghost; } return; }
+ ptrs.set(e.pointerId,{x:e.clientX,y:e.clientY});
+ if(pinch&&ptrs.size===2){ const nz=clamp(pinch.z*pd()/pinch.d,.4,2.4); const wx=(pinch.mx-pinch.cx)/pinch.z, wy=(pinch.my-pinch.cy)/pinch.z; cam.z=nz; cam.x=pinch.mx-wx*nz; cam.y=pinch.my-wy*nz; }
+ else if(drag){ const dx=e.clientX-drag.x, dy=e.clientY-drag.y; if(Math.hypot(dx,dy)>9) moved=true; if(moved){ cam.x=drag.cx+dx; cam.y=drag.cy+dy; } }
+});
+function endPtr(e){
+ if(!ptrs.has(e.pointerId)) return;
+ ptrs.delete(e.pointerId);
+ if(ptrs.size===0){ if(!moved&&drag&&e.type==='pointerup') tap(e.clientX,e.clientY); drag=null; pinch=null; }
+ else if(ptrs.size<2) pinch=null;
+}
+cv.addEventListener('pointerup',endPtr); cv.addEventListener('pointercancel',endPtr);
+cv.addEventListener('wheel',e=>{ e.preventDefault(); const nz=clamp(cam.z*(e.deltaY<0?1.1:.9),.4,2.4); const wx=(e.clientX-cam.x)/cam.z, wy=(e.clientY-cam.y)/cam.z; cam.z=nz; cam.x=e.clientX-wx*nz; cam.y=e.clientY-wy*nz; },{passive:false});
+function screenToWorld(sx,sy){ return [(sx-cam.x)/cam.z,(sy-cam.y)/cam.z]; }
+function screenToGrid(sx,sy){ const [wx,wy]=screenToWorld(sx,sy); const a=wx/32,b=wy/16; return [Math.floor((a+b)/2),Math.floor((b-a)/2)]; }
+function tap(sx,sy){
+ const [wx,wy]=screenToWorld(sx,sy), [gx,gy]=screenToGrid(sx,sy);
+ if(mode==='edit') return editTap(gx,gy);
+ for(const it of items){ const p=ctr(it.x,it.y); if(Math.hypot(p[0]-wx,p[1]-14-wy)<26){ state.inv[it.k]=(state.inv[it.k]||0)+1; items=items.filter(i=>i!==it); floatAt(it.x,it.y,'+1 '+ING[it.k].e,'#2f9e63'); toast('Tu as trouvé : '+ING[it.k].e+' '+ING[it.k].n+' !'); sfx('pop'); return; } }
+ for(const t of trash){ const p=ctr(t.x,t.y); if(Math.hypot(p[0]-wx,p[1]-4-wy)<22){ trash=trash.filter(x=>x!==t); if(t.tg&&t.tg.job&&t.tg.job.t===t) t.tg.job=null; floatAt(t.x,t.y,'✨ +1 XP','#2f9e63'); addXP(1); sfx('pop'); return; } }
+ for(const a of crew){ const p=ctr(a.fx,a.fy); if(Math.hypot(p[0]-wx,p[1]-25-wy)<20){ toast(ROLES[a.s.role].e+' '+a.s.name+' — '+ROLES[a.s.role].n+' niv. '+staffLv(a.s)); return; } }
+ for(const c of custs){ const p=ctr(c.fx,c.fy); if(c.st==='wait'&&Math.hypot(p[0]-wx,p[1]-25-wy)<20){ toast('Ce client attend : '+DISHM[c.order.dish].e+' '+DISHM[c.order.dish].n); return; } }
+}
+
+/* ---------------- MODE DÉCO ---------------- */
+function canPlace(x,y,ignore){
+ if(!inRest(x,y)) return false;
+ if(x===DX&&y===S-1) return false;
+ const o=fAt(x,y); if(o&&o!==ignore) return false;
+ return true;
+}
+function placeCheck(x,y,mover,type){
+ if(!canPlace(x,y,mover)) return 'Case occupée ou hors du restaurant.';
+ let f=mover, ox, oy;
+ if(mover){ ox=mover.x; oy=mover.y; mover.x=x; mover.y=y; }
+ else { f={id:state.nid,t:type,x,y}; state.furn.push(f); }
+ rebuildOcc();
+ const ok=layoutOK();
+ if(!ok){ if(mover){mover.x=ox;mover.y=oy;} else state.furn.pop(); rebuildOcc(); return 'Ça bloquerait le passage !'; }
+ return null;
+}
+function editTap(x,y){
+ if(placing){
+  const F=FURN[placing];
+  if(state.coins<F.p){ toast('Pas assez de pièces !'); placing=null; ghost=null; editBar(); return; }
+  {
+   const err=placeCheck(x,y,null,placing);
+   if(err){ ghost={x,y}; toast(err); return; }
+   state.nid++; state.coins-=F.p; sfx('pop'); floatAt(x,y,'-'+F.p+' 🪙','#e5484d');
+   if(state.coins<F.p){ placing=null; ghost=null; }
+   editBar(); hud(); return;
+  }
+ }
+ const f=fAt(x,y);
+ if(sel&&!f&&inRest(x,y)){
+  const err=placeCheck(x,y,sel,null);
+  if(err){ toast(err); return; } sfx('pop'); sel=null; ghost=null; editBar(); return;
+ }
+ if(f){ sel=(sel===f)?null:f; ghost=null; editBar(); return; }
+ sel=null; ghost=null; editBar();
+}
+function enterEdit(){ mode='edit'; sel=null; ghost=null; $('#bottom').classList.add('hide'); $('#editbar').classList.remove('hide'); editBar(); }
+function exitEdit(){ mode='play'; placing=null; sel=null; ghost=null; $('#bottom').classList.remove('hide'); $('#editbar').classList.add('hide'); resetSim(); save(); }
+function editBar(){
+ let info,btns;
+ if(placing){ const F=FURN[placing]; info=`Touche une case pour poser : <b>${F.n}</b> (${F.p} 🪙)`; btns=`<button class="b alt" data-e="cancel">Arrêter</button>`; }
+ else if(sel){ const F=FURN[sel.t]; info=`<b>${F.n}</b> — touche une case libre pour le déplacer`; btns=`<button class="b red" data-e="sell">Vendre +${Math.floor(F.p/2)} 🪙</button><button class="b alt" data-e="desel">OK</button>`; }
+ else { info='Mode déco : touche un meuble pour le sélectionner'; btns=`<button class="b alt" data-e="shop">🛒 Boutique</button><button class="b green" data-e="done">✔ Terminer</button>`; }
+ $('#einfo').innerHTML=info; $('#ebtns').innerHTML=btns;
+}
+$('#ebtns').addEventListener('click',e=>{
+ const b=e.target.closest('[data-e]'); if(!b) return; const a=b.dataset.e;
+ if(a==='cancel'){ placing=null; ghost=null; }
+ if(a==='desel'){ sel=null; ghost=null; }
+ if(a==='done') return exitEdit();
+ if(a==='shop') return openPanel('shop');
+ if(a==='sell'&&sel){
+  const k=kindOf(sel);
+  if(k==='stove'&&state.furn.filter(f=>kindOf(f)==='stove').length<=1){ toast('Il te faut au moins un fourneau !'); return; }
+  state.furn=state.furn.filter(f=>f!==sel); state.coins+=Math.floor(FURN[sel.t].p/2); rebuildOcc(); sel=null; sfx('coin'); hud();
+ }
+ editBar();
+});
+$('#bEdit').onclick=()=>enterEdit();
+
+/* ---------------- INTERFACE ---------------- */
+let ui={panel:null,tab:null};
+const TABS={shop:[['Tables','Tables'],['Chaises','Chaises'],['Cuisine','Cuisine'],['Déco','Déco'],['style','Sols & Murs'],['grand','Agrandir']],garden:[['potager','Potager'],['marche','Marché'],['stock','Garde-manger']],menu:[['carte','Ma carte'],['plats','Recettes']]};
+const modalQ=[];
+function queueModal(fn){ modalQ.push(fn); if(!ui.panel) nextModal(); }
+function nextModal(){ const fn=modalQ.shift(); if(fn){ ui.panel='custom'; ui.custom=fn; renderPanel(); $('#modal').classList.remove('hide'); } }
+function openPanel(p,tab){ ui.panel=p; ui.tab=tab||(TABS[p]?TABS[p][0][0]:null); renderPanel(); $('#modal').classList.remove('hide'); }
+function closeModal(){ $('#modal').classList.add('hide'); ui.panel=null; ui.plot=null; save(); if(modalQ.length) setTimeout(nextModal,150); }
+function renderPanel(){
+ if(!ui.panel) return;
+ const mc=$('#mc'), st=mc.scrollTop;
+ const r=ui.panel==='custom'?ui.custom():PANELS[ui.panel]();
+ $('#mt').textContent=r.title;
+ const tabs=TABS[ui.panel];
+ $('#tabs').innerHTML=tabs?tabs.map(([id,l])=>`<button class="${ui.tab===id?'on':''}" data-a="tab" data-v="${id}">${l}</button>`).join(''):'';
+ $('#tabs').classList.toggle('hide',!tabs);
+ mc.innerHTML=r.html; mc.scrollTop=st;
+}
+const ingTag=(k,need)=>{ const h=state.inv[k]||0; return `<span class="${need!=null?(h>=need?'ok':'no'):''}">${ING[k].e} ${ING[k].n}${need!=null?` ${h}/${need}`:` ×${h}`}</span>`; };
+const thumbs={};
+function makeThumbs(){
+ const c=document.createElement('canvas'); c.width=c.height=140; const t=c.getContext('2d'), saved=ctx; ctx=t;
+ for(const k in FURN){ t.setTransform(1,0,0,1,0,0); t.clearRect(0,0,140,140); t.setTransform(1.6,0,0,1.6,70,104); drawFurn(k,0,0,null); if(FURN[k].kind==='chair') drawChairBack(null,0,0,FURN[k].col); thumbs[k]=c.toDataURL(); }
+ ctx=saved;
+}
+const PANELS={
+ shop(){
+  const t=ui.tab; let html='';
+  if(t==='style'){
+   html+='<h3>Sols</h3><div class="grid">'+FLOORS.map((f,i)=>{ const own=state.ownF.includes(i), lock=state.level<f.u;
+    return `<div class="card ${lock?'lock':''}"><div style="width:60px;height:40px;border-radius:8px;background:repeating-conic-gradient(${f.a} 0 25%,${f.b} 0 50%) 0 0/20px 20px"></div><div class="nm">${f.n}</div><div class="sub">+${f.d} déco</div>${lock?`<div class="sub">🔒 Niveau ${f.u}</div>`:state.floor===i?'<b>✔ Utilisé</b>':own?`<button class="b sm alt" data-a="useF" data-v="${i}">Utiliser</button>`:`<button class="b sm" data-a="buyF" data-v="${i}">${f.p} 🪙</button>`}</div>`;}).join('')+'</div>';
+   html+='<h3>Murs</h3><div class="grid">'+WALLS.map((f,i)=>{ const own=state.ownW.includes(i), lock=state.level<f.u;
+    return `<div class="card ${lock?'lock':''}"><div style="width:60px;height:40px;border-radius:8px;background:${f.s?`repeating-linear-gradient(90deg,${f.c} 0 8px,${f.s} 8px 12px)`:f.c}"></div><div class="nm">${f.n}</div><div class="sub">+${f.d} déco</div>${lock?`<div class="sub">🔒 Niveau ${f.u}</div>`:state.wall===i?'<b>✔ Utilisé</b>':own?`<button class="b sm alt" data-a="useW" data-v="${i}">Utiliser</button>`:`<button class="b sm" data-a="buyW" data-v="${i}">${f.p} 🪙</button>`}</div>`;}).join('')+'</div>';
+  } else if(t==='grand'){
+   html+=`<p>Ton restaurant fait actuellement <b>${S}×${S}</b> cases.</p>`;
+   html+=EXP.filter(e=>e.s>S).map((e,i)=>{ const lock=state.level<e.u, first=i===0;
+    return `<div class="row"><div class="emo">📐</div><div class="info"><div class="t">${e.s} × ${e.s} cases</div><div class="sub">${lock?'🔒 Niveau '+e.u:'Plus de place pour des tables et de la déco'}</div></div>${!lock&&first?`<button class="b" data-a="expand" data-v="${e.s}">${fmt(e.p)} 🪙</button>`:''}</div>`;}).join('')||'<p>🎉 Ton restaurant est à sa taille maximale !</p>';
+  } else {
+   html+='<div class="grid">'+Object.entries(FURN).filter(([,f])=>f.cat===t).map(([k,f])=>{ const lock=state.level<f.u;
+    const extra=f.kind==='stove'?`Cuisson ×${f.speed}`:f.kind==='counter'?'Pose 3 plats':'';
+    return `<div class="card ${lock?'lock':''}"><img src="${thumbs[k]}" alt=""><div class="nm">${f.n}</div><div class="sub">${f.d?'+'+f.d+' déco':''} ${extra}</div>${lock?`<div class="sub">🔒 Niveau ${f.u}</div>`:`<button class="b sm" data-a="buy" data-v="${k}" ${state.coins<f.p?'disabled':''}>${f.p} 🪙</button>`}</div>`;}).join('')+'</div>';
+   if(t==='Chaises') html+='<p class="sub">Astuce : une chaise doit toucher une table (côté, pas en diagonale) pour qu\'un client puisse s\'y asseoir.</p>';
+   if(t==='Cuisine') html+='<p class="sub">Les cuisiniers préparent les plats aux fourneaux puis les posent sur un comptoir où les serveurs viennent les chercher.</p>';
+  }
+  return {title:'🛒 Boutique',html};
+ },
+ menu(){
+  let html='';
+  if(ui.tab==='carte'){
+   html+=`<p>Places au menu : <b>${state.menu.length}/${menuSlots()}</b>. Les clients commandent au hasard parmi ces plats.</p>`;
+   html+=state.menu.map(id=>{const d=DISHM[id]; return `<div class="row"><div class="emo">${d.e}</div><div class="info"><div class="t">${d.n}</div><div class="sub">${d.c} · Niv. ${lvl(id)} · ${dishPrice(d)} 🪙 · ${d.t}s</div></div><button class="b sm alt" data-a="remMenu" data-v="${id}" ${state.menu.length<=1?'disabled':''}>Retirer</button></div>`;}).join('');
+   if(state.menu.length<menuSlots()) html+='<p class="center sub">➕ Ajoute des plats depuis l\'onglet « Recettes ».</p>';
+  } else {
+   html+='<p class="sub">Améliore tes recettes avec des ingrédients : un plat de meilleur niveau rapporte plus et rend les clients plus heureux.</p>';
+   for(const cat of ['Entrée','Plat','Dessert']){
+    html+=`<h3>${cat}s</h3>`;
+    html+=DISH.filter(d=>d.c===cat).map(d=>{
+     const lock=state.level<d.u, L=lvl(d.id), inM=state.menu.includes(d.id);
+     if(lock) return `<div class="row" style="opacity:.55"><div class="emo">${d.e}</div><div class="info"><div class="t">${d.n}</div><div class="sub">🔒 Niveau ${d.u}</div></div></div>`;
+     const can=L<10&&d.ing.every(k=>(state.inv[k]||0)>=L);
+     return `<div class="row"><div class="emo">${d.e}</div><div class="info"><div class="t">${d.n} <span class="stars">${'★'.repeat(Math.ceil(L/2))}</span></div><div class="sub">Niv. ${L}/10 · ${dishPrice(d)} 🪙</div><div class="ings">${L<10?d.ing.map(k=>ingTag(k,L)).join(''):'<span class="ok">Niveau max !</span>'}</div></div><div style="display:flex;flex-direction:column;gap:5px">${L<10?`<button class="b sm green" data-a="upg" data-v="${d.id}" ${can?'':'disabled'}>Améliorer</button>`:''}${inM?'<span class="sub center">✔ Au menu</span>':`<button class="b sm" data-a="addMenu" data-v="${d.id}" ${state.menu.length>=menuSlots()?'disabled':''}>+ Menu</button>`}</div></div>`;
+    }).join('');
+   }
+  }
+  return {title:'📖 Menu & recettes',html};
+ },
+ garden(){
+  let html='';
+  if(ui.tab==='potager'){
+   if(ui.plot!=null){
+    html+=`<p><b>Choisis une graine</b> pour la parcelle ${ui.plot+1} :</p>`;
+    html+=Object.entries(ING).filter(([,i])=>i.g).map(([k,i])=>{ const lock=state.level<i.g.u;
+     return `<div class="row" ${lock?'style="opacity:.55"':''}><div class="emo">${i.e}</div><div class="info"><div class="t">${i.n}</div><div class="sub">${lock?'🔒 Niveau '+i.g.u:`Récolte : ${i.g.y} · ${fmtT(i.g.t)}`}</div></div>${lock?'':`<button class="b sm" data-a="seed" data-v="${k}" ${state.coins<i.g.c?'disabled':''}>${i.g.c} 🪙</button>`}</div>`;}).join('');
+    html+=`<p class="center"><button class="b alt" data-a="unplot">Retour</button></p>`;
+   } else {
+    html+='<p class="sub">Plante des graines, attends qu\'elles poussent (même quand le jeu est fermé) et récolte tes ingrédients.</p><div class="plots">';
+    const now=Date.now();
+    state.garden.forEach((p,i)=>{
+     if(!p){ html+=`<div class="plot"><div class="big">🟫</div><button class="b sm" data-a="plot" data-v="${i}">Planter</button></div>`; return; }
+     const I=ING[p.k], el=(now-p.at)/1000, pr=clamp(el/I.g.t,0,1);
+     if(pr>=1) html+=`<div class="plot" style="background:#6f9e3f"><div class="big">${I.e}</div><b>${I.n}</b><button class="b sm green" data-a="harvest" data-v="${i}">Récolter</button></div>`;
+     else html+=`<div class="plot"><div class="big">${pr<.5?'🌱':'🌿'}</div><b>${I.n}</b><div class="bar"><i style="width:${pr*100}%"></i></div><span class="sub" style="color:#fff">${fmtT(I.g.t-el)}</span></div>`;
+    });
+    if(state.garden.length<maxPlots()) html+=`<div class="plot" style="background:#c9b08f"><div class="big">➕</div><button class="b sm" data-a="buyPlot" ${state.coins<plotCost()?'disabled':''}>${plotCost()} 🪙</button></div>`;
+    html+='</div>';
+    if(state.garden.length>=maxPlots()&&state.garden.length<12) html+=`<p class="sub center">Nouvelles parcelles au niveau ${(Math.floor(state.level/3)+1)*3}.</p>`;
+   }
+  } else if(ui.tab==='marche'){
+   html+='<p class="sub">Certains ingrédients ne poussent pas au jardin : achète-les ici (ou gagne-les au quiz).</p>';
+   html+=Object.entries(ING).filter(([,i])=>i.b).map(([k,i])=>`<div class="row"><div class="emo">${i.e}</div><div class="info"><div class="t">${i.n}</div><div class="sub">En stock : ${state.inv[k]||0}</div></div><button class="b sm" data-a="mkt" data-v="${k}:1" ${state.coins<i.b?'disabled':''}>×1 · ${i.b} 🪙</button><button class="b sm" data-a="mkt" data-v="${k}:5" ${state.coins<i.b*4?'disabled':''}>×5 · ${i.b*4} 🪙</button></div>`).join('');
+  } else {
+   const ks=Object.keys(ING).filter(k=>state.inv[k]);
+   html+=ks.length?'<div class="ings" style="gap:8px">'+ks.map(k=>`<span style="font-size:15px;padding:6px 10px">${ING[k].e} ${ING[k].n} ×${state.inv[k]}</span>`).join('')+'</div>':'<p>Ton garde-manger est vide.</p>';
+   html+='<p class="sub">Astuce : des ingrédients apparaissent parfois sur le trottoir ✨ — touche-les pour les ramasser !</p>';
+  }
+  return {title:'🌱 Jardin',html};
+ },
+ staff(){
+  let html=`<p>Équipe : <b>${state.staff.length}/${maxStaff()}</b>. Les employés gagnent de l'expérience en travaillant et deviennent plus rapides.</p>`;
+  html+=state.staff.map(s=>{ const R=ROLES[s.role], L=staffLv(s);
+   return `<div class="row"><div class="emo">${R.e}</div><div class="info"><div class="t">${s.name}</div><div class="sub">${R.n} · Niv. ${L}/5 ${L<5?`· ${s.xp%25}/25 XP`:''}</div></div><button class="b sm alt" data-a="role" data-v="${s.id}">Changer de poste</button>${state.staff.length>1?`<button class="b sm red" data-a="fire" data-v="${s.id}">✕</button>`:''}</div>`;}).join('');
+  if(state.staff.length<maxStaff()){
+   html+=`<h3>Embaucher (${hireCost()} 🪙)</h3><div style="display:flex;gap:8px;flex-wrap:wrap">`+Object.entries(ROLES).map(([k,r])=>state.level<r.u?`<button class="b alt" disabled>${r.e} ${r.n} 🔒 niv. ${r.u}</button>`:`<button class="b" data-a="hire" data-v="${k}" ${state.coins<hireCost()?'disabled':''}>${r.e} ${r.n}</button>`).join('')+'</div>';
+  } else html+=`<p class="sub">Une nouvelle place se libère au niveau ${state.level%2?state.level+1:state.level+2}.</p>`;
+  html+='<p class="sub">🧹 Les agents d\'entretien ramassent les déchets et débarrassent les tables : un restaurant propre a une meilleure note.</p>';
+  return {title:'👥 Mon équipe',html};
+ },
+ quiz(){
+  const left=quizLeft(); let html='';
+  if(ui.q==null&&left>0){ newQuestion(); }
+  if(ui.q==null){ html+='<div class="lvlup">🧑‍🍳</div><p class="center"><b>Tu as répondu à toutes les questions du jour !</b><br>Reviens demain pour gagner d\'autres ingrédients.</p>'; return {title:'❓ Quiz gourmand',html}; }
+  const [q,ans]=QUIZ[ui.q];
+  html+=`<p class="sub">Questions restantes aujourd'hui : ${left}. Bonne réponse = 2 ingrédients rares + 10 XP !</p><h3>${q}</h3><div class="qa">`;
+  html+=ui.qo.map(i=>{ let cls='b alt'; if(ui.qa!=null){ if(i===0) cls+=' okk'; else if(i===ui.qa) cls+=' bad'; } return `<button class="${cls}" data-a="ans" data-v="${i}" ${ui.qa!=null?'disabled style="opacity:1"':''}>${ans[i]}</button>`; }).join('');
+  html+='</div>';
+  if(ui.qa!=null){ html+=`<p class="center"><b>${ui.qa===0?'Bonne réponse ! '+ui.qr:'Raté… La bonne réponse était : '+ans[0]}</b></p><p class="center"><button class="b" data-a="nextQ">${quizLeft()>0?'Question suivante':'Terminer'}</button></p>`; }
+  return {title:'❓ Quiz gourmand',html};
+ },
+ rating(){
+  const st=Math.round(rating*10)/10;
+  const row=(e,t,v,mx,tip)=>`<div class="row"><div class="emo">${e}</div><div class="info"><div class="t">${t}</div><div class="bar" style="background:#eee"><i style="width:${clamp(v/mx,0,1)*100}%;background:#ffb347"></i></div><div class="sub">${tip}</div></div></div>`;
+  let html=`<div class="lvlup stars" style="font-size:40px">${'★'.repeat(Math.round(rating))}${'☆'.repeat(5-Math.round(rating))}</div><p class="center"><b>${st} / 5</b> — plus la note est haute, plus il y a de clients et plus ils sont patients.</p>`;
+  html+=row('🪴','Décoration',rParts.d,1.5,'Achète des meubles et de la déco (proportionnel à la taille du resto).');
+  html+=row('🍽️','Qualité du menu',rParts.m,1.2,'Améliore le niveau de tes recettes.');
+  html+=row('😊','Satisfaction des clients',rParts.s,1.5,`Satisfaction moyenne : ${Math.round(state.sat)}%. Sers vite !`);
+  html+=`<div class="row"><div class="emo">🧹</div><div class="info"><div class="t">Propreté</div><div class="sub">${rParts.dirt>0?`Malus : -${rParts.dirt.toFixed(1)} (déchets et tables sales)`:'Impeccable ✨'}</div></div></div>`;
+  return {title:'⭐ Note du restaurant',html};
+ },
+ settings(){
+  let html=`<h3>Nom du restaurant</h3><div style="display:flex;gap:8px"><input type="text" id="rname" maxlength="16" value="${state.name.replace(/"/g,'&quot;')}"><button class="b" data-a="rename">OK</button></div>`;
+  html+=`<h3>Options</h3><div class="row"><div class="info"><div class="t">🔊 Sons</div></div><button class="b sm ${state.sound?'green':'alt'}" data-a="sound">${state.sound?'Activés':'Coupés'}</button></div>`;
+  html+=`<div class="row"><div class="info"><div class="t">🎯 Recentrer la caméra</div></div><button class="b sm alt" data-a="recenter">Recentrer</button></div>`;
+  html+=`<h3>Statistiques</h3><div class="row"><div class="info">🍽️ Clients servis : <b>${fmt(state.served)}</b><br>🪙 Pièces gagnées : <b>${fmt(state.earned)}</b><br>👥 Employés : <b>${state.staff.length}</b></div></div>`;
+  html+=`<h3>Comment jouer</h3><div class="row"><div class="info sub" style="opacity:1">Les clients entrent, s'assoient et commandent un plat de ton menu. Tes cuisiniers cuisinent, tes serveurs servent. Gagne des pièces et de l'XP, décore avec la Boutique, cultive des ingrédients au Jardin pour améliorer tes recettes et fais grimper la note de ton restaurant ! Fais glisser pour te déplacer, pince (ou molette) pour zoomer.</div></div>`;
+  html+=`<h3>Danger</h3><button class="b red" data-a="reset">${ui.cr?'Sûr ? Touche encore pour tout effacer':'Recommencer à zéro'}</button>`;
+  html+=`<p class="sub center">Bistro Ville — prototype v0.1</p>`;
+  return {title:'⚙️ Réglages',html};
+ },
+};
+function fmtT(s){ s=Math.max(0,Math.ceil(s)); return s>=60?Math.floor(s/60)+' min '+(s%60?String(s%60).padStart(2,'0')+' s':''):s+' s'; }
+function newQuestion(){
+ const seen=state.quiz.seen||[]; const pool=QUIZ.map((_,i)=>i).filter(i=>!seen.includes(i));
+ ui.q=pick(pool.length?pool:QUIZ.map((_,i)=>i)); ui.qa=null; ui.qo=[0,1,2,3].sort(()=>Math.random()-.5);
+}
+const ACT={
+ close:()=>closeModal(),
+ tab:v=>{ui.tab=v; ui.plot=null; $('#mc').scrollTop=0; renderPanel();},
+ buy:k=>{ const F=FURN[k]; if(state.coins<F.p) return toast('Pas assez de pièces !'); closeModal(); if(mode!=='edit') enterEdit(); placing=k; sel=null; ghost=null; editBar(); },
+ buyF:i=>{ i=+i; const f=FLOORS[i]; if(state.coins<f.p) return toast('Pas assez de pièces !'); state.coins-=f.p; state.ownF.push(i); state.floor=i; sfx('coin'); },
+ useF:i=>{state.floor=+i;},
+ buyW:i=>{ i=+i; const f=WALLS[i]; if(state.coins<f.p) return toast('Pas assez de pièces !'); state.coins-=f.p; state.ownW.push(i); state.wall=i; sfx('coin'); },
+ useW:i=>{state.wall=+i;},
+ expand:s=>{ s=+s; const e=EXP.find(x=>x.s===s); if(state.coins<e.p) return toast('Pas assez de pièces !'); state.coins-=e.p; state.size=s; for(const c of custs) if(c.order) c.order.cancel=true; custs=[]; orders=[]; items=[]; setSize(); resetSim(); centerCam(); sfx('level'); toast('📐 Restaurant agrandi en '+s+'×'+s+' !'); closeModal(); },
+ remMenu:id=>{ if(state.menu.length>1) state.menu=state.menu.filter(x=>x!==id); },
+ addMenu:id=>{ if(state.menu.length<menuSlots()&&!state.menu.includes(id)){ state.menu.push(id); toast(DISHM[id].e+' ajouté au menu !'); } },
+ upg:id=>{ const d=DISHM[id], L=lvl(id); if(L>=10||!d.ing.every(k=>(state.inv[k]||0)>=L)) return; d.ing.forEach(k=>state.inv[k]-=L); state.dl[id]=L+1; addXP(5*L); sfx('level'); toast(d.e+' '+d.n+' passe niveau '+(L+1)+' !'); },
+ plot:i=>{ui.plot=+i;},
+ unplot:()=>{ui.plot=null;},
+ seed:k=>{ const I=ING[k]; if(state.coins<I.g.c||ui.plot==null) return; state.coins-=I.g.c; state.garden[ui.plot]={k,at:Date.now()}; ui.plot=null; sfx('pop'); },
+ harvest:i=>{ i=+i; const p=state.garden[i]; if(!p) return; const I=ING[p.k]; state.inv[p.k]=(state.inv[p.k]||0)+I.g.y; state.garden[i]=null; addXP(2); sfx('coin'); toast('Récolte : +'+I.g.y+' '+I.e+' '+I.n); },
+ buyPlot:()=>{ if(state.coins<plotCost()||state.garden.length>=maxPlots()) return; state.coins-=plotCost(); state.garden.push(null); sfx('coin'); },
+ mkt:v=>{ const [k,n]=v.split(':'), q=+n, c=ING[k].b*(q===5?4:1); if(state.coins<c) return; state.coins-=c; state.inv[k]=(state.inv[k]||0)+q; sfx('coin'); },
+ role:id=>{ const s=state.staff.find(x=>x.id==id); const rs=Object.keys(ROLES).filter(r=>state.level>=ROLES[r].u); s.role=rs[(rs.indexOf(s.role)+1)%rs.length]; const a=crew.find(c=>c.s===s); if(a){ if(a.job&&a.job.o){ a.job.o.st='wait'; a.job.o.chef=null; a.job.o.waiter=null; a.job.o.at=null; } if(a.job&&a.job.stove) stoveBusy.delete(a.job.stove.id); if(a.job&&a.job.table) cleaning.delete(a.job.table.id); if(a.job&&a.job.t&&a.job.t.tg) a.job.t.tg=null; a.job=null; a.carry=null; a.path=[]; } },
+ fire:id=>{ const s=state.staff.find(x=>x.id==id); if(!s||state.staff.length<=1) return; state.staff=state.staff.filter(x=>x!==s); resetSim(); crew=crew.filter(a=>a.s!==s); toast(s.name+' a quitté l\'équipe.'); },
+ hire:r=>{ const c=hireCost(); if(state.coins<c||state.staff.length>=maxStaff()) return; state.coins-=c; const s=mkStaffData(r); state.staff.push(s); crew.push(mkCrew(s)); sfx('coin'); toast(ROLES[r].e+' '+s.name+' rejoint ton équipe !'); },
+ ans:i=>{ i=+i; if(ui.qa!=null) return; ui.qa=i; state.quiz.n++; state.quiz.seen=[...(state.quiz.seen||[]),ui.q].slice(-15);
+  if(i===0){ const rare=Object.keys(ING).filter(k=>ING[k].b), k=pick(rare), k2=pick(Object.keys(ING)); state.inv[k]=(state.inv[k]||0)+1; state.inv[k2]=(state.inv[k2]||0)+1; ui.qr=`+1 ${ING[k].e} +1 ${ING[k2].e}`; addXP(10); sfx('level'); } else sfx('bad'); },
+ nextQ:()=>{ ui.q=null; ui.qa=null; },
+ rename:()=>{ const v=($('#rname').value||'').trim().slice(0,16); if(v){ state.name=v; toast('Bienvenue « '+v+' » !'); } },
+ sound:()=>{state.sound=!state.sound;},
+ recenter:()=>{centerCam(); closeModal();},
+ reset:()=>{ if(!ui.cr){ui.cr=true; return;} ui.cr=false; try{localStorage.removeItem(SAVE_KEY);}catch(e){} state=newState(); setSize(); defaultLayout(); rebuildOcc(); custs=[];orders=[];trash=[];items=[];dirty.clear(); buildCrew(); centerCam(); closeModal(); showTuto(); },
+};
+$('#modal').addEventListener('click',e=>{
+ if(e.target.id==='modal'||e.target.id==='mx') return closeModal();
+ const b=e.target.closest('[data-a]'); if(!b) return;
+ const a=b.dataset.a; if(ACT[a]){ ACT[a](b.dataset.v); if(ui.panel&&a!=='close'&&a!=='recenter'&&a!=='buy'&&a!=='expand') renderPanel(); hud(); }
+});
+document.querySelectorAll('[data-open]').forEach(b=>b.onclick=()=>{audioInit(); if(b.dataset.open==='quiz'){ui.q=null;} openPanel(b.dataset.open);});
+$('#pRate').onclick=()=>openPanel('rating');
+$('#pSet').onclick=()=>{ui.cr=false; openPanel('settings');};
+$('#pLvl').onclick=()=>toast(`Niveau ${state.level} — ${Math.floor(state.xp)}/${xpNeed(state.level)} XP`);
+$('#pCoins').onclick=()=>toast('Gagne des pièces en servant tes clients !');
+let toastT=0;
+function toast(s){ const t=$('#toast'); t.textContent=s; t.style.opacity=1; clearTimeout(toastT); toastT=setTimeout(()=>t.style.opacity=0,2200); }
+function hud(){
+ $('#coins').textContent=fmt(state.coins); $('#lvl').textContent=state.level;
+ $('#xpbar').style.width=(state.xp/xpNeed(state.level)*100)+'%';
+ $('#rate').textContent=(Math.round(rating*10)/10).toFixed(1);
+ const now=Date.now(); $('#gDot').classList.toggle('hide',!state.garden.some(p=>p&&(now-p.at)/1000>=ING[p.k].g.t));
+ $('#qDot').classList.toggle('hide',quizLeft()<=0);
+}
+function showTuto(){
+ queueModal(()=>({title:'Bienvenue dans Bistro Ville !',html:`<div class="lvlup">🧑‍🍳</div>
+ <p>Tu viens d'ouvrir ton tout premier restaurant, <b>${state.name}</b>. Voici comment ça marche :</p>
+ <div class="row"><div class="emo">🙋</div><div class="info">Les clients arrivent par la rue, s'assoient et commandent un plat de ton <b>menu</b>.</div></div>
+ <div class="row"><div class="emo">👨‍🍳</div><div class="info">Ton <b>cuisinier</b> prépare le plat au fourneau, ton <b>serveur</b> l'apporte. Sers vite avant que les clients perdent patience !</div></div>
+ <div class="row"><div class="emo">🌱</div><div class="info">Cultive des ingrédients au <b>Jardin</b> (ou gagne-les au <b>Quiz</b>) pour améliorer tes recettes.</div></div>
+ <div class="row"><div class="emo">✏️</div><div class="info">Achète des meubles et décore en mode <b>Déco</b> pour faire monter ta <span class="stars">★</span> note.</div></div>
+ <p class="sub">Fais glisser pour te déplacer, pince pour zoomer. Ta partie est sauvegardée automatiquement.</p>
+ <p class="center"><button class="b" data-a="close">C'est parti !</button></p>`}));
+ state.tuto=true;
+}
+
+/* ---------------- SON ---------------- */
+let AC=null;
+function audioInit(){ if(AC) return; try{ AC=new (window.AudioContext||window.webkitAudioContext)(); }catch(e){} }
+function tone(f,t0,d,type,v){ const o=AC.createOscillator(), g=AC.createGain(); o.type=type||'sine'; o.frequency.value=f; g.gain.setValueAtTime(v||.08,AC.currentTime+t0); g.gain.exponentialRampToValueAtTime(.0001,AC.currentTime+t0+d); o.connect(g); g.connect(AC.destination); o.start(AC.currentTime+t0); o.stop(AC.currentTime+t0+d+.02); }
+function sfx(k){
+ if(!state||!state.sound||!AC) return;
+ try{
+  if(k==='coin'){ tone(988,0,.08,'square',.04); tone(1319,.07,.16,'square',.04); }
+  else if(k==='pop'){ tone(520,0,.08,'sine',.08); tone(780,.04,.08,'sine',.06); }
+  else if(k==='level'){ [523,659,784,1047].forEach((f,i)=>tone(f,i*.09,.18,'triangle',.07)); }
+  else if(k==='bad'){ tone(300,0,.15,'sawtooth',.04); tone(220,.12,.2,'sawtooth',.04); }
+ }catch(e){}
+}
+
+/* ---------------- BOUCLE ---------------- */
+let last=performance.now(),acc=0,saveAcc=0,gAcc=0;
+function frame(t){
+ const dt=Math.min(.1,(t-last)/1000); last=t;
+ if(mode==='play') update(dt);
+ for(const f of floaters) f.t-=dt; floaters=floaters.filter(f=>f.t>0);
+ render();
+ acc+=dt; if(acc>.5){ acc=0; calcRating(); hud(); }
+ gAcc+=dt; if(gAcc>1){ gAcc=0; if(ui.panel==='garden'&&ui.tab==='potager'&&ui.plot==null) renderPanel(); }
+ saveAcc+=dt; if(saveAcc>15){ saveAcc=0; save(); }
+ requestAnimationFrame(frame);
+}
+function boot(){
+ const loaded=load();
+ state=loaded||newState();
+ setSize();
+ if(!loaded) defaultLayout();
+ rebuildOcc(); buildCrew();
+ resize(); centerCam(); makeThumbs(); calcRating(); hud();
+ if(!state.tuto) showTuto();
+ else {
+  const away=(Date.now()-state.lastSave)/1000;
+  if(away>120){
+   const mins=Math.min(away/60,480), avg=state.menu.reduce((s,id)=>s+dishPrice(DISHM[id]),0)/Math.max(1,state.menu.length);
+   const gain=Math.floor(mins*Math.max(1,seatCount())*avg*.12);
+   if(gain>0){ earn(gain); queueModal(()=>({title:'Bon retour !',html:`<div class="lvlup">💰</div><p class="center">Pendant ton absence (${fmtT(Math.min(away,28800))}), ton équipe a fait tourner <b>${state.name}</b> et a gagné<br><b style="font-size:26px">${fmt(gain)} 🪙</b></p><p class="center"><button class="b" data-a="close">Merci l'équipe !</button></p>`})); }
+  }
+ }
+ save();
+ requestAnimationFrame(frame);
+}
+addEventListener('resize',()=>{resize();});
+document.addEventListener('visibilitychange',()=>{ if(document.hidden) save(); });
+addEventListener('pagehide',save);
+boot();
+</script>
+</body>
+</html>

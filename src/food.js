@@ -1,0 +1,78 @@
+/* =========================================================
+   PLATS ET BOISSONS EN 3D (posés sur l'assiette, le plateau, le passe-plat)
+   Pour ajouter un plat : une fonction dans FOOD_BUILD portant l'id du plat.
+   ========================================================= */
+const _fm=(c,o)=>M(c,Object.assign({roughness:.7},o||{}));
+const fd=(g,geo_,mat,x,y,z)=>{ const m=mesh(geo_,mat,x,y,z,false); g.add(m); return m; };
+const bowlG=(r)=>geo('bowl'+r,()=>new THREE.SphereGeometry(r,18,10,0,Math.PI*2,Math.PI/2,Math.PI/2));
+function bowl(g,r,col,fill,fy){ const b=fd(g,bowlG(r),_fm(col,{side:THREE.DoubleSide,roughness:.35}),0,r*.78,0); b.scale.y=.8; if(fill) fd(g,CY(r*.93,r*.93,.006,18),_fm(fill,{roughness:.4}),0,(fy||r*.68),0); return b; }
+function glass(g,r,h,liq,fillK){ fd(g,CY(r,r*.82,h,14),new THREE.MeshStandardMaterial({color:'#eaf6fb',transparent:true,opacity:.32,roughness:.05}),0,h/2,0); if(liq) fd(g,CY(r*.86,r*.72,h*(fillK||.7),14),_fm(liq,{roughness:.2,transparent:true,opacity:.9}),0,h*(fillK||.7)/2+.004,0); }
+function straw(g,x,h,c){ const s=fd(g,CY(.006,.006,h,6),_fm(c||'#e5484d'),x,h/2+.02,0); s.rotation.z=-.2; }
+const FOOD_BUILD={
+ pizza:g=>{ // 8 parts : elles disparaissent une à une quand on mange
+  const wedge=(r,h,a)=>geo('wd'+r+','+h+','+a,()=>new THREE.CylinderGeometry(r,r,h,5,1,false,a,Math.PI/4-.035));
+  for(let i=0;i<8;i++){ const a=i*Math.PI/4, w=new THREE.Group(), am=a+Math.PI/8;
+   fd(w,wedge(.108,.016,a),_fm('#dba25a'),0,.008,0); fd(w,wedge(.09,.008,a),_fm('#f4cf6a',{roughness:.5}),0,.019,0);
+   fd(w,CY(.016,.016,.006,10),_fm('#c23a2a'),Math.sin(am)*.058,.025,Math.cos(am)*.058); if(i%2) fd(w,SP(.01,6,5),_fm('#5fa84f'),Math.sin(am)*.03,.025,Math.cos(am)*.03).scale.y=.4;
+   g.add(w); } },
+ salade:g=>{ bowl(g,.095,'#ffffff'); const gr=['#6fbf5a','#8fd06a','#4fa34a']; for(let i=0;i<8;i++){ const a=i*.8; const l=fd(g,IC(.04,0),_fm(gr[i%3],{flatShading:true}),Math.cos(a)*.045,.075+((i%2)*.012),Math.sin(a)*.045); l.scale.y=.6; }
+  fd(g,IC(.04,0),_fm('#8fd06a',{flatShading:true}),0,.09,0); for(const [x,z] of [[.03,.02],[-.035,-.01],[.0,-.04]]) fd(g,SP(.016,8,6),_fm('#e5484d'),x,.1,z); fd(g,SP(.013,6,5),_fm('#f2c94c'),-.01,.105,.03); },
+ soupe:g=>{ bowl(g,.095,'#fff7ea','#e58a3a',.068); fd(g,CY(.03,.03,.004,12),_fm('#fff3dc'),.01,.073,.0).scale.set(1,1,.5); for(const [x,z] of [[-.04,.02],[.03,-.04],[.045,.03]]) fd(g,SP(.008,6,5),_fm('#5fa84f'),x,.074,z); },
+ omelette:g=>{ const o=fd(g,SP(.085,16,10),_fm('#f6cf4f',{roughness:.5}),0,.022,0); o.scale.set(1.15,.3,.7); fd(g,SP(.03,8,6),_fm('#fbe38a'),.02,.036,0).scale.set(1.6,.3,.9);
+  for(const [x,z] of [[-.04,.01],[.0,-.02],[.05,.02]]) fd(g,SP(.007,6,5),_fm('#4fa34a'),x,.046,z); fd(g,CY(.022,.022,.008,10),_fm('#e5484d'),-.07,.012,.06); fd(g,IC(.025,0),_fm('#6fbf5a',{flatShading:true}),.075,.02,-.055).scale.y=.5; },
+ burger:g=>{ fd(g,CY(.07,.066,.025,18),_fm('#d99a4e'),0,.014,0); fd(g,CY(.078,.078,.008,14),_fm('#6fbf5a'),0,.03,0); fd(g,CY(.071,.071,.022,18),_fm('#6b3a22'),0,.045,0);
+  const c=fd(g,new THREE.BoxGeometry(.13,.006,.13),_fm('#f6c23a'),0,.059,0); c.rotation.y=.6; fd(g,CY(.066,.066,.008,14),_fm('#e5484d'),0,.066,0);
+  const t=fd(g,SP(.072,18,10),_fm('#dfa052',{roughness:.5}),0,.07,0); t.scale.y=.62; for(let i=0;i<6;i++){ const a=i*1.05; fd(g,SP(.006,5,4),_fm('#fff3dc'),Math.cos(a)*.035,.108,Math.sin(a)*.035); }
+  for(let i=0;i<4;i++) fd(g,new THREE.BoxGeometry(.012,.012,.07),_fm('#f2c94c'),.1,.012+i*.004,-.03+i*.02).rotation.y=.3*i; },
+ pates:g=>{ for(let i=0;i<5;i++){ const t=fd(g,TO(.07-i*.011,.011),_fm('#f2d27a',{roughness:.6}),0,.018+i*.012,0); t.rotation.set(Math.PI/2,0,i); } fd(g,SP(.04,10,8),_fm('#c8402e'),0,.07,0).scale.y=.5; fd(g,SP(.012,6,5),_fm('#5fa84f'),.01,.09,.0); fd(g,SP(.01,6,5),_fm('#fff3dc'),-.02,.085,.015); },
+ steak:g=>{ const s=fd(g,SP(.065,14,10),_fm('#7a4028',{roughness:.6}),-.03,.02,.01); s.scale.set(1.15,.32,.8); for(let i=-1;i<=1;i++) fd(g,new THREE.BoxGeometry(.09,.004,.007),_fm('#3d2014'),-.03,.041,.01+i*.025).rotation.y=.5;
+  for(let i=0;i<7;i++){ const f=fd(g,new THREE.BoxGeometry(.012,.012,.075),_fm('#f2c94c'),.06+(i%3)*.012,.012+Math.floor(i/3)*.012,-.02+(i%2)*.03); f.rotation.y=(i*.7)%1.5; } fd(g,IC(.022,0),_fm('#6fbf5a',{flatShading:true}),-.06,.02,-.07); },
+ poulet:g=>{ const b=fd(g,SP(.065,14,10),_fm('#c9772e',{roughness:.45}),0,.045,0); b.scale.set(1.2,.75,.9); for(const s of [-1,1]){ const d=fd(g,SP(.03,10,8),_fm('#b9662a',{roughness:.45}),.06,.04,s*.045); d.scale.set(1.5,.8,.8); fd(g,CY(.006,.006,.035,6),_fm('#fff3dc'),.105,.045,s*.05).rotation.z=Math.PI/2; }
+  for(const [x,z] of [[-.08,.05],[-.085,-.04],[-.05,.075]]) fd(g,SP(.02,8,6),_fm('#e8c46a'),x,.018,z); fd(g,IC(.02,0),_fm('#6fbf5a',{flatShading:true}),-.03,.02,-.08); },
+ sushi:g=>{ fd(g,RB(.2,.012,.13,.006),_fm('#3a2a22'),0,.006,0); for(let i=0;i<3;i++){ const x=-.06+i*.045; fd(g,CY(.02,.02,.026,12),_fm('#22252b'),x,.026,-.03); fd(g,CY(.016,.016,.027,12),_fm('#ffffff'),x,.027,-.03); fd(g,CY(.007,.007,.028,8),_fm(i%2?'#6fbf5a':'#f08a5a'),x,.028,-.03); }
+  for(let i=0;i<2;i++){ const x=-.04+i*.07; fd(g,RB(.05,.02,.026,.008),_fm('#ffffff'),x,.022,.03); fd(g,RB(.056,.01,.028,.004),_fm(i?'#f08a5a':'#e5484d'),x,.036,.03); } fd(g,SP(.012,6,5),_fm('#8fd06a'),.08,.018,.04); },
+ curry:g=>{ bowl(g,.098,'#ffffff','#d98a2e',.066); const r=fd(g,SP(.05,12,8),_fm('#fffaf0'),-.035,.07,0); r.scale.y=.6; for(const [x,z] of [[.03,.02],[.05,-.02],[.02,-.04]]) fd(g,SP(.014,6,5),_fm('#b9662a'),x,.074,z); fd(g,SP(.008,6,5),_fm('#e5484d'),.04,.078,.035); fd(g,SP(.008,6,5),_fm('#5fa84f'),.0,.078,.045); },
+ ramen:g=>{ bowl(g,.1,'#a8322a','#e8b96a',.07); for(let i=0;i<3;i++){ const t=fd(g,TO(.04-i*.01,.008),_fm('#f2d27a'),-.02,.076,.01); t.rotation.set(Math.PI/2,0,i); }
+  fd(g,SP(.022,10,8),_fm('#ffffff'),.04,.078,-.02).scale.y=.5; fd(g,SP(.011,8,6),_fm('#f2a33a'),.04,.084,-.02).scale.y=.5; fd(g,new THREE.BoxGeometry(.04,.05,.004),_fm('#22352b'),.03,.095,.05).rotation.x=-.3; for(const [x,z] of [[-.05,-.04],[0,-.055]]) fd(g,SP(.008,6,5),_fm('#5fa84f'),x,.078,z); },
+ croissant:g=>{ fd(g,CY(.1,.085,.012,22),_fm('#ffffff',{roughness:.25}),0,.006,0); const c=_fm('#e2a04a',{roughness:.55}), c2=_fm('#c9822e',{roughness:.55}); for(let i=-3;i<=3;i++){ const t=i/3, s=fd(g,SP(.03-Math.abs(t)*.014,12,10),i%2?c:c2,t*.07,.032-Math.abs(t)*.006,-.01+t*t*.04); s.scale.set(.75,1,1.25); s.rotation.y=-t*.7; } fd(g,CY(.022,.02,.022,12),_fm('#fff6e0',{roughness:.3}),-.06,.022,.05); fd(g,CY(.018,.018,.004,10),_fm('#d8433a',{roughness:.2}),-.06,.033,.05); },
+ tartine:g=>{ fd(g,CY(.1,.085,.012,22),_fm('#ffffff',{roughness:.25}),0,.006,0); for(const [x,z,r,c] of [[-.03,.01,.3,'#d8433a'],[.04,-.02,-.4,'#f0b23a']]){ const b=fd(g,RB(.075,.016,.06,.012),_fm('#e9c896',{roughness:.8}),x,.022,z); b.rotation.y=r; const cr=fd(g,RB(.079,.012,.064,.012),_fm('#b9803a',{roughness:.8}),x,.018,z); cr.rotation.y=r; const j=fd(g,RB(.058,.005,.044,.008),_fm(c,{roughness:.15}),x,.032,z); j.rotation.y=r; } fd(g,RB(.02,.012,.02,.004),_fm('#fff3a8'),.075,.018,.05); },
+ oeufsplat:g=>{ fd(g,CY(.1,.085,.012,22),_fm('#ffffff',{roughness:.25}),0,.006,0); for(const [x,z] of [[-.03,-.01],[.025,.03]]){ const w=fd(g,SP(.045,16,10),_fm('#fffdf6',{roughness:.35}),x,.014,z); w.scale.set(1.1,.14,1); fd(g,SP(.018,14,10),_fm('#f2a01e',{roughness:.15}),x,.022,z).scale.y=.6; } for(const [x,r] of [[.055,.2],[.07,-.1]]){ const b=fd(g,RB(.018,.006,.09,.003),_fm('#b9483a',{roughness:.5}),x,.017,-.02); b.rotation.y=r; fd(g,RB(.006,.007,.088,.002),_fm('#f2c9b0'),x+.004,.0175,-.02).rotation.y=r; } },
+ granola:g=>{ bowl(g,.09,'#fff6e0','#fffdf8',.066); for(let i=0;i<9;i++){ const a=i*.7, r=.02+(i%3)*.018; fd(g,SP(.012,8,6),_fm(['#d8433a','#e5484d','#7fbf4a','#f0b23a','#5a2a5a'][i%5],{roughness:.3}),Math.cos(a)*r,.074,Math.sin(a)*r); } for(let i=0;i<10;i++){ const a=i*1.3+.4; fd(g,IC(.007,0),_fm('#c99a5a',{flatShading:true}),Math.cos(a)*.05,.071,Math.sin(a)*.05); } },
+ brunch:g=>{ fd(g,CY(.11,.094,.012,24),_fm('#ffffff',{roughness:.25}),0,.006,0); const w=fd(g,SP(.04,14,10),_fm('#fffdf6',{roughness:.35}),-.04,.014,.03); w.scale.set(1.1,.14,1); fd(g,SP(.016,12,10),_fm('#f2a01e',{roughness:.15}),-.04,.022,.03).scale.y=.6; for(let i=0;i<3;i++) fd(g,CY(.034,.034,.008,14),_fm('#e8b96a',{roughness:.6}),.04,.016+i*.009,.03); fd(g,RB(.016,.008,.016,.003),_fm('#fff3a8'),.04,.046,.03); for(let i=0;i<5;i++){ const l=fd(g,IC(.022,0),_fm(['#6fbf5a','#8fd06a'][i%2],{flatShading:true}),-.03+i*.02,.022,-.045); l.scale.y=.5; } fd(g,SP(.012,8,6),_fm('#e5484d'),.05,.018,-.04); fd(g,SP(.012,8,6),_fm('#e5484d'),.02,.018,-.055); },
+ planche:g=>{ fd(g,RB(.22,.014,.14,.01),_fm('#8a5a34',{roughness:.7}),0,.007,0); fd(g,CY(.01,.01,.015,8),_fm('#5e3719'),.095,.007,-.05); const y=.014; fd(g,geo('plw',()=>new THREE.CylinderGeometry(.06,.06,.03,3,1,false,0,Math.PI/3)),_fm('#f6c63a',{roughness:.5}),-.09,y+.015,-.03); fd(g,RB(.05,.022,.03,.004),_fm('#fbf4e2',{roughness:.6}),-.03,y+.011,.035).rotation.y=.4; for(let i=0;i<5;i++){ const s=fd(g,CY(.022,.022,.004,14),_fm('#c8423a',{roughness:.5}),.01+i*.016,y+.004+i*.002,-.025); s.rotation.z=.25; fd(g,CY(.014,.014,.0045,10),_fm('#e88a7a'),.01+i*.016,y+.0045+i*.002,-.025).rotation.z=.25; } for(const [x,z,c] of [[.07,.04,'#5a6b2a'],[.085,.02,'#3a3a2a'],[.055,.02,'#5a6b2a'],[.09,.045,'#3a3a2a']]) fd(g,SP(.011,8,6),_fm(c,{roughness:.3}),x,y+.01,z); for(let i=0;i<3;i++) fd(g,RB(.012,.012,.05,.004),_fm('#e2a548',{roughness:.7}),-.07+i*.016,y+.007,.05).rotation.y=.2*i; },
+ frappe:g=>{ glass(g,.034,.12,'#8a5a3a',.72); fd(g,SP(.03,10,8),_fm('#fffaf0',{roughness:.6}),0,.108,0).scale.y=.55; const st=fd(g,CY(.004,.004,.15,6),_fm('#d8433a'),.012,.09,0); st.rotation.z=-.18; },
+ theglace:g=>{ glass(g,.034,.12,'#d9963a',.78); const l=fd(g,CY(.022,.022,.004,14),_fm('#f6e04a',{roughness:.3}),.03,.118,0); l.rotation.z=1.2; for(const [x,z] of [[.008,.006],[-.01,-.008]]) fd(g,RB(.016,.016,.016,.004),_fm('#eaf6fb',{transparent:true,opacity:.6,roughness:.05}),x,.085,z); fd(g,SP(.008,6,5),_fm('#5fa84f'),-.012,.106,.01).scale.set(1.5,.3,1); },
+ crepe:g=>{ for(let i=0;i<3;i++) fd(g,CY(.08-i*.004,.08-i*.004,.012,18),_fm('#e8b96a',{roughness:.6}),0,.008+i*.013,0); fd(g,CY(.06,.07,.004,14),_fm('#b9662a',{roughness:.3}),0,.043,0); fd(g,RB(.03,.014,.03,.004),_fm('#fff3a8'),0,.052,0); for(const [x,z] of [[.09,.03],[.085,-.035]]) fd(g,SP(.014,8,6),_fm('#e5484d'),x,.014,z); },
+ glace:g=>{ fd(g,CY(.03,.04,.012,12),_fm('#dfeaf2',{roughness:.2}),0,.006,0); fd(g,CY(.008,.008,.04,8),_fm('#dfeaf2',{roughness:.2}),0,.03,0); const c=fd(g,bowlG(.06),_fm('#eaf3f8',{side:THREE.DoubleSide,roughness:.15,transparent:true,opacity:.75}),0,.1,0); c.scale.y=.85;
+  for(const [x,z,col] of [[-.025,.01,'#f6a5c0'],[.025,.01,'#fff3dc'],[0,-.025,'#8a5a3a']]) fd(g,SP(.032,10,8),_fm(col,{roughness:.8}),x,.105,z); fd(g,SP(.03,10,8),_fm('#fff7ea',{roughness:.8}),0,.135,0); fd(g,SP(.012,8,6),_fm('#e5484d'),0,.165,0); fd(g,new THREE.BoxGeometry(.012,.07,.004),_fm('#e8b96a'),.035,.14,-.01).rotation.z=-.4; },
+ tarte:g=>{ fd(g,CY(.1,.088,.028,20),_fm('#d99a4e'),0,.014,0); fd(g,CY(.086,.086,.006,20),_fm('#f0c060',{roughness:.4}),0,.03,0); for(let i=0;i<10;i++){ const a=i*.63; const s=fd(g,SP(.02,8,6),_fm('#e8a84a',{roughness:.4}),Math.cos(a)*.052,.034,Math.sin(a)*.052); s.scale.set(1.3,.35,.7); s.rotation.y=-a; } fd(g,SP(.02,8,6),_fm('#e8a84a'),0,.035,0).scale.y=.4; },
+ gateau:g=>{ fd(g,CY(.075,.075,.03,20),_fm('#f6dfa8'),0,.015,0); fd(g,CY(.076,.076,.014,20),_fm('#f6a5b8'),0,.037,0); fd(g,CY(.075,.075,.022,20),_fm('#f6dfa8'),0,.055,0); fd(g,CY(.077,.077,.008,20),_fm('#fff7f0',{roughness:.5}),0,.07,0);
+  for(let i=0;i<6;i++){ const a=i*1.047; fd(g,SP(.014,8,6),_fm('#e5484d',{roughness:.4}),Math.cos(a)*.05,.082,Math.sin(a)*.05); } fd(g,SP(.016,8,6),_fm('#e5484d',{roughness:.4}),0,.084,0); },
+ pot:g=>{ fd(g,CY(.085,.075,.09,18),_fm('#c8ccd2',{metalness:.7,roughness:.25}),0,.045,0); fd(g,CY(.078,.078,.004,18),_fm('#e58a3a'),0,.088,0); for(const s of [-1,1]) fd(g,RB(.03,.012,.02,.005),_fm('#33363c'),s*.095,.07,0); },
+ // boissons
+ eau:g=>{ glass(g,.03,.085,'#bfe6ff',.75); },
+ soda:g=>{ fd(g,CY(.034,.027,.09,14),_fm('#e5484d',{roughness:.4}),0,.045,0); fd(g,CY(.036,.036,.008,14),_fm('#ffffff'),0,.092,0); straw(g,.008,.11,'#ffffff'); },
+ jus:g=>{ glass(g,.03,.085,'#f6a33a',.8); straw(g,.008,.1,'#5fa84f'); fd(g,CY(.02,.02,.005,10),_fm('#f2c94c'),.028,.086,0).rotation.z=Math.PI/2; },
+ biere:g=>{ glass(g,.036,.095,'#e8a23a',.78); fd(g,CY(.033,.033,.018,14),_fm('#fffaf0',{roughness:.9}),0,.085,0); const h=fd(g,TO(.025,.007),_fm('#eaf6fb',{transparent:true,opacity:.5,roughness:.1}),.045,.05,0); },
+ vin:g=>{ fd(g,CY(.024,.026,.004,12),_fm('#eaf6fb',{roughness:.1}),0,.002,0); fd(g,CY(.004,.004,.05,6),_fm('#eaf6fb',{roughness:.1}),0,.028,0); const b=fd(g,bowlG(.032),new THREE.MeshStandardMaterial({color:'#eaf6fb',transparent:true,opacity:.35,roughness:.05,side:THREE.DoubleSide}),0,.085,0); b.scale.y=1.3; fd(g,CY(.027,.014,.022,12),_fm('#8a1f2e',{roughness:.2}),0,.064,0); },
+ mojito:g=>{ glass(g,.03,.1,'#bfe8b0',.82); for(const [x,y] of [[.01,.07],[-.012,.05],[.006,.03]]) fd(g,SP(.008,6,5),_fm('#4fa34a'),x,y,.01); straw(g,-.008,.12,'#22252b'); fd(g,CY(.018,.018,.005,10),_fm('#a8d86a'),.03,.1,0).rotation.z=Math.PI/2; },
+ cosmo:g=>{ fd(g,CY(.024,.026,.004,12),_fm('#eaf6fb',{roughness:.1}),0,.002,0); fd(g,CY(.004,.004,.055,6),_fm('#eaf6fb',{roughness:.1}),0,.03,0); const c=fd(g,new THREE.ConeGeometry(.04,.04,14,1,true),new THREE.MeshStandardMaterial({color:'#eaf6fb',transparent:true,opacity:.35,roughness:.05,side:THREE.DoubleSide}),0,.078,0); c.rotation.x=Math.PI; const l=fd(g,new THREE.ConeGeometry(.032,.03,14),_fm('#f06a8a',{roughness:.2}),0,.076,0); l.rotation.x=Math.PI; fd(g,SP(.008,6,5),_fm('#e5484d'),.02,.098,0); },
+ spritz:g=>{ fd(g,CY(.024,.026,.004,12),_fm('#eaf6fb',{roughness:.1}),0,.002,0); fd(g,CY(.004,.004,.04,6),_fm('#eaf6fb',{roughness:.1}),0,.022,0); const b=fd(g,bowlG(.038),new THREE.MeshStandardMaterial({color:'#eaf6fb',transparent:true,opacity:.35,roughness:.05,side:THREE.DoubleSide}),0,.085,0); b.scale.y=1.2; fd(g,CY(.033,.018,.03,12),_fm('#f2853a',{roughness:.2}),0,.062,0); fd(g,CY(.018,.018,.005,10),_fm('#f2a33a'),.03,.085,0).rotation.z=Math.PI/2; },
+ whisky:g=>{ glass(g,.034,.055,'#c9772e',.5); fd(g,RB(.02,.02,.02,.004),_fm('#eaf6fb',{transparent:true,opacity:.6,roughness:.1}),.005,.03,0); },
+};
+const FOOD_PROTO=new Map(); let FOOD_KEYS=null;
+function foodProto(emo){
+ if(!FOOD_KEYS){ FOOD_KEYS=new Map([['🥘','pot']]); for(const d of DISH) FOOD_KEYS.set(d.e,d.id); for(const d of DRINKS) FOOD_KEYS.set(d.e,d.id); for(const k in ING) if(ING_BUILD[k]) FOOD_KEYS.set(ING[k].e,'ing:'+k); }
+ const id=FOOD_KEYS.get(emo), f=id&&(FOOD_BUILD[id]||ING_BUILD[id.slice(4)]); if(!f) return null;
+ let p=FOOD_PROTO.get(id); if(!p){ p=new THREE.Group(); f(p); p.userData.fid=id; FOOD_PROTO.set(id,p); } return p;
+}
+// le plat se vide petit à petit : les morceaux disparaissent du dessus vers le fond (pr de 0 à 1)
+function eatFood(o,pr){ const ch=o.children, keep=FOOD_KEEP[o.userData.fid]||0, m=ch.length-keep, vis=pr<=0?m:Math.max(0,Math.ceil((1-pr)*m)); for(let i=0;i<ch.length;i++) ch[i].visible=i<keep+vis; }
+const FOOD_KEEP={salade:1,soupe:1,curry:1,ramen:1,glace:3,sushi:1,pot:9,eau:9,soda:9,jus:9,biere:9,vin:9,mojito:9,cosmo:9,spritz:9,whisky:9};
+// affiche le plat 3D (ou, à défaut, l'ancien émoji) dans un support : assiette, plateau, comptoir
+function setFood(h,sp,emo,y){
+ const ud=h.userData; if(ud.fk===emo) return; ud.fk=emo;
+ if(ud.fo){ h.remove(ud.fo); ud.fo=null; }
+ const p=foodProto(emo);
+ if(p){ const o=p.clone(true); o.position.y=y; h.add(o); ud.fo=o; sp.visible=false; } else { sp.visible=true; setEmo(sp,emo); }
+}

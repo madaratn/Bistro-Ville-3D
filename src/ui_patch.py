@@ -1,0 +1,23 @@
+# v0.44 : nouvelle interface — panneaux crème à cadre de bois, gros boutons brillants, icônes dessinées (plus d'émojis dans les commandes)
+def RX(a,b,n=1):
+    global js
+    c=js.count(a); assert c==n,('ui_patch',a[:70],c); js=js.replace(a,b)
+SV=lambda d: '<svg viewBox="0 0 24 24">'+d+'</svg>'
+BOLT=SV('<path d="M13.5 2 5 13.5h5.5L9.5 22 19 10h-5.8z" fill="#ffc93c" stroke="#b9770e" stroke-width="1.4" stroke-linejoin="round"/>')
+FLAME=SV('<path d="M12 2.5c.6 3.4 4.8 5.3 4.8 10.2A4.9 4.9 0 0 1 12 21.5a4.9 4.9 0 0 1-4.8-4.9c0-2.3 1.2-3.6 2.2-4.9.3 1.5 1 2.2 1.8 2.6-.4-3.6.1-7.6.8-11.8z" fill="#fff3c4" stroke="#fff" stroke-width="1.2" stroke-linejoin="round"/>')
+TARGET=SV('<circle cx="12" cy="12" r="9" fill="#fff" stroke="#d8433a" stroke-width="2.4"/><circle cx="12" cy="12" r="4.6" fill="none" stroke="#d8433a" stroke-width="2.4"/><circle cx="12" cy="12" r="1.6" fill="#d8433a"/>')
+BOOK=SV('<path d="M3.5 5.5c3-1.3 5.8-1.2 8.5.4 2.7-1.6 5.5-1.7 8.5-.4v13c-3-1.2-5.8-1.1-8.5.5-2.7-1.6-5.5-1.7-8.5-.5z" fill="#fff8e6" stroke="#7a4a26" stroke-width="1.8" stroke-linejoin="round"/><path d="M12 6v13" stroke="#7a4a26" stroke-width="1.8"/>')
+RX('<button id="sRush" aria-label="Coup de feu">🔥<i></i></button><button id="sDay" aria-label="Missions du jour">🎯<i class="hide"></i></button><button id="sSto" aria-label="Histoire">📖<i class="hide">!</i></button>',
+   '<button id="sRush" aria-label="Coup de feu">'+FLAME+'<i></i></button><button id="sDay" aria-label="Missions du jour">'+TARGET+'<i class="hide"></i></button><button id="sSto" aria-label="Histoire">'+BOOK+'<i class="hide">!</i></button>')
+RX("$('#sEn').innerHTML='⚡<b>'+state.en.v+'</b>';","$('#sEn').innerHTML='"+BOLT+"<b>'+state.en.v+'</b>'; { const o=isOpen(), bo=$('#bOpen'); if(bo){ bo.classList.toggle('on',o); bo.firstChild.firstChild.textContent=o?'OUVERT':'FERMÉ'; bo.lastChild.textContent=o?'Fermer':'Ouvrir'; if(!bo.onclick) bo.onclick=()=>{ audioInit(); toggleOpen(); }; } }")
+
+# --- disposition : le jour au centre sous la barre du haut, le coup de feu à gauche, « Plus » regroupe boutique, jardin, quiz, comptes ---
+RX("'<button id=\"sJour\" aria-label=\"Journée et comptes\"></button><button id=\"sEn\"","'<button id=\"sEn\"")
+RX("function sideInit(){ if($('#side')) return;","function sideInit(){ if($('#side')) return; { const j=document.createElement('button'); j.id='sJour'; j.setAttribute('aria-label','Journée et comptes'); document.body.appendChild(j); j.onclick=()=>{ audioInit(); openPanel('gestion'); }; }")
+RX("$('#sJour').innerHTML='<b>Jour '+d.n+'</b><span>'+hh+' h '+String(mm).padStart(2,'0')+'</span><em>'+svcNow().s+'</em>';","$('#sJour').innerHTML='<b>Jour '+d.n+'</b><span>'+hh+' h '+String(mm).padStart(2,'0')+'</span><em>'+svcNow().s+'</em>'; $('#sJour').classList.toggle('hide',mode!=='play'); { const r=$('#sRush'); if(r&&r.parentNode.id==='side'){ const L=document.createElement('div'); L.id='sideL'; document.body.appendChild(L); L.appendChild(r); L.addEventListener('click',e=>{ if(!e.target.closest('#sRush')) return; audioInit(); if(rush) return toast('Le coup de feu est en cours !'); const D=dailyCheck(); energyTick(); if(D.rush>=RUSH_MAX) return toast('Tes '+RUSH_MAX+' coups de feu du jour sont faits. Reviens demain !'); if(!isOpen()) return toast('Ouvre d’abord le restaurant pour lancer un coup de feu.'); if(state.en.v<RUSH_COST) return toast('Il faut '+RUSH_COST+' d’énergie pour un coup de feu (tu en as '+state.en.v+'). Elle revient avec le temps.'); startRush(); }); } const L=$('#sideL'); if(L) L.classList.toggle('hide',mode!=='play'); }")
+RX("const PANELS={",r"""const MORE=[['garden','Jardin et marché','garden','#6fdc8c','#2fae6e','#1c7d4a'],['shop','Boutique','shop','#ffad4d','#ff7a2f','#d4561c'],['quiz','Quiz du jour','quiz','#b59cff','#7b5cf0','#5537c4'],['gestion','Les comptes','menu','#ffcf8a','#e5a03d','#b9772e'],['daily','Missions','team','#ff8f8f','#e5484d','#a8262b'],['story','Histoire','menu','#b98cff','#8a5cf0','#5b33c4']];
+const PANELS={
+ more(){ const gd=!$('#gDot').classList.contains('hide'), qd=!$('#qDot').classList.contains('hide');
+  return {title:'Plus',html:'<div class="moreG">'+MORE.map(m=>`<button class="moreB" data-a="go" data-v="${m[0]}"><i class="ic" style="--g1:${m[3]};--g2:${m[4]};--g3:${m[5]}">${svg(m[2])}</i><span>${m[1]}</span>${(m[0]==='garden'&&gd)||(m[0]==='quiz'&&qd)||(m[0]==='daily'&&dailyReady())||(m[0]==='story'&&storyReady())?'<em>!</em>':''}</button>`).join('')+'</div>'}; },""")
+RX(" close:()=>closeModal(),"," close:()=>closeModal(),\n go:v=>{ closeModal(); openPanel(v); },")
+RX("PICON={","PICON={more:['shop','#ffc96b','#f0962a','#b9641a'],")

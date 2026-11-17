@@ -1,0 +1,5 @@
+# v0.41 : bouton pour tourner la vue
+RP("<button id=\"sSto\" aria-label=\"Histoire\">📖<i class=\"hide\">!</i></button>'","<button id=\"sSto\" aria-label=\"Histoire\">📖<i class=\"hide\">!</i></button><button id=\"sCam\" aria-label=\"Tourner la vue\"><svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2.2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M20 12a8 8 0 1 1-2.6-5.9\"/><path d=\"M20 4v5h-5\"/></svg></button>'")
+RP("if(b.id==='sSto') return openPanel('story');","if(b.id==='sSto') return openPanel('story'); if(b.id==='sCam'){ const now=performance.now(); if(now-(b._t||0)<350){ rotView(-1); resetView(); toast('Vue remise par défaut'); } else rotView(1); b._t=now; return; }")
+RP(" const NEWS=[];",""" const NEWS=[];
+ if(!state.cam1){ state.cam1=1; if(loaded) NEWS.push(`<div class="row"><div class="emo">🎥</div><div class="info"><div class="t">Change l’angle de vue</div><div class="sub">Le bouton ↻ à droite fait pivoter la vue d’un quart de tour (double appui : vue par défaut). Avec deux doigts : tourne-les pour pivoter librement, glisse-les vers le haut ou le bas pour incliner la caméra.</div></div></div>`); }""")
