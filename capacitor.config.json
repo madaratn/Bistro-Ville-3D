@@ -1,6 +1,6 @@
 {
-  "appId": "com.bistroville.app",
-  "appName": "Bistro Ville",
+  "appId": "com.madaratn.chezodette",
+  "appName": "Chez Odette",
   "webDir": "www",
   "backgroundColor": "#8fd37a",
   "android": { "allowMixedContent": false },

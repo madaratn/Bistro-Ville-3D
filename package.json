@@ -1,8 +1,8 @@
 {
-  "name": "bistro-ville",
+  "name": "chez-odette",
   "version": "0.1.0",
   "private": true,
-  "description": "Bistro Ville - jeu mobile de gestion de restaurant",
+  "description": "Chez Odette - jeu mobile de gestion de restaurant",
   "scripts": {
     "serve": "npx http-server www -p 8080",
     "sync": "npx cap sync",

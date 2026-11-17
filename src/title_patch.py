@@ -16,7 +16,7 @@ function titleScreen(hasSave,go){
  titleOn=true; const el=document.createElement('div'); el.id='title'; document.body.appendChild(el); let view='main';
  const tg=(k,on,t,s)=>`<div class="tiO"><div><b>${t}</b><span>${s}</span></div><button data-t="${k}" class="${on?'on':''}">${on?'Oui':'Non'}</button></div>`;
  const draw=()=>{ const real=hasSave&&state.prolog, fin=state.story&&state.story.v&&typeof storyEnd==='function'&&storyEnd();
-  let h='<div class="tiLogo"><i>Bistro</i><b>Ville</b><em>3D</em><span>L’héritage de Mamie Odette</span></div><div class="tiBox">';
+  let h='<div class="tiLogo"><i>Chez</i><b>Odette</b><span>L’héritage de Mamie Odette</span></div><div class="tiBox">';
   if(view==='main'){ h+=(real?`<button class="tiB go" data-t="cont">Continuer<span>Jour ${state.day?state.day.n:1} · niveau ${state.level} · ${state.coins} pièces</span></button>`:'')+`<button class="tiB ${real?'':'go'}" data-t="new">Nouvelle partie${real?'<span>Recommence depuis le début</span>':'<span>Découvre l’histoire du bistrot</span>'}</button><button class="tiB" data-t="opt">Options</button><button class="tiB lock" data-t="multi">Multijoueur<span>${fin?'Bientôt disponible':'Se débloque à la fin de l’histoire'}</span></button>`; }
   else if(view==='opt'){ h+='<h3>Options</h3>'+tg('sound',state.sound,'Bruitages','Pièces, service, boutons')+tg('music',state.music!==false,'Musique','L’ambiance du bistrot')+tg('vib',state.vib!==false,'Vibrations','Petits retours au toucher')+tg('daynight',state.daynight!==false,'Jour et nuit','La lumière suit l’heure du jeu')+tg('lite',LITE,'Mode léger','Pour les téléphones anciens : moins de détails, plus fluide')+'<button class="tiB" data-t="back">Retour</button>'; }
   else if(view==='wipe'){ h+=`<h3>Nouvelle partie ?</h3><p>Il n’y a qu’une seule sauvegarde. Ta partie en cours (jour ${state.day?state.day.n:1}, niveau ${state.level}) sera effacée pour de bon.</p><button class="tiB red" data-t="wipe">Oui, tout recommencer</button><button class="tiB" data-t="back">Annuler</button>`; }
@@ -34,3 +34,4 @@ function titleScreen(hasSave,go){
  draw();
 }
 function prologue(done){""")
+RX("Bienvenue dans Bistro Ville !","Bienvenue Chez Odette !")

@@ -1,6 +1,6 @@
 **Jouer en ligne : https://madaratn.github.io/Bistro-Ville-3D/**
 
-# Bistro Ville 3D — prototype v0.64
+# Chez Odette — prototype v0.65
 
 Jeu mobile de gestion de restaurant (Android + iOS), inspiré des mécaniques de Restaurant City,
 avec un nom, des graphismes et des personnages 100 % originaux.
@@ -85,4 +85,4 @@ Change aussi `appId` dans `capacitor.config.json` pour un identifiant à toi.
 
 ## Licence
 
-© 2026 Ali Mezghenni. Tous droits réservés. Ce projet n'est pas libre de droits : voir le fichier [LICENSE](LICENSE). Toute copie, modification, redistribution ou utilisation commerciale est interdite sans autorisation écrite.
+© 2026 Ali Mezghenni. Tous droits réservés. Ce projet n'est pas libre de droits : voir le fichier [LICENSE](LICENSE). Toute copie, modification, redistribution ou utilisation commerciale est interdite sans autorisation écrite. Composants tiers : voir [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
