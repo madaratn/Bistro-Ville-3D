@@ -2,7 +2,7 @@
 def RX(a,b,n=1):
     global js
     c=js.count(a); assert c==n,('intro_patch',a[:70],c); js=js.replace(a,b)
-RX("function prologue(done){",r"""function prologue(done){ try{ if(typeof cinePrologue==='function'&&camOK()) return cinePrologue(done); }catch(e){ console.warn(e); } return prologue2D(done); }
+RX("function prologue(done){",r"""function prologue(done){ try{ if(typeof cinePrologue==='function'&&camOK()&&!LITE) return cinePrologue(done); }catch(e){ console.warn(e); } return prologue2D(done); }
 function prologue2D(done){
  const st=state.staff, a=st[0]?st[0].name:'Léa', b=st[1]?st[1].name:'Hugo', P=k=>foodThumbs['who:'+k]||'', dishes=DISH.map(d=>foodThumbs[d.e]).filter(Boolean), tb=[thumbs.table2,thumbs.table3,thumbs.table,thumbs.tableP2].filter(Boolean), heads=['c','j','l','r','y','a','z'];
  const room=()=>{ let h='<div class="inRoom"><div class="inWall"><i class="inWin"></i><span class="inSign">Chez Odette</span><i class="inWin"></i></div><div class="inFloor"></div>'; let n=0;

@@ -1,9 +1,11 @@
 /* ================= RENDU 3D (Three.js) ================= */
 const FONT='Fredoka,"Trebuchet MS",sans-serif';
 const cv=$('#c');
-const renderer=new THREE.WebGLRenderer({canvas:cv,antialias:true,powerPreference:'high-performance'});
-renderer.setPixelRatio(Math.min(2,window.devicePixelRatio||1));
-renderer.shadowMap.enabled=true; renderer.shadowMap.type=THREE.PCFSoftShadowMap;
+let LITE=false; try{ const ua=navigator.userAgent||'', q=new URLSearchParams(location.search), pref=localStorage.getItem('bv_lite'); LITE=q.get('lite')==='1'||pref==='1'||(pref!=='0'&&((navigator.deviceMemory&&navigator.deviceMemory<=3)||(navigator.hardwareConcurrency&&navigator.hardwareConcurrency<=4)||/Android [4-8][.;]/.test(ua))); }catch(e){}
+const PXR=()=>LITE?1:Math.min(2,window.devicePixelRatio||1);
+const renderer=new THREE.WebGLRenderer({canvas:cv,antialias:!LITE,powerPreference:'high-performance'});
+renderer.setPixelRatio(PXR());
+renderer.shadowMap.enabled=!LITE; renderer.shadowMap.type=THREE.PCFSoftShadowMap;
 renderer.toneMapping=THREE.ACESFilmicToneMapping; renderer.toneMappingExposure=1.08;
 renderer.outputColorSpace=THREE.SRGBColorSpace;
 const scene=new THREE.Scene();
@@ -13,7 +15,7 @@ const FOV0=26, camera=new THREE.PerspectiveCamera(FOV0,1,1,500);
 const cam={tx:4,tz:4,dist:40,yaw:Math.PI/4,pitch:.57};
 const pmrem=new THREE.PMREMGenerator(renderer); const ENV=pmrem.fromScene(new RoomEnvironment(),.04).texture; scene.environment=ENV; scene.environmentIntensity=.25;
 const hemi=new THREE.HemisphereLight(0xffe6c4,0xc49a62,1.0); scene.add(hemi);
-const sun=new THREE.DirectionalLight(0xfff0d6,2.7); sun.castShadow=true; sun.shadow.mapSize.set(2048,2048); sun.shadow.bias=-.0004; sun.shadow.normalBias=.03; sun.shadow.radius=3; scene.add(sun,sun.target);
+const sun=new THREE.DirectionalLight(0xfff0d6,2.7); sun.castShadow=!LITE; sun.shadow.mapSize.set(LITE?512:2048,LITE?512:2048); sun.shadow.bias=-.0004; sun.shadow.normalBias=.03; sun.shadow.radius=3; scene.add(sun,sun.target);
 const inLight=new THREE.PointLight(0xffbf73,0,0,1.1); scene.add(inLight);
 const C_SUN_D=new THREE.Color('#ffd49a'), C_SUN_N=new THREE.Color('#7f8fd0'), C_HEMI_D=new THREE.Color('#ffe6c4'), C_HEMI_N=new THREE.Color('#6d7ab8');
 const staticRoot=new THREE.Group(), furnRoot=new THREE.Group(), agentRoot=new THREE.Group(), fxRoot=new THREE.Group();
@@ -915,7 +917,7 @@ function drawKDS(force){
 /* --- caméra --- */
 function camOK(){ return isFinite(cam.dist)&&isFinite(cam.tx)&&isFinite(cam.tz)&&cam.dist>0; }
 function updCam(){ if(!camOK()){ if(!(innerWidth>0&&innerHeight>0)) return; camera.aspect=innerWidth/innerHeight; camera.updateProjectionMatrix(); cam.tx=S/2+.25; cam.tz=S/2+.7; cam.dist=fitDist()*.5; if(!camOK()) return; } const cp=Math.cos(cam.pitch); camera.position.set(cam.tx+cam.dist*cp*Math.sin(cam.yaw),cam.dist*Math.sin(cam.pitch),cam.tz+cam.dist*cp*Math.cos(cam.yaw)); camera.lookAt(cam.tx,0,cam.tz); }
-function resize(){ if(!(innerWidth>0&&innerHeight>0)) return; renderer.setPixelRatio(Math.min(2,window.devicePixelRatio||1)); renderer.setSize(innerWidth,innerHeight,false); camera.aspect=innerWidth/innerHeight; camera.updateProjectionMatrix(); }
+function resize(){ if(!(innerWidth>0&&innerHeight>0)) return; renderer.setPixelRatio(PXR()); renderer.setSize(innerWidth,innerHeight,false); camera.aspect=innerWidth/innerHeight; camera.updateProjectionMatrix(); }
 function fitDist(){ const vf=FOV0*Math.PI/180, hf=2*Math.atan(Math.tan(vf/2)*innerWidth/innerHeight); const dw=(S*1.5)/(2*Math.tan(hf/2)), dh=(S*1.25+1.5)/(2*Math.tan(vf/2)); return Math.max(dw,dh)*1.05; }
 function centerCam(){ if(!(innerWidth>0&&innerHeight>0)){ cam.dist=NaN; return; } camera.aspect=innerWidth/innerHeight; cam.tx=S/2+.25; cam.tz=S/2+.7; cam.dist=fitDist()*.5; updCam(); }
 
@@ -1037,23 +1039,29 @@ function tap(sx,sy){
 }
 
 /* --- vignettes boutique --- */
-function makeThumbs(){
- const c=document.createElement('canvas'); c.width=c.height=192; let r;
- try{ r=new THREE.WebGLRenderer({canvas:c,antialias:true,alpha:true,preserveDrawingBuffer:true}); }catch(e){ return; }
- r.outputColorSpace=SRGB; r.toneMapping=THREE.ACESFilmicToneMapping; r.setPixelRatio(1); r.setSize(192,192,false);
+let thumbsReady=false;
+function makeThumbs(){ const g=makeThumbsGen(); let auto=false; try{ auto=!!navigator.webdriver; }catch(e){}
+ const fin=()=>{ thumbsReady=true; try{ icoRe=null; }catch(e){} try{ if(typeof hud==='function'&&state) hud(); }catch(e){} };
+ if(auto){ try{ for(const _ of g){} }catch(e){ console.warn(e); } return fin(); }
+ const step=()=>{ const t0=performance.now(); try{ while(performance.now()-t0<16){ if(g.next().done) return fin(); } }catch(e){ console.warn(e); return fin(); } setTimeout(step,4); }; step(); }
+function* makeThumbsGen(){
+ try{ portraitsInit(); }catch(e){}
+ const TS=LITE?112:192, c=document.createElement('canvas'); c.width=c.height=TS; let r;
+ try{ r=new THREE.WebGLRenderer({canvas:c,antialias:!LITE,alpha:true,preserveDrawingBuffer:true}); }catch(e){ return; }
+ r.outputColorSpace=SRGB; r.toneMapping=THREE.ACESFilmicToneMapping; r.setPixelRatio(1); r.setSize(TS,TS,false); yield;
  const sc=new THREE.Scene(); { const pm=new THREE.PMREMGenerator(r); sc.environment=pm.fromScene(new RoomEnvironment(),.04).texture; sc.environmentIntensity=.6; } sc.add(new THREE.HemisphereLight(0xfff8ee,0xb89a7a,1.6)); const d=new THREE.DirectionalLight(0xffffff,2.2); d.position.set(-2,4,3); sc.add(d);
  const cm=new THREE.PerspectiveCamera(26,1,.05,50), box=new THREE.Box3(), cen=new THREE.Vector3(), sz=new THREE.Vector3();
  for(const k in FURN){ const g=buildFurn(k,null); g.traverse(o=>{ if(o.isSprite) o.visible=false; }); sc.add(g); box.setFromObject(g); box.getCenter(cen); box.getSize(sz);
-  const rad=sz.length()/2, dist=rad/Math.sin(13*Math.PI/180)*1.02; cm.position.set(cen.x+dist*.55,cen.y+dist*.5,cen.z+dist*.67); cm.lookAt(cen); r.render(sc,cm); thumbs[k]=c.toDataURL(); sc.remove(g); }
+  const rad=sz.length()/2, dist=rad/Math.sin(13*Math.PI/180)*1.02; cm.position.set(cen.x+dist*.55,cen.y+dist*.5,cen.z+dist*.67); cm.lookAt(cen); r.render(sc,cm); thumbs[k]=c.toDataURL(); sc.remove(g); yield; }
  // vignettes des plats et boissons (utilisées dans les bulles, le carnet de commandes et les menus)
  { const em=new Map([['pot','🥘']]); for(const d of DISH) em.set(d.id,d.e); for(const d of DRINKS) em.set(d.id,d.e);
   for(const id in FOOD_BUILD){ const e=em.get(id), p=e&&foodProto(e); if(!p) continue; const g=new THREE.Group(); const o=p.clone(true); g.add(o);
    if(DISHM[id]){ g.add(mesh(CY(.125,.09,.02,24),M('#ffffff',{roughness:.3}),0,-.011,0,false)); }
    sc.add(g); box.setFromObject(g); box.getCenter(cen); box.getSize(sz);
-   const rad=sz.length()/2, dist=rad/Math.sin(13*Math.PI/180)*.92; cm.position.set(cen.x+dist*.25,cen.y+dist*.8,cen.z+dist*.55); cm.lookAt(cen); r.render(sc,cm); foodThumbs[e]=c.toDataURL(); sc.remove(g); } }
- try{ const bx=new THREE.Box3(), cn=new THREE.Vector3(), sz2=new THREE.Vector3(); if(!winMat) winMat=new THREE.MeshStandardMaterial({color:'#ffe7c2',roughness:.08,emissive:'#ffd79a',emissiveIntensity:.35}); for(const k in WOBJ){ const o=wallObj3D(k); if(!o) continue; sc.add(o); bx.setFromObject(o); bx.getCenter(cn); bx.getSize(sz2); const d=sz2.length()/2/Math.sin(13*Math.PI/180)*1.05; cm.position.set(cn.x+d*.3,cn.y+d*.18,cn.z+d*.93); cm.lookAt(cn); r.render(sc,cm); thumbs['wo:'+k]=c.toDataURL(); sc.remove(o); } }catch(e){}
- try{ gourmetThumbs(r,sc,cm,c); }catch(e){}
- r.dispose(); if(r.forceContextLoss) r.forceContextLoss();
+   const rad=sz.length()/2, dist=rad/Math.sin(13*Math.PI/180)*.92; cm.position.set(cen.x+dist*.25,cen.y+dist*.8,cen.z+dist*.55); cm.lookAt(cen); r.render(sc,cm); foodThumbs[e]=c.toDataURL(); sc.remove(g); yield; } }
+ try{ const bx=new THREE.Box3(), cn=new THREE.Vector3(), sz2=new THREE.Vector3(); if(!winMat) winMat=new THREE.MeshStandardMaterial({color:'#ffe7c2',roughness:.08,emissive:'#ffd79a',emissiveIntensity:.35}); for(const k in WOBJ){ const o=wallObj3D(k); if(!o) continue; sc.add(o); bx.setFromObject(o); bx.getCenter(cn); bx.getSize(sz2); const d=sz2.length()/2/Math.sin(13*Math.PI/180)*1.05; cm.position.set(cn.x+d*.3,cn.y+d*.18,cn.z+d*.93); cm.lookAt(cn); r.render(sc,cm); thumbs['wo:'+k]=c.toDataURL(); sc.remove(o); yield; } }catch(e){}
+ yield; try{ gourmetThumbs(r,sc,cm,c); }catch(e){}
+ yield; r.dispose(); if(r.forceContextLoss) r.forceContextLoss();
 }
 
 /* --- l'écriteau « Ouvert / Fermé » suspendu à l'auvent : on le touche pour ouvrir ou fermer --- */

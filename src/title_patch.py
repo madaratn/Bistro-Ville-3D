@@ -18,7 +18,7 @@ function titleScreen(hasSave,go){
  const draw=()=>{ const real=hasSave&&state.prolog, fin=state.story&&state.story.v&&typeof storyEnd==='function'&&storyEnd();
   let h='<div class="tiLogo"><i>Bistro</i><b>Ville</b><em>3D</em><span>L’héritage de Mamie Odette</span></div><div class="tiBox">';
   if(view==='main'){ h+=(real?`<button class="tiB go" data-t="cont">Continuer<span>Jour ${state.day?state.day.n:1} · niveau ${state.level} · ${state.coins} pièces</span></button>`:'')+`<button class="tiB ${real?'':'go'}" data-t="new">Nouvelle partie${real?'<span>Recommence depuis le début</span>':'<span>Découvre l’histoire du bistrot</span>'}</button><button class="tiB" data-t="opt">Options</button><button class="tiB lock" data-t="multi">Multijoueur<span>${fin?'Bientôt disponible':'Se débloque à la fin de l’histoire'}</span></button>`; }
-  else if(view==='opt'){ h+='<h3>Options</h3>'+tg('sound',state.sound,'Bruitages','Pièces, service, boutons')+tg('music',state.music!==false,'Musique','L’ambiance du bistrot')+tg('vib',state.vib!==false,'Vibrations','Petits retours au toucher')+tg('daynight',state.daynight!==false,'Jour et nuit','La lumière suit l’heure du jeu')+'<button class="tiB" data-t="back">Retour</button>'; }
+  else if(view==='opt'){ h+='<h3>Options</h3>'+tg('sound',state.sound,'Bruitages','Pièces, service, boutons')+tg('music',state.music!==false,'Musique','L’ambiance du bistrot')+tg('vib',state.vib!==false,'Vibrations','Petits retours au toucher')+tg('daynight',state.daynight!==false,'Jour et nuit','La lumière suit l’heure du jeu')+tg('lite',LITE,'Mode léger','Pour les téléphones anciens : moins de détails, plus fluide')+'<button class="tiB" data-t="back">Retour</button>'; }
   else if(view==='wipe'){ h+=`<h3>Nouvelle partie ?</h3><p>Il n’y a qu’une seule sauvegarde. Ta partie en cours (jour ${state.day?state.day.n:1}, niveau ${state.level}) sera effacée pour de bon.</p><button class="tiB red" data-t="wipe">Oui, tout recommencer</button><button class="tiB" data-t="back">Annuler</button>`; }
   else if(view==='multi'){ h+=`<h3>Multijoueur</h3><p>${fin?'Tu as terminé l’histoire : le multijoueur arrive dans une prochaine version.':'Termine d’abord l’histoire de Mamie Odette. Ensuite, tu pourras visiter les bistrots de tes amis et les inviter dans le tien.'}</p><button class="tiB" data-t="back">Retour</button>`; }
   el.innerHTML=h+'</div><div class="tiV">'+(document.title||'')+'</div>'; };
@@ -29,7 +29,7 @@ function titleScreen(hasSave,go){
   if(t==='wipe'){ wiping=true; try{ localStorage.removeItem(SAVE_KEY); sessionStorage.setItem('bv_new','1'); }catch(e){} location.reload(); return; }
   if(t==='opt'||t==='multi'){ view=t; return draw(); }
   if(t==='back'){ view='main'; return draw(); }
-  if(t==='sound') state.sound=!state.sound; else if(t==='music'){ state.music=state.music===false; if(state.music) musicStart(); else musicStop(); } else if(t==='vib') state.vib=state.vib===false; else if(t==='daynight') state.daynight=state.daynight===false;
+  if(t==='sound') state.sound=!state.sound; else if(t==='music'){ state.music=state.music===false; if(state.music) musicStart(); else musicStop(); } else if(t==='vib') state.vib=state.vib===false; else if(t==='daynight') state.daynight=state.daynight===false; else if(t==='lite'){ try{ localStorage.setItem('bv_lite',LITE?'0':'1'); }catch(e){} if(hasSave) save(); location.reload(); return; }
   if(hasSave) save(); draw(); });
  draw();
 }

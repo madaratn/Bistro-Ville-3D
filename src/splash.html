@@ -10,3 +10,6 @@
 <div class="spName"><span>M</span><span>A</span><span>D</span><span>A</span><span>R</span><span>A</span><i></i><span>T</span><span>N</span></div>
 <div class="spSub">PRODUCTION</div>
 <div class="spBar"><i></i></div><div class="spTxt">Chargement…</div></div>
+<script>(function(){var s=document.getElementById('splash'),t=s&&s.querySelector('.spTxt'),done=false;function msg(m){if(t&&document.getElementById('splash')){t.innerHTML=m;t.style.color='#ffd27a';t.style.padding='0 18px';t.style.lineHeight='1.4';}}
+window.addEventListener('error',function(e){if(done)return;if(!document.getElementById('splash'))return;done=true;msg('Le jeu n\u2019arrive pas à démarrer sur cet appareil.<br><small style="opacity:.7">'+String(e&&e.message||'erreur').slice(0,90)+'</small>');});
+setTimeout(function(){if(document.getElementById('splash')&&!done)msg('Chargement plus long que prévu…<br><small style="opacity:.7">Sur un appareil ancien, cela peut prendre jusqu\u2019à une minute.</small>');},14000);})();</script>
