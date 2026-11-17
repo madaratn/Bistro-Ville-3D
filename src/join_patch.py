@@ -1,5 +1,5 @@
 # v0.26 : tables collées = une grande table (visuel + grandes tablées)
-RP("function seatTable(ch){","""function tableJoin(t){ return [[-1,0],[1,0],[0,-1],[0,1]].map(([dx,dy])=>{ const f=fAt(t.x+dx,t.y+dy); return f&&kindOf(f)==='table'?1:0; }); }
+RP("function seatTable(ch){","""function tableJoin(t){ return [[-1,0],[1,0],[0,-1],[0,1]].map(([dx,dy])=>{ const f=fAt(t.x+dx,t.y+dy); return f&&kindOf(f)==='table'&&f.t===t.t?1:0; }); }
 function tableCluster(t){ const out=[t], seen=new Set([t.id]); for(let i=0;i<out.length;i++) for(const [dx,dy] of D4){ const f=fAt(out[i].x+dx,out[i].y+dy); if(f&&kindOf(f)==='table'&&!seen.has(f.id)){ seen.add(f.id); out.push(f); } } return out; }
 function seatTable(ch){""")
 RP("function maxTableCap(){ let m=0; for(const t of state.furn) if(kindOf(t)==='table'){ const n=state.furn.filter(f=>kindOf(f)==='chair'&&seatTable(f)===t).length; if(n>m) m=n; } return m; }",

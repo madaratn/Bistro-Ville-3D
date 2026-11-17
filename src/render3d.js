@@ -1198,7 +1198,7 @@ function decor3D(g,m,ud){
 /* ===== v0.53 : styles de tables et de chaises ===== */
 function tableLegs(g,F,H,cx,cz,tw,td){
  const m=F.legc?M(F.legc,{metalness:F.legm===0?0:.7,roughness:F.legm===0?.6:.3}):M(shade(F.col,-.25),{roughness:.5}), h=H-.03;
- if(F.leg==='ped'){ g.add(mesh(CY(.2,.22,.03,24),m,cx,.015,cz)); g.add(mesh(CY(.035,.05,h-.03,14),m,cx,h/2+.015,cz)); g.add(mesh(CY(.12,.04,.03,16),m,cx,h-.015,cz)); if(tw>.9||td>.9){ const ax=tw>td; for(const s of [-1,1]){ const x=cx+(ax?s*(tw/2-.25):0), z=cz+(ax?0:s*(td/2-.25)); g.add(mesh(CY(.16,.18,.03,20),m,x,.015,z)); g.add(mesh(CY(.03,.045,h-.03,12),m,x,h/2+.015,z)); } } }
+ if(F.leg==='ped'){ g.add(mesh(CY(.2,.22,.03,24),m,cx,.015,cz)); g.add(mesh(CY(.035,.05,h-.03,14),m,cx,h/2+.015,cz)); g.add(mesh(CY(.12,.04,.03,16),m,cx,h-.015,cz)); }
  else if(F.leg==='pin'){ for(const [x,z] of [[-.2,-.2],[.2,-.2],[-.2,.2],[.2,.2]]){ for(const d of [-1,1]){ const l=mesh(CY(.009,.009,h+.01,6),m,x-Math.sign(x)*.02+d*.012,h/2,z-Math.sign(z)*.02); l.rotation.z=Math.sign(x)*.1+d*.07; l.rotation.x=-Math.sign(z)*.1; g.add(l); } } }
  else if(F.leg==='x'){ for(const z of [-.18,.18]) for(const d of [-1,1]){ const l=mesh(new THREE.BoxGeometry(.035,h*1.3,.035),m,0,h/2,z); l.rotation.z=d*.7; g.add(l); } g.add(mesh(new THREE.BoxGeometry(.03,.03,.36),m,0,h/2,0)); }
  else if(F.leg==='blk'){ for(const [x,z] of [[-.19,-.19],[.19,-.19],[-.19,.19],[.19,.19]]) g.add(mesh(RB(.085,h,.085,.015),m,x,h/2,z)); for(const z of [-.19,.19]) g.add(mesh(new THREE.BoxGeometry(.38,.04,.03),m,0,h-.06,z)); }
