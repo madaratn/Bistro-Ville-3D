@@ -15,7 +15,7 @@ def R(old,new):
 R(" if(Math.abs(dx+dy)>.01) a.back=(dx+dy)<0;"," if(Math.abs(dx+dy)>.01) a.back=(dx+dy)<0;\n if(dx||dy){ a.hx=dx; a.hy=dy; }")
 R("function faceTo(a,f){ const dx=f.x-a.x, dy=f.y-a.y;","function faceTo(a,f){ const dx=f.x-a.x, dy=f.y-a.y; a.hx=dx; a.hy=dy;")
 R("const TW=64, TH=32, WH=66;","")
-R("<p class=\"sub center\">Bistro Ville — prototype v0.2</p>","<p class=\"sub center\">Bistro Ville 3D — prototype v0.61</p>")
+R("<p class=\"sub center\">Bistro Ville — prototype v0.2</p>","<p class=\"sub center\">Bistro Ville 3D — prototype v0.62</p>")
 exec(open('src/logic_patch.py').read())
 exec(open('src/deco_patch.py').read())
 exec(open('src/bar_patch.py').read())
@@ -70,7 +70,7 @@ r3=open('src/render3d.js').read()
 import base64,glob
 cd={os.path.basename(f)[:-4]:base64.b64encode(open(f,'rb').read()).decode() for f in sorted(glob.glob('build/chars2/*.glb'))}
 open('build/charsData.js','w').write('export const CHARS_DATA='+json.dumps(cd)+';\n')
-main="import * as THREE from 'three';\nimport {RoundedBoxGeometry} from 'three/examples/jsm/geometries/RoundedBoxGeometry.js';\nimport {RoomEnvironment} from 'three/examples/jsm/environments/RoomEnvironment.js';\nimport {mergeGeometries} from 'three/examples/jsm/utils/BufferGeometryUtils.js';\n"+js+"\n"+r3+"\n"+open('src/chars_cozy.js').read()+"\n"+open('src/food.js').read()+"\n"+open('src/gourmet.js').read()+"\n"+open('src/saga.js').read()+"\n"+open('src/city.js').read()+"\n"+open('src/belmont.js').read()+"\n"+open('src/belsim.js').read()+"\n"+open('src/camview.js').read()+"\n"+open('src/cine.js').read()+"\n"+open('src/portraits.js').read()+"\nboot();\n"+("window.__dbg=c=>eval(c);\n" if DEBUG else "")
+main="import * as THREE from 'three';\nimport {RoundedBoxGeometry} from 'three/examples/jsm/geometries/RoundedBoxGeometry.js';\nimport {RoomEnvironment} from 'three/examples/jsm/environments/RoomEnvironment.js';\nimport {mergeGeometries} from 'three/examples/jsm/utils/BufferGeometryUtils.js';\n"+js+"\n"+r3+"\n"+open('src/chars_cozy.js').read()+"\n"+open('src/food.js').read()+"\n"+open('src/gourmet.js').read()+"\n"+open('src/saga.js').read()+"\n"+open('src/city.js').read()+"\n"+open('src/belmont.js').read()+"\n"+open('src/belsim.js').read()+"\n"+open('src/camview.js').read()+"\n"+open('src/cine.js').read()+"\n"+open('src/portraits.js').read()+"\nconst splT0=performance.now(); function splashDone(){ const el=document.getElementById('splash'); if(!el) return; const w=navigator.webdriver?0:Math.max(0,3000-(performance.now()-splT0)); el.classList.add('rdy'); setTimeout(()=>{ el.classList.add('out'); setTimeout(()=>el.remove(),800); },w); }\nrequestAnimationFrame(()=>setTimeout(()=>{ try{ boot(); }finally{ splashDone(); } },navigator.webdriver?0:80));\n"+("window.__dbg=c=>eval(c);\n" if DEBUG else "")
 open('build/main.js','w').write(main)
 subprocess.run(['npx','esbuild','main.js','--bundle','--format=iife']+([] if DEBUG else ['--minify'])+['--target=es2019','--outfile=bundle.js','--log-level=warning'],cwd='build',check=True)
 bundle=open('build/bundle.js').read().replace('</script','<\\/script')
@@ -106,6 +106,8 @@ assert old_eb in head
 head=head.replace(old_eb,'<div id="editbar" class="hide">\n  <div id="esel" class="hide"></div>\n  <div id="edock">\n    <button id="ecol" data-e="col" aria-label="Replier le catalogue"><i></i></button>\n    <div id="etabs"></div>\n    <div id="eitems"></div>\n    <div id="efoot"><button class="b alt sm" id="eundo" data-e="undo">↶ Annuler</button><span id="ehint"></span><button class="b green sm" data-e="done">✔ Terminer</button></div>\n  </div>\n</div>')
 head=head.replace('<button class="pill round" id="pSet">','<button class="pill round" id="pWatch" aria-label="Regarder le restaurant"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 12s3.5-6.5 9.5-6.5S21.5 12 21.5 12s-3.5 6.5-9.5 6.5S2.5 12 2.5 12z"/><circle cx="12" cy="12" r="2.8"/></svg></button>\n  <button class="pill round" id="pSet">',1)
 assert 'id="pWatch"' in head
+assert head.count('<body>')==1
+head=head.replace('<body>','<body>'+open('src/splash.html').read())
 assert '<nav id="bottom">' in head
 head=head.replace('<nav id="bottom">','<nav id="bottom"><button class="nb" id="bOpen" aria-label="Ouvrir ou fermer le restaurant"><i class="sgn"><b></b></i><span></span></button>')
 # barre du bas regroupée : écriteau, carte, équipe, déco, et un bouton « Plus » pour le reste

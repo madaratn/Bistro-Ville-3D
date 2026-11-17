@@ -1,6 +1,6 @@
 **Jouer en ligne : https://madaratn.github.io/Bistro-Ville-3D/**
 
-# Bistro Ville 3D — prototype v0.61
+# Bistro Ville 3D — prototype v0.62
 
 Jeu mobile de gestion de restaurant (Android + iOS), inspiré des mécaniques de Restaurant City,
 avec un nom, des graphismes et des personnages 100 % originaux.
@@ -82,7 +82,6 @@ Change aussi `appId` dans `capacitor.config.json` pour un identifiant à toi.
 ## Crédits
 - Moteur 3D : Three.js (licence MIT). Police : Fredoka (SIL Open Font License).
 - Les modèles compressés utilisés par le jeu sont dans `build/chars2/` (script : `build/process_umc.mjs`).
-
 
 ## Licence
 
