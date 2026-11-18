@@ -113,7 +113,7 @@ function buildCity(root){
  { const st=[M('#cdb89c',{roughness:.95}),M('#bfa888',{roughness:.95}),M('#d8c6ac',{roughness:.95})], r=seeded(31);
   for(let x=-20;x<Sx+28;x+=.55){ if(Math.abs(((x+40)%9)-4.5)<.7) continue; const hh=.2+r()*.1; cStone.push([x+r()*.05,hh/2,Sx+6.45+r()*.04,hh/.25]); }
   for(const [hx,hz] of [[-9,Sx+7.6],[-8.1,Sx+7.9],[Sx+6,Sx+7.7]]){ const b=mesh(CY(.32,.32,.5,16),M('#e3c46a',{roughness:.95}),hx,.32,hz); b.rotation.z=Math.PI/2; root.add(b); }
-  for(let i=0;i<60;i++){ const fx=-18+r()*(Sx+44), fz=Sx+6.9+r()*2.2; cFlw.push([fx,.06,fz,Math.floor(r()*FLW.length)]); } }
+  for(let i=0;i<60;i++){ const fx=-18+r()*(Sx+44), fz=Sx+6.9+r()*2.2; if(Math.abs(fx-Sx/2)<9.8) continue; cFlw.push([fx,.06,fz,Math.floor(r()*FLW.length)]); } }
  // --- terrasse du bar ---
  city.terr=[];
  for(const [tx,umb] of [[-8.6,'#a8463a'],[-6,'#e5a33b']]){ const tz=Sx+.62; terraceTable(root,tx,tz,umb);
@@ -126,6 +126,7 @@ function buildCity(root){
   inst(cFlw,new THREE.SphereGeometry(.06,7,6),new THREE.MeshStandardMaterial({color:'#ffffff',roughness:.8}),true); }
  city.venues={bar:{door:-7.2,side:'L'},cinema:{door:-15.3,side:'L'},mall:{door:Sx+15.5,side:'R'},rival:{door:Sx+7.2,side:'R'}};
  city.ready=true;
+ try{ if(life&&life.bike){ fxRoot.remove(life.bike.g); } buildLife(root); }catch(e){ console.warn(e); }
 }
 /* --- passants --- */
 function mkWalker(o){ return Object.assign({id:uid++,kind:'walk',look:randLook(),fx:0,fy:0,rot:0,v:0,speed:rnd(.95,1.15),moving:false,ph:Math.random()*6,route:[],path:[],sitting:false},o); }

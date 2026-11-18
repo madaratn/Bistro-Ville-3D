@@ -207,7 +207,7 @@ function rebuildStatic(){
  const bench=makeBench(); bench.position.set(-2.5,0,S+.5); staticRoot.add(bench);
  for(const bx of [DX-2,DX-3]) if(bx>=0&&bx<S){ const wb=makeBench('#c9904f'); wb.position.set(bx+.5,0,S+.5); staticRoot.add(wb); }
  const r=seeded(11), bush=[M('#6cc35a',{flatShading:true}),M('#57b04f',{flatShading:true})], fl=['#ff7aa8','#ffd23f','#ffffff','#c58cff'];
- for(let i=0;i<26;i++){ let x=r()*40-16, z=r()*36-14; if(x>-1.2&&x<S+1.2&&z>-1.2&&z<S+6.5) continue; if(r()<.55){ staticRoot.add(mesh(IC(.18+r()*.2,1),bush[i%2],x,.12,z)); } else { const c=M(fl[i%4]); for(let k=0;k<4;k++) staticRoot.add(mesh(SP(.05,8,6),c,x+(r()-.5)*.4,.06,z+(r()-.5)*.4,false)); } }
+ for(let i=0;i<26;i++){ let x=r()*40-16, z=r()*36-14; if(x>-1.2&&x<S+1.2&&z>-1.2&&z<S+6.5) continue; if(Math.abs(x-S/2)<9.9&&z>S+6.5&&z<S+11.3) continue; if(r()<.55){ staticRoot.add(mesh(IC(.18+r()*.2,1),bush[i%2],x,.12,z)); } else { const c=M(fl[i%4]); for(let k=0;k<4;k++) staticRoot.add(mesh(SP(.05,8,6),c,x+(r()-.5)*.4,.06,z+(r()-.5)*.4,false)); } }
  // cuisine : carrelage, muret et enseigne (rectangle réglable dans un coin)
  { const kw=KR.w, kd=KR.d, X0=KR.x0, Y0=KR.y0;
   const kt=canvasTex(kw*64,kd*64,(x)=>{ for(let j=0;j<kd*4;j++) for(let i=0;i<kw*4;i++){ x.fillStyle=(i+j)%2?'#f4f1ec':'#e2ded7'; x.fillRect(i*16,j*16,16,16); } x.strokeStyle='rgba(120,110,100,.25)'; x.lineWidth=1; for(let i=0;i<=kw*4;i++){ x.beginPath(); x.moveTo(i*16,0); x.lineTo(i*16,kd*64); x.stroke(); } for(let j=0;j<=kd*4;j++){ x.beginPath(); x.moveTo(0,j*16); x.lineTo(kw*64,j*16); x.stroke(); } });
@@ -710,7 +710,7 @@ function syncFurn(T,n){
 }
 function syncAgents(dt,T){
  const seen=new Set();
- for(const a of crew.concat(custs,city.walkers,evA)){
+ for(const a of crew.concat(custs,city.walkers,evA,lifeA)){
   let o=aObjs.get(a);
   if(o&&a.s&&o.role!==a.s.role){ agentRoot.remove(o.root); o=null; }
   if(!o){ o=makeCharC(a); agentRoot.add(o.root); aObjs.set(a,o); }
@@ -950,7 +950,7 @@ function render(){
  for(const l of streetLights){ l.userData.L.intensity=n*10; l.userData.head.material.emissiveIntensity=n*2.5; }
  headMat.emissiveIntensity=.2+n*2.5;
  if(vis){ scene.background.set('#120f1a'); scene.fog.color.copy(scene.background); hemi.intensity=.42; hemi.color.set('#ffe2c0'); sun.intensity=.9; sun.color.set('#ffd9a8'); scene.environmentIntensity=.4; inLight.intensity=0; belLight.intensity=75; } else belLight.intensity=0;
- edgePan(dt); viewShift(dt); watchCam(dt); updCam(); doorSign(T); viewUpdate(); renderer.render(scene,camera); updOverlay(); wallMarks(); momDraw(); cineTick(); try{ evFxTick(dt); }catch(e){ console.warn(e); } if(vis) belHot(); updRail(dt); updHandle(); kdsT-=dt; if(kdsT<=0){ kdsT=.4; drawKDS(); }
+ edgePan(dt); viewShift(dt); watchCam(dt); updCam(); doorSign(T); viewUpdate(); renderer.render(scene,camera); updOverlay(); wallMarks(); momDraw(); cineTick(); try{ evFxTick(dt); lifeTick(dt,T); }catch(e){ console.warn(e); } if(vis) belHot(); updRail(dt); updHandle(); kdsT-=dt; if(kdsT<=0){ kdsT=.4; drawKDS(); }
 }
 
 /* --- entrées --- */
@@ -960,7 +960,7 @@ function screenToGrid(sx,sy){ const p=groundAt(sx,sy); return p?[Math.floor(p.x)
 const ptrs=new Map(); let drag=null,pinch=null,moved=false,dragPt=null;
 const pd=()=>{const [a,b]=[...ptrs.values()]; return Math.hypot(a.x-b.x,a.y-b.y);};
 const pa=()=>{const [a,b]=[...ptrs.values()]; return Math.atan2(b.y-a.y,b.x-a.x);}, pcy=()=>{const [a,b]=[...ptrs.values()]; return (a.y+b.y)/2;};
-function clampCam(){ if(visit.on){ cam.tx=clamp(cam.tx,1,BW-1); cam.tz=clamp(cam.tz,1,BD); const fd=belFit(); cam.dist=clamp(cam.dist,fd*.2,fd*.72); return; } cam.tx=clamp(cam.tx,-3,S+8); cam.tz=clamp(cam.tz,-3,S+6); const fd=fitDist(); cam.dist=clamp(cam.dist,Math.max(6,fd*.3),fd*1.6); }
+function clampCam(){ if(visit.on){ cam.tx=clamp(cam.tx,1,BW-1); cam.tz=clamp(cam.tz,1,BD); const fd=belFit(); cam.dist=clamp(cam.dist,fd*.2,fd*.72); return; } cam.tx=clamp(cam.tx,-6,S+10); cam.tz=clamp(cam.tz,-3,S+10); const fd=fitDist(); cam.dist=clamp(cam.dist,Math.max(6,fd*.3),fd*1.6); }
 const liftY=t=>t==='touch'?34:0;   // sur mobile, l'objet saisi apparaît au-dessus du doigt
 function dragGhost(){ if(!dragPt) return; const g=screenToGrid(dragPt.x,dragPt.y-liftY(dragPt.t)); if(inRest(g[0],g[1])) ghost={x:g[0],y:g[1]}; }
 function edgePan(dt){
