@@ -813,7 +813,7 @@ function toScreen(x,y,z){ _v.set(x,y,z).project(camera); return [(_v.x*.5+.5)*in
 function ovPut(key,x,y,z,cls,html){
  const [sx,sy,sz]=toScreen(x,y,z); if(sz>1) return null;
  let e=ovEls.get(key); if(!e){ e=document.createElement('div'); e.className=cls; ov.appendChild(e); ovEls.set(key,e); }
- if(e._h!==html){ e.innerHTML=html; e._h=html; }
+ if(e._h!==html){ e.innerHTML=deEmo(html); e._h=html; }
  e.style.transform=`translate(${sx.toFixed(1)}px,${sy.toFixed(1)}px) scale(${ovScale.toFixed(3)})`; ovUsed.add(key); return e;
 }
 let ovScale=1;

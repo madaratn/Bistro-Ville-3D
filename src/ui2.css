@@ -492,3 +492,9 @@ body.blackout canvas{filter:brightness(.42) saturate(.6)!important}
 .rgC small{font-size:11.5px;line-height:1.3;color:#7a5a3a}
 .rgC .rgF{color:#27a05c;font-weight:700}
 .rgC.lock{opacity:.7;border-style:dashed}
+
+/* --- icônes dessinées à la place des emojis --- */
+svg.ui{width:1.15em;height:1.15em;vertical-align:-.2em;display:inline-block;flex:none}
+.bb span svg.ui,.th svg.ui{width:20px;height:20px;vertical-align:middle}
+.emo svg.ui,.hero svg.ui{width:1em;height:1em;vertical-align:-.12em}
+.say svg.ui{width:1.25em;height:1.25em}

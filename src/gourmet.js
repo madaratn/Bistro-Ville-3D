@@ -92,7 +92,8 @@ function gourmetThumbs(r,sc,cm,c){
 }
 // remplace dans l'interface les émojis d'ingrédients et de plats par leur image 3D
 let icoRe=null;
-function iconizeEl(el){ if(!el) return;
+function iconizeEl(el){ if(!el) return; try{ iconizeEl0(el); }catch(e){} try{ deEmoEl(el); }catch(e){} }
+function iconizeEl0(el){ if(!el) return;
  if(!icoRe){ const ks=Object.keys(foodThumbs).filter(k=>!/^(who|bel):/.test(k)); if(!ks.length) return; icoRe=new RegExp('('+ks.sort((a,b)=>b.length-a.length).map(k=>k.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')).join('|')+')\\uFE0F?','g'); }
  const tw=document.createTreeWalker(el,NodeFilter.SHOW_TEXT), todo=[]; let n; while((n=tw.nextNode())){ icoRe.lastIndex=0; if(icoRe.test(n.nodeValue)) todo.push(n); }
  for(const t of todo){ const fr=document.createDocumentFragment(); let last=0, s=t.nodeValue, m; icoRe.lastIndex=0; while((m=icoRe.exec(s))){ if(m.index>last) fr.appendChild(document.createTextNode(s.slice(last,m.index))); const im=document.createElement('img'); im.className='fi'; im.src=foodThumbs[m[1]]; im.alt=''; fr.appendChild(im); last=m.index+m[0].length; } if(last<s.length) fr.appendChild(document.createTextNode(s.slice(last))); t.parentNode.replaceChild(fr,t); }
