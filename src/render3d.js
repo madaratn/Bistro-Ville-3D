@@ -960,7 +960,7 @@ function screenToGrid(sx,sy){ const p=groundAt(sx,sy); return p?[Math.floor(p.x)
 const ptrs=new Map(); let drag=null,pinch=null,moved=false,dragPt=null;
 const pd=()=>{const [a,b]=[...ptrs.values()]; return Math.hypot(a.x-b.x,a.y-b.y);};
 const pa=()=>{const [a,b]=[...ptrs.values()]; return Math.atan2(b.y-a.y,b.x-a.x);}, pcy=()=>{const [a,b]=[...ptrs.values()]; return (a.y+b.y)/2;};
-function clampCam(){ if(visit.on){ cam.tx=clamp(cam.tx,1,BW-1); cam.tz=clamp(cam.tz,1,BD); const fd=belFit(); cam.dist=clamp(cam.dist,fd*.2,fd*.72); return; } cam.tx=clamp(cam.tx,-6,S+10); cam.tz=clamp(cam.tz,-3,S+13); const fd=fitDist(); cam.dist=clamp(cam.dist,Math.max(6,fd*.3),fd*1.6); }
+function clampCam(){ if(visit.on){ cam.tx=clamp(cam.tx,1,BW-1); cam.tz=clamp(cam.tz,1,BD); const fd=belFit(); cam.dist=clamp(cam.dist,fd*.2,fd*.72); return; } cam.tx=clamp(cam.tx,-15,S+19); cam.tz=clamp(cam.tz,-3,S+13); const fd=fitDist(); cam.dist=clamp(cam.dist,Math.max(6,fd*.3),fd*1.6); }
 const liftY=t=>t==='touch'?34:0;   // sur mobile, l'objet saisi apparaît au-dessus du doigt
 function dragGhost(){ if(!dragPt) return; const g=screenToGrid(dragPt.x,dragPt.y-liftY(dragPt.t)); if(inRest(g[0],g[1])) ghost={x:g[0],y:g[1]}; }
 function edgePan(dt){

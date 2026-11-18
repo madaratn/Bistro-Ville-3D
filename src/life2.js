@@ -43,6 +43,7 @@ function buildLife2(root,L){ const c=L.c;
  { const g=new THREE.Group(); g.add(mesh(CY(.9,1.5,5,14),lfM('#f1e4c8',{roughness:.95}),0,2.5,0)); const cap=mesh(new THREE.ConeGeometry(1.15,1.2,14),lfM('#a84a32'),0,5.6,0); cap.userData.own=1; g.add(cap); g.add(mesh(new THREE.BoxGeometry(.5,.9,.06),lfM('#6b4630'),0,.45,1.47,false)); for(const y of [2.2,3.6]) g.add(mesh(new THREE.BoxGeometry(.4,.5,.06),cityWin,0,y,1.2-(y-2.2)*.12,false));
   const sl=new THREE.Group(); sl.position.set(0,5.0,1.2); sl.add(mesh(CY(.12,.12,.5,8),lfM('#6b4630'),0,0,-.1,false)); sl.children[0].rotation.x=Math.PI/2; for(let i=0;i<4;i++){ const b=new THREE.Group(); b.rotation.z=i*Math.PI/2; b.add(mesh(new THREE.BoxGeometry(.1,3.3,.06),lfM('#6b4630'),0,1.65,0,false)); b.add(mesh(new THREE.BoxGeometry(.75,2.5,.03),lfM('#fff6e0',{side:THREE.DoubleSide}),.42,1.9,0,false)); sl.add(b); } g.add(sl); L.mill=sl;
   g.position.set(-7.5,0,-15.5); g.rotation.y=.5; root.add(g); }
+ try{ buildLife3(root,L); }catch(e){ console.warn(e); }
  L.chim=(typeof cChim!=='undefined'?cChim:[]).filter(p=>p[2]<-4&&p[0]>-12&&p[0]<S+14).filter((p,i)=>i%2===0).slice(0,5);
 }
 function lifeTick2(dt,T){ const L=life;
@@ -62,5 +63,6 @@ function lifeTick2(dt,T){ const L=life;
  if(L.acc&&!LITE&&Math.random()<dt*2.2) spawnPart(noteTex(),pick(['#b8323a','#2f5f8f','#3f8a4f','#8a5cc8']),L.accP[0]+rnd(-.2,.2),1.0,L.accP[1],rnd(-.25,.25),rnd(.5,.8),rnd(-.25,.1),1.6,.2,0,false);
  if(L.acc){ L.acc.rotT=Math.PI*.9+Math.sin(T*2.4)*.25; if(Math.sin(T*2.4)>.995) L.acc.hop=.3; } if(L.painter){ L.painter.idle-=dt; if(L.painter.idle<=0){ L.painter.idle=rnd(2,5); L.painter.hop=.25; L.painter.rotT=Math.PI+rnd(-.3,.3); } }
  if(L.dog&&L.dogW){ const w=L.dogW, d=L.dog, tx=w.fx+.5+Math.sin(w.rot||0)*.75, tz=w.fy+.5+Math.cos(w.rot||0)*.75-.35, dx=tx-d.position.x, dz=tz-d.position.z, ds=Math.hypot(dx,dz); if(ds>.05){ const sp=Math.min(ds*3,1.6)*dt; d.position.x+=dx/ds*sp; d.position.z+=dz/ds*sp; d.rotation.y=Math.atan2(dx,dz); d.userData.legs.forEach((p,i)=>p.rotation.x=Math.sin(T*14+(i%3?Math.PI:0))*.55*Math.min(1,ds*3)); } d.position.y=Math.abs(Math.sin(T*14))*.012; d.userData.t.rotation.z=Math.sin(T*12)*.6; }
+ try{ lifeTick3(dt,T); }catch(e){ console.warn(e); }
  if(!LITE) for(const p of L.chim||[]) if(Math.random()<dt*1.5) spawnPart(GLOW,'#f4efe6',p[0]+rnd(-.05,.05),p[1],p[2],rnd(.1,.3),rnd(.4,.6),rnd(-.05,.05),3.2,.35,3.2,false);
 }

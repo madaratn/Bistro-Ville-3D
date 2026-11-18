@@ -58,7 +58,7 @@ function terraceChair(root,x,z,ang){ const g=new THREE.Group(), c=M('#3d4450',{m
  g.add(mesh(RB(.3,.04,.3,.012),s,0,.28,0)); g.add(mesh(RB(.3,.28,.03,.01),s,0,.44,-.14));
  g.position.set(x,0,z); g.rotation.y=ang; root.add(g); }
 function buildCity(root){
- const Sx=S; cWin=[]; cSill=[]; cChim=[]; cShut=[]; cBox=[]; cFlw=[]; const cStone=[];
+ const Sx=S; cWin=[]; cSill=[]; cChim=[]; city.flags=[]; city.stars=[]; cShut=[]; cBox=[]; cFlw=[]; const cStone=[];
  // --- à gauche : l'auberge-bar et sa terrasse, puis le vieux cinéma ---
  const bar={x0:-9.8,x1:-4.6,zf:Sx,dep:6,h:2.7,col:'#e9c48a'};
  cityBlock(root,bar); shopFront(root,{x0:bar.x0,x1:bar.x1,zf:Sx,door:-7.2,awn:'#a8463a',sign:'Le Comptoir',sbg:'#5a3a26',sw:2.2,sy:1.62,doorC:'#3f6b5a'});
@@ -82,12 +82,12 @@ function buildCity(root){
   root.add(mesh(new THREE.BoxGeometry(1.5,2.2,.06),gold,cx,1.4,zf+.02,false)); root.add(mesh(new THREE.BoxGeometry(1.3,2.02,.03),dark,cx,1.36,zf+.06,false));        // grande porte
   for(const sx of [-1,1]) root.add(mesh(CY(.02,.02,.5,8),gold,cx+sx*.12,1.3,zf+.1,false));
   { const sg=ownMesh(new THREE.PlaneGeometry(4.4,.8),new THREE.MeshStandardMaterial({map:signBoard('LE BELMONT','#1f2029','#f2d27a',4.4,.8),transparent:true,roughness:.5,emissive:'#f2d27a',emissiveIntensity:.18}),cx,3.42,zf+.5,false); root.add(sg);
-   root.add(mesh(new THREE.BoxGeometry(4.6,.95,.1),gold,cx,3.42,zf+.42,false)); for(let i=0;i<5;i++){ const st=mesh(new THREE.OctahedronGeometry(.13),M('#ffe08a',{emissive:'#ffd24a',emissiveIntensity:.9,metalness:.5,roughness:.3}),cx-1+i*.5,4.02,zf+.5,false); st.userData.own=1; root.add(st); } }
+   root.add(mesh(new THREE.BoxGeometry(4.6,.95,.1),gold,cx,3.42,zf+.42,false)); for(let i=0;i<5;i++){ const st=mesh(new THREE.OctahedronGeometry(.13),M('#ffe08a',{emissive:'#ffd24a',emissiveIntensity:.9,metalness:.5,roughness:.3}),cx-1+i*.5,4.02,zf+.5,false); st.userData.own=1; root.add(st); city.stars.push(st); } }
   const cz0=zf+.45, cz1=Sx+2;
   root.add(mesh(new THREE.BoxGeometry(1.5,.03,cz1-cz0),red,cx,.045,(cz0+cz1)/2,false));                                    // tapis rouge
   for(const sx of [-1,1]) for(let z=cz0+.2;z<Sx+.9;z+=.6){ root.add(mesh(CY(.03,.045,.5,10),gold,cx+sx*.9,.25,z)); root.add(mesh(SP(.05,10,8),gold,cx+sx*.9,.52,z,false)); if(z+.6<Sx+.9){ const rp=mesh(CY(.02,.02,.6,6),red,cx+sx*.9,.42,z+.3,false); rp.rotation.x=Math.PI/2; root.add(rp); } }
   for(const sx of [-1,1]){ const tx=cx+sx*1.9; root.add(mesh(CY(.2,.16,.36,16),dark,tx,.3+.18,zf+.75)); for(let k=0;k<3;k++) root.add(mesh(SP(.26-k*.07,14,12),M('#3f8a4f',{roughness:.85}),tx,.75+k*.3,zf+.75)); lantern(root,cx+sx*1.25,1.5,zf+.3); }
-  for(const sx of [-1,1]){ const fx=cx+sx*(w/2-.3); root.add(mesh(CY(.02,.02,1.3,8),gold,fx,h+.9,zf-.1)); const fl=mesh(new THREE.BoxGeometry(.6,.36,.02),red,fx+.32,h+1.3,zf-.1,false); root.add(fl); }
+  for(const sx of [-1,1]){ const fx=cx+sx*(w/2-.3); root.add(mesh(CY(.02,.02,1.3,8),gold,fx,h+.9,zf-.1)); const fp=new THREE.Group(); fp.position.set(fx,h+1.3,zf-.1); const fl=mesh(new THREE.BoxGeometry(.6,.36,.02),red,.32,0,0,false); fp.add(fl); root.add(fp); city.flags.push(fp); }
   // Victor Belmont en personne, sur son perron
   try{ const o=makeCharC({id:9917,s:{id:9917,role:'rival',outfit:{skin:'#f1c7a3',hairC:'#2b2b30',hair:'short',top:'#f7f3ea',bottom:'#23242c',shoes:'#16161a',hat:'toque',extras:['buttons','scarf','glasses'],accent:'#d4a53a',w:1.12,h:1.05}}}); o.root.position.set(cx+.95,.3,zf+.62); o.root.rotation.y=-.5; o.root.scale.multiplyScalar(1.12); root.add(o.root); city.belmont=o; }catch(e){}
  }

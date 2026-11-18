@@ -34,7 +34,7 @@ function viewTag(){ // range chaque élément du décor : mur nord/ouest, haies,
   else if(c.z>-.2&&c.z<S+.2&&Math.abs(c.x-S)<.35&&box.max.y<2&&box.max.y>.2&&sz.x<.8) t='h';
   else t=az(o);
   o.userData.wall=t||'-'; }
- if(typeof cityRoot!=='undefined') for(const o of cityRoot.children){ if(o.userData.side) continue; box.setFromObject(o); if(box.isEmpty()){ o.userData.side='-'; continue; } box.getCenter(c); o.userData.side=az(o); }
+ if(typeof cityRoot!=='undefined') for(const o of cityRoot.children){ if(o.userData.side) continue; box.setFromObject(o); if(box.isEmpty()){ o.userData.side='-'; continue; } box.getCenter(c); o.userData.side=az(o); if(o.userData.side==='a'&&c.x>S+3.3&&c.x<S+11.1&&c.z>S-7.7&&c.z<S+1.2){ o.userData.az=Math.atan2(7.2+S/2,-3.8+S/2); o.userData.azW=.62; } }
 }
 function viewUpdate(){
  if(viewStale){ viewStale=false; if(!staticRoot.children.some(o=>o.userData.wall==='E')) viewBuildWalls(); viewTag(); viewSig=''; }
