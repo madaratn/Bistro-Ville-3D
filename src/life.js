@@ -91,7 +91,7 @@ function lifeTick(dt,T){ const L=life; if(!L) return; { const h=!!(cine||visit.o
  for(const a of lifeA){ if(a.stroll){ if(!a.plan.length&&!a.path.length) lfStroll(a); evActTick(a,dt); a.dead=0; }
   else if(a.run){ a.ang+=dt*1.9/1.75; const x=L.fx+Math.cos(a.ang)*1.75, z=L.fz+Math.sin(a.ang)*1.75; a.fx=x-.5; a.fy=z-.5; a.rot=a.rotT=Math.atan2(-Math.sin(a.ang),Math.cos(a.ang)); a.moving=true; a.v=1.9; a.ph+=dt*9; const o=aObjs.get(a); if(o&&a.prop&&!a.propOk){ a.propOk=1; o.root.add(a.prop()); } }
   else if(a.keep){ a.idle-=dt; if(a.idle<=0){ a.idle=rnd(3,7); a.rotT=rnd(-.5,.5); if(Math.random()<.35) a.hop=.4; } } }
- if(!state.lifeHint&&state.tuto&&mode==='play'&&L.t>25&&!ui.panel&&!ev){ state.lifeHint=1; toast('Nouveau : la place du marché, en face du bistrot. Fais glisser la vue pour aller voir Lucien, Rosa, le Capitaine, Albert et Zoé.'); }
+ if(!state.lifeHint2&&state.tuto&&mode==='play'&&L.t>25&&!ui.panel&&!ev){ state.lifeHint2=1; toast('Nouveau : la place du marché, en face du bistrot. Fais glisser la vue pour te promener dans le quartier, et touche tes voisins pour les saluer.'); }
  lifeSay-=dt; if(lifeSay<=0&&mode==='play'&&!ui.panel){ lifeSay=rnd(7,13); const K=pick(L.keep); if(K.a){ floatAt(K.x-.5,K.z-.5,pick(K.say),SAGA_WHO[K.k]?SAGA_WHO[K.k][1]:'#3a2a1f'); K.a.hop=.45; } }
  if(!LITE){ for(const p of L.smoke) if(Math.random()<dt*3) spawnPart(GLOW,'#f4efe6',p[0]+rnd(-.04,.04),p[1],p[2],rnd(.1,.3),rnd(.45,.7),rnd(-.05,.05),2.6,.3,3,false);
   if(Math.random()<dt*26){ const an=Math.random()*6.28; spawnPart(GLOW,'#bfe9ff',L.fx,1.22,L.fz,Math.cos(an)*rnd(.25,.5),rnd(.9,1.5),Math.sin(an)*rnd(.25,.5),.75,.09,0,false); }
