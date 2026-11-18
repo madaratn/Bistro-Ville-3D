@@ -448,3 +448,20 @@ body.cine:has(#prolog.cine:not(.load)) canvas{}
 .bdg.pop{animation:bdgP .45s cubic-bezier(.3,1.8,.5,1)}
 @keyframes bdgP{from{transform:scale(.3)}}
 .moreB em{min-width:22px;height:22px;padding:0 5px;border-radius:999px;font:700 12.5px/22px Fredoka,system-ui,sans-serif;width:auto}
+
+/* --- vie de l'équipe --- */
+.gal{color:#f2b33d;letter-spacing:1px;text-shadow:0 1px 0 #b9772e;margin-left:3px}
+.tmM{display:flex;align-items:center;gap:8px;margin-top:5px}.tmM .bar{flex:1;height:8px}.tmM em{font-style:normal;font-weight:700;font-size:12px;white-space:nowrap}
+.tmN{color:#c8423a!important;font-weight:700}
+.row.tm.quit{border-color:#e5484d;box-shadow:0 3px 0 #e5484d}
+.tmQ{display:flex;flex-direction:column;gap:8px;margin-top:10px}
+.tmQ button{border:2.5px solid #17603a;border-radius:14px;background:linear-gradient(180deg,#e9ffe0,#c9f0c4);padding:9px 12px;text-align:left;cursor:pointer;font-family:Fredoka,system-ui,sans-serif;color:#1f4a2c;box-shadow:0 3px 0 #17603a}
+.tmQ button b{display:block;font-size:16px}.tmQ button span{font-size:12.5px;opacity:.85}
+.tmQ button.no{border-color:#8a1c20;background:linear-gradient(180deg,#ffe9e6,#f6c4c0);color:#6a1418;box-shadow:0 3px 0 #8a1c20}
+.tmQ button:disabled{opacity:.45}
+
+.tmC{display:grid;grid-template-columns:76px 1fr;gap:12px;align-items:start;background:#fffdf6;border:2px solid #e6d2ac;border-radius:16px;padding:10px}
+.tmP{width:76px;height:76px;border-radius:50%;border:4px solid #5aa0d8;overflow:hidden;background:#fff6e0}
+.tmP img{width:100%;height:100%}
+.tmC b{color:#3a82c8;font-size:14px}.tmC p{margin:3px 0 0;font-size:15px;line-height:1.38}
+.tmK{margin-top:7px}
