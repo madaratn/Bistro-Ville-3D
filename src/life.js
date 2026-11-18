@@ -79,6 +79,7 @@ function buildLife(root){ lifeA=[]; const c=S/2, zs=S+8.15, L=life={birds:[],fl:
   g.position.set(c-14,11,-16); root.add(g); L.bal=g; }
  { const g=new THREE.Group(); L.flock=[]; for(let i=0;i<5;i++){ const b=new THREE.Group(), m=lfM('#3a3a44'); const w=[-1,1].map(s=>{ const p=new THREE.Group(); p.add(mesh(new THREE.BoxGeometry(.3,.015,.1),m,s*.15,0,0,false)); b.add(p); return p; }); b.userData.w=w; const r=Math.ceil(i/2), sd=i%2?1:-1; b.position.set(-r*.5,0,i?sd*r*.45:0); g.add(b); L.flock.push(b); } g.position.set(-30,7,-3); g.visible=false; root.add(g); L.flockG=g; }
  try{ buildLife2(root,L); }catch(e){ console.warn(e); }
+ try{ buildDecor(root,L); }catch(e){ console.warn(e); }
  for(const o of root.children) if(!o.userData.side&&o.position.z>S+6.6) o.userData.side='-';
  L.trees=[[-6,S+5.3],[1.5,S+5.4],[S-2,S+5.3],[S+5,S+5.4],[-2.4,1],[S+1.6,1.6]];
 }

@@ -21,7 +21,7 @@ function lifeRainInit(){ const N=LITE?120:320, pos=new Float32Array(N*6); const 
  lifeShad=[]; for(let i=0;i<4;i++){ const s=new THREE.Mesh(new THREE.CircleGeometry(5+i*1.3,20),new THREE.MeshBasicMaterial({color:'#1a2030',transparent:true,opacity:.06,depthWrite:false})); s.rotation.x=-Math.PI/2; s.scale.set(1.6,1,1); s.position.set(-40+i*24,.06,-12+i*11); s.renderOrder=2; fxRoot.add(s); lifeShad.push(s); } }
 function lifePlaneGo(){ if(lifePlane){ fxRoot.remove(lifePlane); disposeTree(lifePlane); } const g=new THREE.Group(), rd=lfM('#e5484d',{roughness:.4}), wh=lfM('#fff6e0'); const f=mesh(CA(.22,1.1),rd,0,0,0); f.rotation.z=Math.PI/2; g.add(f); g.add(mesh(RB(.5,.05,2.4,.02),wh,.15,.05,0)); g.add(mesh(RB(.3,.04,.9,.02),wh,-.75,.05,0)); g.add(mesh(RB(.3,.4,.04,.02),rd,-.78,.25,0)); g.add(mesh(SP(.16,8,6),lfM('#9fc4d6'),.25,.2,0,false));
  const pr=new THREE.Group(); pr.position.set(.82,0,0); pr.add(mesh(new THREE.BoxGeometry(.03,.9,.08),lfM('#2b2b30'),0,0,0,false)); g.add(pr); g.userData.pr=pr;
- const txt='Mangez chez '+(state.name||'Odette')+' !', bw=Math.max(4.5,txt.length*.36); const bn=ownMesh(new THREE.PlaneGeometry(bw,.9),new THREE.MeshBasicMaterial({map:signBoard(txt,'#fff6e0','#b8323a',bw,.9),transparent:true,side:THREE.DoubleSide}),-1.8-bw/2,-.1,0,false); g.add(bn); g.userData.bn=bn; const rp=ownMesh(new THREE.BoxGeometry(.9,.01,.01),lfM('#ffffff'),-1.35,-.05,0,false); g.add(rp);
+ const nm=state.name||'Chez Odette', txt=/^chez /i.test(nm)?'Mangez c'+nm.slice(1)+' !':'Mangez chez '+nm+' !', bw=Math.max(4.5,txt.length*.36); const bn=ownMesh(new THREE.PlaneGeometry(bw,.9),new THREE.MeshBasicMaterial({map:signBoard(txt,'#fff6e0','#b8323a',bw,.9),transparent:true,side:THREE.DoubleSide}),-1.8-bw/2,-.1,0,false); g.add(bn); g.userData.bn=bn; const rp=ownMesh(new THREE.BoxGeometry(.9,.01,.01),lfM('#ffffff'),-1.35,-.05,0,false); g.add(rp);
  g.position.set(life.c-48,8.5,-7); fxRoot.add(g); lifePlane=g; }
 function lifeParade(L,k){ const P=L.par={k,t:0,A:[]}, mk=(o,x,z,sp)=>{ const a=lfAgent(o,x,z); a.speed=sp; a.par=1; P.A.push(a); return a; };
  if(k==='band'){ const z=S+3, un=()=>({look:Object.assign(randLook(),{body:'#c8423a',pants:'#fff6e0',hat:'#c8423a'})}), gold=()=>lfM('#e3b04b',{metalness:.7,roughness:.25});
@@ -39,7 +39,7 @@ function lifeParade(L,k){ const P=L.par={k,t:0,A:[]}, mk=(o,x,z,sp)=>{ const a=l
 }
 function lifeTick5(dt,T){ const L=life, n=nightF(), zr=S+17.6, W=lifeW; if(!lifeRainG) lifeRainInit();
  // ---- garde-fou : si l'appareil peine, on allège tout seul ----
- if(!LITE&&!navigator.webdriver){ L.ft=(L.ft===undefined?dt:L.ft*.985+dt*.015); if(L.t>25&&L.ft>.055){ LITE=true; try{ sun.castShadow=false; resize(); }catch(e){} for(const a of lifeA) if(!a.keep){ a.hide=true; a.off=1; } toast('Affichage allégé pour garder le jeu fluide.'); } }
+ if(!LITE&&!navigator.webdriver){ L.ft=(L.ft===undefined?dt:L.ft*.985+dt*.015); if(L.t>(L.gt||25)&&L.ft>.05&&GFX.on){ GFX.on=false; L.gt=L.t+20; L.ft=.03; toast('Effets d’image coupés pour garder le jeu fluide.'); } else if(L.t>(L.gt||25)&&L.ft>.055){ LITE=true; try{ sun.castShadow=false; resize(); }catch(e){} for(const a of lifeA) if(!a.keep){ a.hide=true; a.off=1; } toast('Affichage allégé pour garder le jeu fluide.'); } }
  // ---- météo : averse, parapluies, arc-en-ciel, ombres de nuages ----
  W.t-=dt; if(W.rain<=0&&W.t<=0&&mode==='play'){ W.rain=rnd(32,48); W.T=W.rain; toast('Une averse ! Tout le monde sort son parapluie.'); }
  const rk=W.rain>0?Math.min(1,(W.T-W.rain)/3,W.rain/3):0;

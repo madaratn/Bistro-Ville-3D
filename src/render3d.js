@@ -149,7 +149,7 @@ function rebuildStatic(){
  winMat=new THREE.MeshStandardMaterial({color:'#ffe7c2',roughness:.08,metalness:.1,emissive:'#ffd79a',emissiveIntensity:.35});
  shaftMat=new THREE.MeshBasicMaterial({color:'#ffcf85',transparent:true,opacity:.16,depthWrite:false,blending:THREE.AdditiveBlending});
  // sol extérieur
- const ground=ownMesh(new THREE.PlaneGeometry(260,260),new THREE.MeshStandardMaterial({color:'#c3c26a',roughness:1}),S/2,-.02,S/2,false); ground.rotation.x=-Math.PI/2; staticRoot.add(ground);
+ const ground=ownMesh(new THREE.PlaneGeometry(260,260),new THREE.MeshStandardMaterial({map:grassTex(),roughness:1}),S/2,-.02,S/2,false); ground.receiveShadow=true; ground.rotation.x=-Math.PI/2; staticRoot.add(ground);
  // sol du resto
  const floor=ownMesh(new THREE.PlaneGeometry(S,S),new THREE.MeshStandardMaterial({map:floorTex(F),roughness:.55}),S/2,.001,S/2,false); floor.rotation.x=-Math.PI/2; staticRoot.add(floor);
  const mat=mesh(RB(.8,.02,.6,.008),M('#b0443a',{roughness:.95}),DX+.5,.01,S-.5,false); staticRoot.add(mat); if(DXO!==DX) staticRoot.add(mesh(RB(.8,.02,.6,.008),M('#4f8f5b',{roughness:.95}),DXO+.5,.01,S-.5,false));
@@ -918,7 +918,7 @@ function drawKDS(force){
 /* --- caméra --- */
 function camOK(){ return isFinite(cam.dist)&&isFinite(cam.tx)&&isFinite(cam.tz)&&cam.dist>0; }
 function updCam(){ if(!camOK()){ if(!(innerWidth>0&&innerHeight>0)) return; camera.aspect=innerWidth/innerHeight; camera.updateProjectionMatrix(); cam.tx=S/2+.25; cam.tz=S/2+.7; cam.dist=fitDist()*.5; if(!camOK()) return; } const cp=Math.cos(cam.pitch); camera.position.set(cam.tx+cam.dist*cp*Math.sin(cam.yaw),cam.dist*Math.sin(cam.pitch),cam.tz+cam.dist*cp*Math.cos(cam.yaw)); camera.lookAt(cam.tx,0,cam.tz); }
-function resize(){ if(!(innerWidth>0&&innerHeight>0)) return; renderer.setPixelRatio(PXR()); renderer.setSize(innerWidth,innerHeight,false); camera.aspect=innerWidth/innerHeight; camera.updateProjectionMatrix(); }
+function resize(){ if(!(innerWidth>0&&innerHeight>0)) return; renderer.setPixelRatio(PXR()); renderer.setSize(innerWidth,innerHeight,false); camera.aspect=innerWidth/innerHeight; camera.updateProjectionMatrix();  gfxResize(); }
 function fitDist(){ const vf=FOV0*Math.PI/180, hf=2*Math.atan(Math.tan(vf/2)*innerWidth/innerHeight); const dw=(S*1.5)/(2*Math.tan(hf/2)), dh=(S*1.25+1.5)/(2*Math.tan(vf/2)); return Math.max(dw,dh)*1.05; }
 function centerCam(){ if(!(innerWidth>0&&innerHeight>0)){ cam.dist=NaN; return; } camera.aspect=innerWidth/innerHeight; cam.tx=S/2+.25; cam.tz=S/2+.7; cam.dist=fitDist()*.5; updCam(); }
 
@@ -951,7 +951,7 @@ function render(){
  for(const l of streetLights){ l.userData.L.intensity=n*10; l.userData.head.material.emissiveIntensity=n*2.5; }
  headMat.emissiveIntensity=.2+n*2.5;
  if(vis){ scene.background.set('#120f1a'); scene.fog.color.copy(scene.background); hemi.intensity=.42; hemi.color.set('#ffe2c0'); sun.intensity=.9; sun.color.set('#ffd9a8'); scene.environmentIntensity=.4; inLight.intensity=0; belLight.intensity=75; } else belLight.intensity=0;
- edgePan(dt); viewShift(dt); watchCam(dt); updCam(); doorSign(T); viewUpdate(); renderer.render(scene,camera); updOverlay(); wallMarks(); momDraw(); cineTick(); try{ evFxTick(dt); lifeTick(dt,T); }catch(e){ console.warn(e); } if(vis) belHot(); updRail(dt); updHandle(); kdsT-=dt; if(kdsT<=0){ kdsT=.4; drawKDS(); }
+ edgePan(dt); viewShift(dt); watchCam(dt); updCam(); doorSign(T); viewUpdate(); gfxRender(); updOverlay(); wallMarks(); momDraw(); cineTick(); try{ evFxTick(dt); lifeTick(dt,T); }catch(e){ console.warn(e); } if(vis) belHot(); updRail(dt); updHandle(); kdsT-=dt; if(kdsT<=0){ kdsT=.4; drawKDS(); }
 }
 
 /* --- entrées --- */
