@@ -25,8 +25,8 @@ function lfBike(){ const g=new THREE.Group(), fr=lfM(pick(['#e5484d','#3f9bd6','
  for(const s of [-1,1]){ const a=mesh(CA(.03,.24),tp,.1,.74,s*.1,false); a.rotation.z=-1.1; g.add(a); }
  const bk=mesh(RB(.2,.14,.22,.02),lfM('#b9895a'),.42,.42,0,false); g.add(bk); g.add(mesh(CY(.02,.02,.26,6),lfM('#d9a85c'),.42,.56,.03,false)); g.userData={wh,legs}; return g; }
 function buildLife(root){ lifeA=[]; const c=S/2, zs=S+8.15, L=life={birds:[],fl:[],c,zs,t:0,smoke:[],keep:[],bikeT:6,flockT:4,str:[]};
- const pl=ownMesh(new THREE.PlaneGeometry(19,4.3),new THREE.MeshStandardMaterial({map:(()=>{ const t=streetTex(); t.repeat.set(19,4.3); return t; })(),roughness:.9}),c,.012,S+8.9,false); pl.rotation.x=-Math.PI/2; root.add(pl);
- root.add(mesh(new THREE.BoxGeometry(19.2,.08,.12),lfM('#e9dfcf'),c,.03,S+11.08,false));
+ const pl=ownMesh(new THREE.PlaneGeometry(19,7.7),new THREE.MeshStandardMaterial({map:(()=>{ const t=streetTex(); t.repeat.set(19,7.7); return t; })(),roughness:.9}),c,.012,S+10.6,false); pl.rotation.x=-Math.PI/2; root.add(pl);
+ root.add(mesh(new THREE.BoxGeometry(19.2,.08,.12),lfM('#e9dfcf'),c,.03,S+14.5,false));
  // --- Le Fournil de Lucien ---
  { const g=lfStall(root,c-7.4,zs,{awn:'#c98a3e',sign:'Le Fournil de Lucien',sbg:'#6b4226',sfg:'#ffe2a8'}), br=lfM('#b5653a'), cr=lfM('#d9a85c'), dkc=lfM('#a8703a');
   g.add(mesh(RB(.9,.9,.6,.05),br,-.5,.45,-1.0)); const d=mesh(CY(.22,.22,.05,16,1,false,0,Math.PI),lfM('#2a1c14'),-.5,.42,-.69,false); d.rotation.x=Math.PI/2; g.add(d); g.add(mesh(SP(.12,8,6),lfM('#ff8a2a',{emissive:'#ff6a10',emissiveIntensity:1.6}),-.5,.47,-.74,false));
@@ -69,7 +69,7 @@ function buildLife(root){ lifeA=[]; const c=S/2, zs=S+8.15, L=life={birds:[],fl:
  // --- les commerçants ---
  for(const K of L.keep){ const W=WHO_LOOK[K.k]; if(!W) continue; const a=lfAgent({id:W.id+500,s:{id:W.id,role:'story',outfit:W.outfit},kidF:K.kid},K.x,K.z); a.keep=K; K.a=a; a.idle=Math.random()*4; }
  // --- les badauds, l'enfant au ballon ---
- if(!LITE){ for(let i=0;i<4;i++){ const a=lfAgent({},c-8+i*4.5,S+9.2+Math.random()*.8); a.stroll=1; a.speed=.85+Math.random()*.2; L.str.push(a); }
+ if(!LITE){ for(let i=0;i<6;i++){ const a=lfAgent({},c-8+i*3,S+9.2+Math.random()*.8); a.stroll=1; a.speed=.85+Math.random()*.2; L.str.push(a); }
   const k=lfAgent({kidF:1},L.fx+1.7,L.fz); k.run=1; k.speed=1.9; k.ang=0; k.prop=()=>{ const g=new THREE.Group(); g.add(mesh(SP(.12,12,10),lfM(pick(['#e5484d','#4fc3f7','#ffd23f']),{roughness:.3}),.22,1.25,0)); g.add(mesh(CY(.004,.004,.62,4),lfM('#fff'),.22,.88,0,false)); return g; }; L.kid=k; }
  // --- pigeons, chat ---
  for(let i=0;i<(LITE?3:7);i++){ const b=lfBird(); b.userData.x=L.fx+rnd(-2.4,2.4); b.userData.z=S+10.3+rnd(-.5,.5); b.userData.ph=Math.random()*6; b.userData.m=0; b.userData.t=rnd(6,16); b.position.set(b.userData.x,.02,b.userData.z); b.rotation.y=Math.random()*6; root.add(b); L.birds.push(b); }
@@ -78,13 +78,16 @@ function buildLife(root){ lifeA=[]; const c=S/2, zs=S+8.15, L=life={birds:[],fl:
  { const g=new THREE.Group(), cols=['#e5484d','#ffd23f','#3f9bd6','#fff3dc']; for(let i=0;i<8;i++){ const s=mesh(new THREE.SphereGeometry(1.5,10,14,i*Math.PI/4,Math.PI/4),lfM(cols[i%4],{side:THREE.DoubleSide}),0,0,0,false); s.scale.y=1.2; s.userData.own=1; g.add(s); } g.add(mesh(CY(.5,.3,.7,10),lfM('#e5484d'),0,-1.9,0,false)); g.add(mesh(RB(.5,.4,.5,.05),lfM('#8a5a36'),0,-2.9,0,false)); for(const [x,z] of [[-.22,-.22],[.22,-.22],[-.22,.22],[.22,.22]]) g.add(mesh(CY(.01,.01,.8,4),lfM('#3a3530'),x,-2.4,z,false));
   g.position.set(c-14,11,-16); root.add(g); L.bal=g; }
  { const g=new THREE.Group(); L.flock=[]; for(let i=0;i<5;i++){ const b=new THREE.Group(), m=lfM('#3a3a44'); const w=[-1,1].map(s=>{ const p=new THREE.Group(); p.add(mesh(new THREE.BoxGeometry(.3,.015,.1),m,s*.15,0,0,false)); b.add(p); return p; }); b.userData.w=w; const r=Math.ceil(i/2), sd=i%2?1:-1; b.position.set(-r*.5,0,i?sd*r*.45:0); g.add(b); L.flock.push(b); } g.position.set(-30,7,-3); g.visible=false; root.add(g); L.flockG=g; }
+ try{ buildLife2(root,L); }catch(e){ console.warn(e); }
  for(const o of root.children) if(!o.userData.side&&o.position.z>S+6.6) o.userData.side='-';
  L.trees=[[-6,S+5.3],[1.5,S+5.4],[S-2,S+5.3],[S+5,S+5.4],[-2.4,1],[S+1.6,1.6]];
 }
 function lfStroll(a){ const L=life, r=Math.random(); let x,z; if(r<.62){ const K=pick(L.keep); x=K.x+rnd(-.5,.5); z=K.kid?K.z+1.05:L.zs+rnd(.75,1.0); a.plan.push({pts:[[x-.5,z-.5]]},{w:rnd(3,6),fn:q=>{ q.rotT=Math.PI; if(Math.random()<.3) q.hop=.4; }}); }
  else if(r<.8){ const an=Math.random()*6.28; x=L.fx+Math.cos(an)*1.55; z=L.fz+Math.abs(Math.sin(an))*1.3+.3; a.plan.push({pts:[[x-.5,z-.5]]},{w:rnd(2,5),fn:q=>{ q.rotT=Math.atan2(L.fx-x,L.fz-z); }}); }
- else { x=L.c+rnd(-8.5,8.5); z=S+rnd(9.4,10.5); a.plan.push({pts:[[x-.5,z-.5]]},{w:rnd(.5,2)}); } }
-function lifeTick(dt,T){ const L=life; if(!L||cine||visit.on) return; L.t+=dt; dt=Math.min(dt,.1);
+ else if(r<.9&&L.accP){ x=L.accP[0]+rnd(-1,1); z=L.accP[1]-rnd(1.1,1.6); a.plan.push({pts:[[x-.5,z-.5]]},{w:rnd(4,9),fn:q=>{ q.rotT=0; if(Math.random()<.5) q.hop=.4; }}); }
+ else if(r<.96&&L.carP){ const an=rnd(2.2,4.2); x=L.carP[0]+Math.cos(an)*2.3; z=L.carP[1]+Math.sin(an)*2.3; a.plan.push({pts:[[x-.5,z-.5]]},{w:rnd(4,8),fn:q=>{ q.rotT=Math.atan2(L.carP[0]-x,L.carP[1]-z); }}); }
+ else { x=L.c+rnd(-8.5,8.5); z=S+rnd(9.4,11.2); a.plan.push({pts:[[x-.5,z-.5]]},{w:rnd(.5,2)}); } }
+function lifeTick(dt,T){ const L=life; if(!L) return; { const h=!!(cine||visit.on); if(h!==L.hid){ L.hid=h; for(const a of lifeA) a.hide=h; } if(h) return; } L.t+=dt; dt=Math.min(dt,.1);
  for(const a of lifeA){ if(a.stroll){ if(!a.plan.length&&!a.path.length) lfStroll(a); evActTick(a,dt); a.dead=0; }
   else if(a.run){ a.ang+=dt*1.9/1.75; const x=L.fx+Math.cos(a.ang)*1.75, z=L.fz+Math.sin(a.ang)*1.75; a.fx=x-.5; a.fy=z-.5; a.rot=a.rotT=Math.atan2(-Math.sin(a.ang),Math.cos(a.ang)); a.moving=true; a.v=1.9; a.ph+=dt*9; const o=aObjs.get(a); if(o&&a.prop&&!a.propOk){ a.propOk=1; o.root.add(a.prop()); } }
   else if(a.keep){ a.idle-=dt; if(a.idle<=0){ a.idle=rnd(3,7); a.rotT=rnd(-.5,.5); if(Math.random()<.35) a.hop=.4; } } }
@@ -103,6 +106,7 @@ function lifeTick(dt,T){ const L=life; if(!L||cine||visit.on) return; L.t+=dt; d
    b.position.set((u.sx+(u.tx-u.sx)*e)*(1-bl)+cx*bl,.02+bl*(2.2+Math.sin(u.ph)*.5),(u.sz+(u.tz-u.sz)*e)*(1-bl)+cz*bl); b.rotation.y=Math.atan2(b.position.x-px,b.position.z-pz); u.w.forEach((w,i)=>w.rotation.z=(i?-1:1)*Math.sin(T*26+u.ph)*.9); u.h.rotation.x=0; if(u.t<=0){ u.m=0; u.t=rnd(9,22); } } }
  // le chat sur le muret
  { const c=L.cat, u=c.userData; u.p-=dt; if(u.p>0){ u.t.rotation.z=Math.sin(T*2.2)*.5; u.h.rotation.y=Math.sin(T*.7)*.6; } else { u.x+=u.d*dt*.55; if(u.x>L.c+9||u.x<L.c-9){ u.d*=-1; } if(Math.random()<dt*.12) u.p=rnd(3,8); c.position.x=u.x; c.position.y=.27+Math.abs(Math.sin(T*7))*.012; c.rotation.y=u.d>0?Math.PI/2:-Math.PI/2; u.t.rotation.z=Math.sin(T*4)*.25; u.h.rotation.y=0; } }
+ try{ lifeTick2(dt,T); }catch(e){ console.warn(e); }
  // montgolfière et vol d'oiseaux
  if(L.bal){ L.bal.position.x+=dt*.22; L.bal.position.y=11+Math.sin(T*.4)*.5; L.bal.rotation.y+=dt*.05; if(L.bal.position.x>L.c+34) L.bal.position.x=L.c-34; }
  if(L.flockG){ const g=L.flockG; if(g.visible){ g.position.x+=dt*3.2; g.position.y=7+Math.sin(T*.8)*.3; for(const b of L.flock) b.userData.w.forEach((w,i)=>w.rotation.z=(i?-1:1)*Math.sin(T*9+b.position.z*3)*.6); if(g.position.x>S+34){ g.visible=false; L.flockT=rnd(14,30); } } else { L.flockT-=dt; if(L.flockT<=0){ g.visible=true; g.position.set(-28,7,rnd(-6,S*.4)); } } }

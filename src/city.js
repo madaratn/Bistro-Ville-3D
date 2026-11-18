@@ -6,7 +6,7 @@ const city={walkers:[],venues:{},terr:[],spawnT:2,ready:false};
 const cityWin=new THREE.MeshStandardMaterial({color:'#ffe9c4',roughness:.15,metalness:.1,emissive:'#ffcf8a',emissiveIntensity:.15});
 const cityGlass=new THREE.MeshStandardMaterial({color:'#9fc4d6',roughness:.08,metalness:.3,emissive:'#ffd79a',emissiveIntensity:.05});
 const bulbMat=new THREE.MeshStandardMaterial({color:'#fff3c4',emissive:'#ffd36a',emissiveIntensity:.6});
-let cWin=[], cSill=[];
+let cWin=[], cSill=[], cChim=[];
 const C_NEAR_E=()=>S+1.2, C_NEAR_W=()=>S+1.8, C_FAR_E=()=>S+4.7, C_FAR_W=()=>S+5.3;
 function signBoard(txt,bg,fg,w,h,font){ return canvasTex(512,Math.round(512*h/w),(x,W,H)=>{ x.fillStyle=bg; rrect(x,4,4,W-8,H-8,Math.min(28,H/3)); x.fill(); x.strokeStyle='rgba(255,255,255,.55)'; x.lineWidth=5; rrect(x,14,14,W-28,H-28,Math.min(20,H/4)); x.stroke(); x.fillStyle=fg; x.font=(font||'600 ')+Math.round(H*.48)+'px '+FONT; x.textAlign='center'; x.textBaseline='middle'; x.fillText(txt,W/2,H/2+3); }); }
 // maison de village : crépi chaud, colombages, volets, jardinières, toit de tuiles à deux pans
@@ -33,7 +33,7 @@ function cityBlock(root,o){
  if(o.side!==false) for(let f=0;f<fl;f++){ const y=1.9+f*.95; for(let z=zf-.8;z>zf-dep+.4;z-=1.4) cWin.push([x1+.02,y,z,Math.PI/2]); }
  gableRoof(root,x0,x1,zc,dep,h,o.rh||Math.min(1.5,dep*.22),o.roofC||ROOFS[Math.floor(r()*ROOFS.length)]);
  // cheminée
- root.add(mesh(new THREE.BoxGeometry(.3,.75,.3),M('#a8644a',{roughness:.95}),x0+w*(.25+r()*.5),h+.55,zc-dep*.22)); 
+ { const chx=x0+w*(.25+r()*.5); root.add(mesh(new THREE.BoxGeometry(.3,.75,.3),M('#a8644a',{roughness:.95}),chx,h+.55,zc-dep*.22)); cChim.push([chx,h+1.0,zc-dep*.22]); } 
 }
 function shopFront(root,o){
  const {x0,x1,zf}=o, cx=(x0+x1)/2, wood=M('#6b4630',{roughness:.8});
@@ -58,7 +58,7 @@ function terraceChair(root,x,z,ang){ const g=new THREE.Group(), c=M('#3d4450',{m
  g.add(mesh(RB(.3,.04,.3,.012),s,0,.28,0)); g.add(mesh(RB(.3,.28,.03,.01),s,0,.44,-.14));
  g.position.set(x,0,z); g.rotation.y=ang; root.add(g); }
 function buildCity(root){
- const Sx=S; cWin=[]; cSill=[]; cShut=[]; cBox=[]; cFlw=[]; const cStone=[];
+ const Sx=S; cWin=[]; cSill=[]; cChim=[]; cShut=[]; cBox=[]; cFlw=[]; const cStone=[];
  // --- à gauche : l'auberge-bar et sa terrasse, puis le vieux cinéma ---
  const bar={x0:-9.8,x1:-4.6,zf:Sx,dep:6,h:2.7,col:'#e9c48a'};
  cityBlock(root,bar); shopFront(root,{x0:bar.x0,x1:bar.x1,zf:Sx,door:-7.2,awn:'#a8463a',sign:'Le Comptoir',sbg:'#5a3a26',sw:2.2,sy:1.62,doorC:'#3f6b5a'});
