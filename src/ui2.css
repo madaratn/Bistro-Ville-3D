@@ -498,3 +498,11 @@ svg.ui{width:1.15em;height:1.15em;vertical-align:-.2em;display:inline-block;flex
 .bb span svg.ui,.th svg.ui{width:20px;height:20px;vertical-align:middle}
 .emo svg.ui,.hero svg.ui{width:1em;height:1em;vertical-align:-.12em}
 .say svg.ui{width:1.25em;height:1.25em}
+/* v0.71 : annonce d'événement */
+#evS{position:fixed;left:0;right:0;top:34%;z-index:7;text-align:center;pointer-events:none;opacity:0}
+#evS b{display:inline-block;position:relative;font-size:27px;line-height:1.1;color:#fff;padding:12px 22px;border-radius:18px;background:var(--ec);border:3px solid #fff;box-shadow:0 8px 0 rgba(60,30,10,.35),0 0 40px var(--ec);max-width:84vw;text-shadow:0 2px 0 rgba(0,0,0,.25)}
+#evS i{position:absolute;left:50%;top:50%;width:520px;height:520px;margin:-260px 0 0 -260px;background:repeating-conic-gradient(from 0deg,rgba(255,255,255,.5) 0 10deg,transparent 10deg 20deg);border-radius:50%;-webkit-mask:radial-gradient(circle,#000 0,transparent 68%);mask:radial-gradient(circle,#000 0,transparent 68%);animation:evSpin 6s linear infinite}
+#evS.go{animation:evPop 2.4s cubic-bezier(.2,1.4,.4,1) both}
+@keyframes evPop{0%{opacity:0;transform:scale(.3) rotate(-8deg)}14%{opacity:1;transform:scale(1.08) rotate(2deg)}22%{transform:scale(1) rotate(0)}80%{opacity:1;transform:scale(1)}100%{opacity:0;transform:scale(1.25) translateY(-40px)}}
+@keyframes evSpin{to{transform:rotate(360deg)}}
+body.cine #evS{display:none}

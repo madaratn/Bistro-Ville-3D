@@ -659,7 +659,7 @@ function makeCar(c){
  g.position.set(c.x,0,c.z); g.rotation.y=c.v>0?0:Math.PI; return g;
 }
 function updCars(dt){
- carT-=dt; if(carT<=0){ carT=rnd(4,10); const d=Math.random()<.5?1:-1; const c={x:d>0?-18:S+27,z:d>0?S+2.5:S+3.5,v:d*rnd(2.8,4.2),c:pick(CAR_COLS),k:Math.random()<.2}; c.g=makeCar(c); fxRoot.add(c.g); cars.push(c); }
+ carT-=dt; if(carT<=0){ carT=rnd(4,10); const d=evBusOn?-1:Math.random()<.5?1:-1; const c={x:d>0?-18:S+27,z:d>0?S+2.5:S+3.5,v:d*rnd(2.8,4.2),c:pick(CAR_COLS),k:Math.random()<.2}; c.g=makeCar(c); fxRoot.add(c.g); cars.push(c); }
  for(const c of cars){ c.x+=c.v*dt; c.g.position.x=c.x; if(c.x<-19||c.x>S+28){ fxRoot.remove(c.g); c.dead=1; } }
  cars=cars.filter(c=>!c.dead);
 }
@@ -710,7 +710,7 @@ function syncFurn(T,n){
 }
 function syncAgents(dt,T){
  const seen=new Set();
- for(const a of crew.concat(custs,city.walkers)){
+ for(const a of crew.concat(custs,city.walkers,evA)){
   let o=aObjs.get(a);
   if(o&&a.s&&o.role!==a.s.role){ agentRoot.remove(o.root); o=null; }
   if(!o){ o=makeCharC(a); agentRoot.add(o.root); aObjs.set(a,o); }
@@ -950,7 +950,7 @@ function render(){
  for(const l of streetLights){ l.userData.L.intensity=n*10; l.userData.head.material.emissiveIntensity=n*2.5; }
  headMat.emissiveIntensity=.2+n*2.5;
  if(vis){ scene.background.set('#120f1a'); scene.fog.color.copy(scene.background); hemi.intensity=.42; hemi.color.set('#ffe2c0'); sun.intensity=.9; sun.color.set('#ffd9a8'); scene.environmentIntensity=.4; inLight.intensity=0; belLight.intensity=75; } else belLight.intensity=0;
- edgePan(dt); viewShift(dt); watchCam(dt); updCam(); doorSign(T); viewUpdate(); renderer.render(scene,camera); updOverlay(); wallMarks(); momDraw(); cineTick(); if(vis) belHot(); updRail(dt); updHandle(); kdsT-=dt; if(kdsT<=0){ kdsT=.4; drawKDS(); }
+ edgePan(dt); viewShift(dt); watchCam(dt); updCam(); doorSign(T); viewUpdate(); renderer.render(scene,camera); updOverlay(); wallMarks(); momDraw(); cineTick(); try{ evFxTick(dt); }catch(e){ console.warn(e); } if(vis) belHot(); updRail(dt); updHandle(); kdsT-=dt; if(kdsT<=0){ kdsT=.4; drawKDS(); }
 }
 
 /* --- entrées --- */
