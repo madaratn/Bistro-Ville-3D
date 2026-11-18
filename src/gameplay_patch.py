@@ -26,3 +26,11 @@ RX("if(layoutSig()!==editSig) freshService();","if(layoutSig()!==editSig){ const
 # v0.89 : la salle se remplit plus vite — l'entrée laisse passer plus de groupes à la fois, et on s'installe sans attendre trop longtemps le serveur
 RX("return s.size>=(rush?3:2);","return s.size>=Math.max(2,Math.ceil(seatCount()/5))+(rush?2:0);")
 RX("c.hostT>(rush?4:7)||!hostOn()","c.hostT>(rush?1.5:4)||!hostOn()")
+# v0.90 : cuisine ouverte — serveurs, barman et agent d'entretien peuvent la traverser ; en cuisine, l'équipe ne se bloque plus
+RX("const zoneOf=a=>a&&a.s&&a.s.role==='chef'?'k':'d';","const zoneOf=a=>a&&a.s?(a.s.role==='chef'?'k':'s'):'d';")
+RX("function bfs(sx,sy,isGoal,goalPass,zone){\n const kz=zone==='k';","function bfs(sx,sy,isGoal,goalPass,zone){\n const kz=zone==='k', fz=zone==='s';")
+RX("if(kz!==inKitchen(nx,cy)||kz!==inKitchen(cx,ny)) continue;","if(!fz&&(kz!==inKitchen(nx,cy)||kz!==inKitchen(cx,ny))) continue;")
+RX("if(kz!==inKitchen(nx,ny)) continue;","if(!fz&&kz!==inKitchen(nx,ny)) continue;")
+RX("if(!a.job&&!a.path.length&&(a.s.role==='chef')!==inKitchen(a.x,a.y)){","if(!a.job&&!a.path.length&&a.s.role==='chef'&&!inKitchen(a.x,a.y)){")
+RX("for(const a of crew){ if((a.s.role==='chef')!==inKitchen(a.x,a.y)&&a.home){","for(const a of crew){ if(a.s.role==='chef'&&!inKitchen(a.x,a.y)&&a.home){")
+RX("function whoBlocks(a,x,y){\n for(const b of TRF){ if(b===a||b.ghostT>0) continue;","function whoBlocks(a,x,y){\n for(const b of TRF){ if(b===a||b.ghostT>0) continue; if(a.s&&b.s&&(inKitchen(x,y)||inKitchen(Math.round(b.fx),Math.round(b.fy)))) continue;")

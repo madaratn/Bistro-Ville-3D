@@ -215,15 +215,15 @@ function rebuildStatic(){
   const tileM=M('#f3efe8',{roughness:.5}), capM=M('#a8693a',{roughness:.5});
   const isCtr=(x,y)=>{ const f=fAt(x,y); return f&&['counter','dish','fridge'].includes(kindOf(f)); };
   const sS=Y0+kd<S, sN=Y0>0, sE=X0+kw<S, sW=X0>0;
-  const segX=(z,ky)=>{ for(let x=X0;x<X0+kw;x++) if(!isCtr(x,ky)){ staticRoot.add(mesh(new THREE.BoxGeometry(1,.5,.09),tileM,x+.5,.25,z)); staticRoot.add(mesh(new THREE.BoxGeometry(1.02,.04,.15),capM,x+.5,.52,z)); } };
-  const segZ=(xw,kx)=>{ for(let y=Y0;y<Y0+kd;y++) if(!isCtr(kx,y)){ staticRoot.add(mesh(new THREE.BoxGeometry(.09,.5,1),tileM,xw,.25,y+.5)); staticRoot.add(mesh(new THREE.BoxGeometry(.15,.04,1.02),capM,xw,.52,y+.5)); } };
+  const segX=(z,ky)=>{ for(let x=X0;x<X0+kw;x++) if(!isCtr(x,ky)){ staticRoot.add(mesh(new THREE.BoxGeometry(1,.012,.1),capM,x+.5,.01,z,false)); } };
+  const segZ=(xw,kx)=>{ for(let y=Y0;y<Y0+kd;y++) if(!isCtr(kx,y)){ staticRoot.add(mesh(new THREE.BoxGeometry(.1,.012,1),capM,xw,.01,y+.5,false)); } };
   if(sS) segX(Y0+kd,Y0+kd-1); if(sN) segX(Y0,Y0); if(sE) segZ(X0+kw,X0+kw-1); if(sW) segZ(X0,X0);
-  for(const [px,pz,ok] of [[X0+kw,Y0+kd,sS&&sE],[X0,Y0+kd,sS&&sW],[X0+kw,Y0,sN&&sE],[X0,Y0,sN&&sW]]) if(ok) staticRoot.add(mesh(RB(.16,.56,.16,.02),capM,px,.28,pz));
+  for(const [px,pz,ok] of [[X0+kw,Y0+kd,sS&&sE],[X0,Y0+kd,sS&&sW],[X0+kw,Y0,sN&&sE],[X0,Y0,sN&&sW]]) if(ok) staticRoot.add(mesh(RB(.14,.18,.14,.02),capM,px,.09,pz));
   const st=canvasTex(256,64,(x)=>{ x.fillStyle='#2f3d35'; rrect(x,2,2,252,60,14); x.fill(); x.strokeStyle='#e8c46a'; x.lineWidth=3; rrect(x,8,8,240,48,10); x.stroke(); x.fillStyle='#fff'; x.font='600 30px '+FONT; x.textAlign='center'; x.textBaseline='middle'; x.fillText('CUISINE',140,34); x.font='30px '+EMO; x.fillText('👨‍🍳',42,34); });
   const sz=sS?Y0+kd:Y0, ky=sS?Y0+kd-1:Y0;
   let sx0=X0+1; for(let x=X0;x<X0+kw-1;x++) if(!isCtr(x,ky)&&!isCtr(x+1,ky)){ sx0=x+1; break; }
   const sg=ownMesh(new THREE.PlaneGeometry(.9,.22),new THREE.MeshStandardMaterial({map:st,transparent:true,roughness:.6}),sx0,.72,sz+.06,false); staticRoot.add(sg);
-  for(const sx of [-.3,.3]) staticRoot.add(mesh(new THREE.BoxGeometry(.012,.2,.012),M('#3a3a3a'),sx0+sx,.64,sz+.05,false));
+  for(const sx of [-.42,.42]) staticRoot.add(mesh(new THREE.BoxGeometry(.03,.84,.03),M('#3a3a3a'),sx0+sx,.42,sz+.05,false));
   // écran de commandes : la tablette du serveur envoie la commande ici
   { const W=.8,H=.42; let px,py=1.14,pz,ry=0,pole=false;
    if(Y0===0){ const bw=backWins(), xs=[]; for(let i=X0;i<X0+kw;i++) if(!bw.includes(i)) xs.push(i); const cx=X0+kw/2-.5; xs.sort((a,b)=>Math.abs(a-cx)-Math.abs(b-cx)); px=(xs.length?xs[0]:Math.floor(cx))+.5; pz=.04; }
