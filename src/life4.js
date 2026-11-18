@@ -85,7 +85,7 @@ function buildLife4(root,L){ const c=L.c, zr=S+17.6;
   const k1=mk({kidF:1},[[-3,S+4.95],[S+6,S+4.95],[S+6,S+5.7],[-3,S+5.7]],2.2), k2=mk({kidF:1},[[-3,S+4.95],[S+6,S+4.95],[S+6,S+5.7],[-3,S+5.7]],2.2,-1.1); k2.loop.i=0; }
  // ================= points à toucher =================
  L.taps=[]; const say=(x,z,t,col)=>floatAt(x-.5,z-.5,t,col||'#3a2a1f');
- for(const K of L.keep) L.taps.push({x:K.x,y:.7,z:K.z,r:34,fn:()=>{ const d=dayOf().n, H=state.hi&&state.hi.d===d?state.hi:(state.hi={d,k:{}}); if(K.a) K.a.hop=.5; if(!H.k[K.k]){ H.k[K.k]=1; earn(3); floatAt(K.x-.5,K.z-.5,'Bonjour ! +3',null,true); sparkle(K.x-.5,K.z-.5,6); sfx('coin'); if(Object.keys(H.k).length===L.keep.length){ setTimeout(()=>toast('Tu as salué tous tes voisins aujourd’hui. Ils t’adorent !'),700); addXP(5); } hud(); } else say(K.x,K.z,pick(K.say),SAGA_WHO[K.k][1]); }});
+ for(const K of L.keep) L.taps.push({x:K.x,y:.7,z:K.z,r:40,fn:()=>{ openStall(K.k); }});
  L.taps.push({x:L.fx,y:.6,z:L.fz,r:44,fn:()=>{ for(let i=0;i<34;i++){ const an=Math.random()*6.28; spawnPart(GLOW,'#bfe9ff',L.fx,1.2,L.fz,Math.cos(an)*rnd(.4,1.3),rnd(1.5,3),Math.sin(an)*rnd(.4,1.3),1,.12,0,false); } for(const b of L.birds) if(b.userData.m===0) b.userData.t=0; sfx('pop'); }});
  if(L.carP) L.taps.push({x:L.carP[0],y:1.2,z:L.carP[1],r:60,fn:()=>{ L.carB=5; sparkle(L.carP[0]-.5,L.carP[1]-.5,14); sfx('level'); say(L.carP[0],L.carP[1],'Et ça tourne !','#c8423a'); }});
  if(L.towerP) L.taps.push({x:L.towerP[0],y:6,z:L.towerP[1],r:60,fn:()=>{ L.bellT=5; sfx('level'); }});

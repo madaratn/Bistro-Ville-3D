@@ -509,3 +509,9 @@ body.cine #evS{display:none}
 /* v0.72 : visage de l'employé */
 .tmF{flex:0 0 52px;width:52px;height:52px;border-radius:50%;border:3px solid #5aa0d8;overflow:hidden;background:#fff6e0;margin-right:9px;align-self:flex-start}
 .tmF img{width:100%;height:100%;display:block}
+/* v0.83 : marché des voisins */
+.mkF{margin:10px 2px 4px;font-size:13px;color:#8a6a4a;display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.mkF i{flex:1 0 100%;height:8px;border-radius:6px;background:#f0e2c8;overflow:hidden}.mkF u{display:block;height:100%;background:linear-gradient(90deg,#ffd27a,#f2a81d);border-radius:6px}
+.mkHi{color:#27a05c;font-weight:600;margin:8px 0 2px}
+.row.mkR .tmF{align-self:center}
+.tier.t2{background:#ffe9b0;color:#a8680a}
