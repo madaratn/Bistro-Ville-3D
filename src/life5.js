@@ -14,7 +14,7 @@ function buildLife5(root,L){ const c=L.c, zr=S+17.6;
  L.gulls=[]; for(let i=0;i<(LITE?1:3);i++){ const b=new THREE.Group(), w=lfM('#ffffff'); const bd=mesh(SP(.07,8,6),w,0,0,0,false); bd.scale.set(.8,.7,1.5); b.add(bd); const ws=[-1,1].map(s=>{ const p=new THREE.Group(); p.add(mesh(new THREE.BoxGeometry(.34,.012,.1),w,s*.17,0,0,false)); p.add(mesh(new THREE.BoxGeometry(.08,.014,.08),lfM('#3a3a44'),s*.36,0,0,false)); b.add(p); return p; }); b.userData={ws,a:i*2.1,r:2.4+i*.9,h:3.2+i*.5,side:'-'}; root.add(b); L.gulls.push(b); }
  // arc-en-ciel (après la pluie)
  { const g=new THREE.Group(); ['#e5484d','#ff9a3d','#ffd23f','#57b86a','#3f9bd6','#7a5cc8'].forEach((col,i)=>{ const t=new THREE.Mesh(new THREE.TorusGeometry(15.5-i*.38,.2,6,48,Math.PI),new THREE.MeshBasicMaterial({color:col,transparent:true,opacity:0,depthWrite:false,fog:false})); t.userData.own=1; g.add(t); }); g.position.set(c+2,-1,-27); g.userData.side='-'; g.visible=false; root.add(g); lifeBow=g; }
- L.parT=45; L.par=null; L.pel=[]; L.wed=[];
+ L.parT=45; L.par=null; L.pel=[]; L.wed=[]; try{ lifeStatue(root,L); }catch(e){ console.warn(e); }
  L.taps.push({o:L.sq,y:.5,r:34,fn:()=>{ L.sq.userData.m=2; L.sq.userData.t=0; floatAt(L.sq.position.x-.5,L.sq.position.z-.5,'Tchik !','#b5653a'); sfx('pop'); }});
 }
 function lifeRainInit(){ const N=LITE?120:320, pos=new Float32Array(N*6); const g=new THREE.BufferGeometry(); g.setAttribute('position',new THREE.BufferAttribute(pos,3)); const m=new THREE.LineBasicMaterial({color:'#d6ecff',transparent:true,opacity:0,depthWrite:false}); lifeRainG=new THREE.LineSegments(g,m); lifeRainG.frustumCulled=false; lifeRainG.visible=false; lifeRainG.userData={N,p:Array.from({length:N},()=>[Math.random()*26-13,Math.random()*9,Math.random()*26-13])}; fxRoot.add(lifeRainG);
@@ -69,8 +69,20 @@ function lifeTick5(dt,T){ const L=life, n=nightF(), zr=S+17.6, W=lifeW; if(!life
   for(const w of L.wed){ w.x+=w.v*dt; w.g.position.x=w.x; if(w.lead){ if(!LITE&&Math.random()<dt*5) spawnPart(heartTex(),pick(['#ff5d8f','#ff8fb6','#ffffff']),w.x-.6,.6,S+2.5,rnd(-.6,-.1),rnd(.5,1.1),rnd(-.4,.4),1.5,.2,0,false); if(!w.said&&w.x>S/2-2){ w.said=1; floatAt(w.x-.5,S+2,'Vive les mariés !','#e0457f'); sfx('level'); } } if(w.x>S+29){ fxRoot.remove(w.g); w.dead=1; } } L.wed=L.wed.filter(w=>!w.dead);
   if(!live&&!L.pel.length&&!L.wed.length&&P.t>2){ lifeA=lifeA.filter(a=>!a.gone); L.par=null; L.parT=rnd(80,140); } }
  else if(L.parWait>0){ L.parWait-=dt; if(L.parWait<=0||!cars.length){ L.parWait=0; lifeParade(L,L.parNext); } }
- else if(mode==='play'&&!cine&&!visit.on&&!ev&&rk<=0){ L.parT-=dt; if(L.parT<=0){ const ks=['band','peloton','school','wedding'].filter(k=>k!==L.parLast&&(!LITE||k==='peloton'||k==='wedding')); L.parNext=L.parLast=pick(ks); if(L.parNext==='school') lifeParade(L,'school'); else L.parWait=32; } }
+ else if(mode==='play'&&!cine&&!visit.on&&!ev&&rk<=0&&projHas('fanfare')){ L.parT-=dt; if(L.parT<=0){ const ks=['band','peloton','school','wedding'].filter(k=>k!==L.parLast&&(!LITE||k==='peloton'||k==='wedding')); L.parNext=L.parLast=pick(ks); if(L.parNext==='school') lifeParade(L,'school'); else L.parWait=32; } }
  // ---- ambiance sonore discrète ----
  if(state.sound&&typeof AC!=='undefined'&&AC&&mode==='play'&&!cine){ L.snd=(L.snd===undefined?4:L.snd)-dt; if(L.snd<=0){ try{ if(n<.5&&rk<=0){ L.snd=rnd(5,13); const f=rnd(2300,3400); for(let i=0;i<(2+Math.floor(Math.random()*3));i++) tone(f+i*rnd(-180,220),i*.11,.07,'sine',.01); } else if(n>=.5){ L.snd=rnd(2.5,5); for(let i=0;i<4;i++) tone(4300,i*.07,.03,'sine',.005); } else L.snd=3; }catch(e){ L.snd=10; } }
   if(L.bellT>4.9&&!L.bellS){ L.bellS=1; try{ tone(392,0,1.6,'sine',.028); tone(196,0,1.8,'sine',.02); tone(392,.9,1.6,'sine',.022); }catch(e){} } if(L.bellT<4) L.bellS=0; }
 }
+
+// ---------- projets du quartier : ce qui apparaît quand on finance ----------
+function lifeStatue(root,L){ const g=new THREE.Group(), st=lfM('#d8cdb8',{roughness:.9}), br=lfM('#b08a4a',{metalness:.75,roughness:.35}); g.add(mesh(CY(.75,.85,.3,20),st,0,.15,0)); g.add(mesh(RB(.9,.9,.9,.05),st,0,.75,0)); g.add(mesh(RB(1.05,.12,1.05,.03),st,0,1.24,0,false));
+ const pl=ownMesh(new THREE.PlaneGeometry(.7,.34),new THREE.MeshStandardMaterial({map:signBoard('Mamie Odette','#3a2a1f','#ffe2a8',.7,.34),transparent:true,roughness:.6}),0,.78,.455,false); g.add(pl);
+ g.add(mesh(CY(.2,.3,.62,14),br,0,1.61,0)); g.add(mesh(CA(.17,.3),br,0,2.1,0)); g.add(mesh(SP(.17,14,10),br,0,2.55,0)); g.add(mesh(SP(.1,10,8),br,0,2.72,-.06)); for(const s of [-1,1]){ const a=mesh(CA(.05,.34),br,s*.2,2.1,.1); a.rotation.x=-.9; a.rotation.z=-s*.3; g.add(a); } g.add(mesh(CY(.2,.2,.03,16),br,0,2.02,.36,false)); g.add(mesh(SP(.11,10,8,0,Math.PI*2,0,Math.PI/2),br,0,2.03,.36,false));
+ g.position.set(L.c-6.4,0,S+12.9); g.rotation.y=Math.PI/4; g.userData.side='-'; g.visible=false; root.add(g); L.gStatue=g; L.statP=[L.c-6.4,S+12.9]; }
+function lifeProjVis(L){ if(L.pvT&&L.t-L.pvT<.5) return; L.pvT=L.t; const on=k=>projHas(k);
+ if(L.water) L.water.visible=on('fontaine'); for(const d of L.ducks||[]) d.visible=on('fontaine');
+ for(const o of L.gPlay||[]) o.visible=on('jeux'); if(L.gCar) L.gCar.visible=on('manege'); if(L.gStatue) L.gStatue.visible=on('statue'); }
+function lifeProjFx(k){ const L=life; if(!L) return; const P={moulin:[-7.5,-15.5],fontaine:[L.fx,L.fz],jeux:[L.c+13.5,S+10.2],fanfare:[S/2,S+3],manege:L.carP,feux:[L.c,S+17],train:[L.c,-18],statue:L.statP}[k]; L.pvT=0; lifeProjVis(L);
+ if(P){ cam.tx=clamp(P[0],-15,S+19); cam.tz=clamp(P[1],-6,S+19); for(let i=0;i<5;i++) setTimeout(()=>{ try{ sparkle(P[0]-.5+rnd(-1.5,1.5),P[1]-.5+rnd(-1.5,1.5),10); if(k==='feux'||k==='statue') lifeFirework(P[0]+rnd(-3,3),rnd(5,8),P[1]+rnd(-1,2)); }catch(e){} },i*350); }
+ if(k==='fanfare') L.parT=4; if(k==='train'&&L.train2) L.train2.t=2; }

@@ -14,7 +14,7 @@ function buildLife2(root,L){ const c=L.c;
   for(let i=0;i<14;i++){ const a=i*Math.PI/7; rot.add(mesh(SP(.045,8,6),bulbMat,Math.cos(a)*1.72,2.12,Math.sin(a)*1.72,false)); }
   L.hor=[]; ['#fff6e0','#4fc3f7','#ffd23f','#ff8fb6','#7bd66c','#fff6e0'].forEach((col,i)=>{ const a=i*Math.PI/3, x=Math.cos(a)*1.1, z=Math.sin(a)*1.1; rot.add(mesh(CY(.018,.018,2.0,6),gold,x,1.2,z,false)); const h=lfHorse(col); h.position.set(x,.75,z); h.rotation.y=-a-Math.PI/2+Math.PI; h.userData.ph=i*1.4; rot.add(h); L.hor.push(h);
    if(i%2===0){ const k=new THREE.Group(), sk=lfM(pick(['#f8d5b5','#e0ac69','#c68642'])), tp=lfM(pick(['#4f8ff7','#f76b8a','#4fc28f','#f7b84f'])); k.add(mesh(CA(.06,.12),tp,0,.26,0)); k.add(mesh(SP(.075,10,8),sk,0,.44,0)); k.add(mesh(SP(.08,10,8,0,Math.PI*2,0,Math.PI*.5),lfM(pick(['#5a3a1a','#2b1b0e','#e6c15a'])),0,.45,0,false)); h.add(k); } });
-  g.position.set(c+4.6,0,S+12.6); root.add(g); L.car=rot; L.carP=[c+4.6,S+12.6]; }
+  g.position.set(c+4.6,0,S+12.6); root.add(g); L.car=rot; L.carP=[c+4.6,S+12.6]; L.gCar=g; }
  // ---------- le peintre et son chevalet ----------
  { const g=new THREE.Group(), w=lfM('#8a5a36'); for(const [x,r] of [[-.16,.12],[.16,-.12]]){ const l=mesh(CY(.015,.015,1.1,6),w,x,.55,0); l.rotation.z=r; g.add(l); } const bk=mesh(CY(.015,.015,1.1,6),w,0,.55,.2); bk.rotation.x=-.35; g.add(bk); g.add(mesh(new THREE.BoxGeometry(.5,.03,.06),w,0,.55,-.03,false));
   const cv=ownMesh(new THREE.PlaneGeometry(.46,.36),new THREE.MeshStandardMaterial({map:canvasTex(128,100,x=>{ x.fillStyle='#bfe3f2'; x.fillRect(0,0,128,100); x.fillStyle='#c3c26a'; x.fillRect(0,62,128,38); x.fillStyle='#f2dfc0'; x.fillRect(30,34,68,36); x.fillStyle='#c8553d'; x.beginPath(); x.moveTo(24,36); x.lineTo(64,14); x.lineTo(104,36); x.fill(); x.fillStyle='#ef5a4f'; x.fillRect(54,50,20,20); x.fillStyle='#57b04f'; x.beginPath(); x.arc(14,54,12,0,7); x.arc(114,56,11,0,7); x.fill(); }),roughness:.8}),0,.76,-.05,false); cv.rotation.y=Math.PI; g.add(cv); g.add(mesh(new THREE.BoxGeometry(.5,.4,.02),lfM('#fff'),0,.76,-.035,false));
@@ -48,7 +48,7 @@ function buildLife2(root,L){ const c=L.c;
 }
 function lifeTick2(dt,T){ const L=life;
  if(L.car){ L.car.rotation.y-=dt*.55; for(const h of L.hor) h.position.y=.78+Math.sin(T*2.2+h.userData.ph)*.16; }
- if(L.mill) L.mill.rotation.z-=dt*.5;
+ if(L.mill&&projHas('moulin')) L.mill.rotation.z-=dt*.5;
  for(const p of L.cloth||[]){ p.rotation.x=Math.sin(T*1.7+p.userData.ph)*.22+.08; }
  for(const d of L.ducks||[]){ d.userData.a+=dt*.5; const a=d.userData.a; d.position.set(L.fx+Math.cos(a)*.55,.33+Math.sin(T*3+a)*.008,L.fz+Math.sin(a)*.55); d.rotation.y=-a; }
  // poules

@@ -86,7 +86,7 @@ function buildLife(root){ lifeA=[]; const c=S/2, zs=S+8.15, L=life={birds:[],fl:
 function lfStroll(a){ const L=life, r=Math.random(); let x,z; if(r<.62){ const K=pick(L.keep); x=K.x+rnd(-.5,.5); z=K.kid?K.z+1.05:L.zs+rnd(.75,1.0); a.plan.push({pts:[[x-.5,z-.5]]},{w:rnd(3,6),fn:q=>{ q.rotT=Math.PI; if(Math.random()<.3) q.hop=.4; }}); }
  else if(r<.8){ const an=Math.random()*6.28; x=L.fx+Math.cos(an)*1.55; z=L.fz+Math.abs(Math.sin(an))*1.3+.3; a.plan.push({pts:[[x-.5,z-.5]]},{w:rnd(2,5),fn:q=>{ q.rotT=Math.atan2(L.fx-x,L.fz-z); }}); }
  else if(r<.9&&L.accP){ x=L.accP[0]+rnd(-1,1); z=L.accP[1]-rnd(1.1,1.6); a.plan.push({pts:[[x-.5,z-.5]]},{w:rnd(4,9),fn:q=>{ q.rotT=0; if(Math.random()<.5) q.hop=.4; }}); }
- else if(r<.96&&L.carP){ const an=rnd(2.2,4.2); x=L.carP[0]+Math.cos(an)*2.3; z=L.carP[1]+Math.sin(an)*2.3; a.plan.push({pts:[[x-.5,z-.5]]},{w:rnd(4,8),fn:q=>{ q.rotT=Math.atan2(L.carP[0]-x,L.carP[1]-z); }}); }
+ else if(r<.96&&L.carP&&projHas('manege')){ const an=rnd(2.2,4.2); x=L.carP[0]+Math.cos(an)*2.3; z=L.carP[1]+Math.sin(an)*2.3; a.plan.push({pts:[[x-.5,z-.5]]},{w:rnd(4,8),fn:q=>{ q.rotT=Math.atan2(L.carP[0]-x,L.carP[1]-z); }}); }
  else { x=L.c+rnd(-8.5,8.5); z=S+rnd(9.4,11.2); a.plan.push({pts:[[x-.5,z-.5]]},{w:rnd(.5,2)}); } }
 function lifeTick(dt,T){ const L=life; if(!L) return; { const h=!!(cine||visit.on); if(h!==L.hid){ L.hid=h; for(const a of lifeA) a.hide=h; } if(h) return; } L.t+=dt; dt=Math.min(dt,.1);
  for(const a of lifeA){ if(a.stroll){ if(!a.plan.length&&!a.path.length) lfStroll(a); evActTick(a,dt); a.dead=0; }
@@ -95,7 +95,7 @@ function lifeTick(dt,T){ const L=life; if(!L) return; { const h=!!(cine||visit.o
  if(!state.lifeHint2&&state.tuto&&mode==='play'&&L.t>25&&!ui.panel&&!ev){ state.lifeHint2=1; toast('Nouveau : la place du marché, en face du bistrot. Fais glisser la vue pour te promener dans le quartier, et touche tes voisins pour les saluer.'); }
  lifeSay-=dt; if(lifeSay<=0&&mode==='play'&&!ui.panel){ lifeSay=rnd(7,13); const K=pick(L.keep); if(K.a){ floatAt(K.x-.5,K.z-.5,pick(K.say),SAGA_WHO[K.k]?SAGA_WHO[K.k][1]:'#3a2a1f'); K.a.hop=.45; } }
  if(!LITE){ for(const p of L.smoke) if(Math.random()<dt*2.2) spawnPart(GLOW,'#f4efe6',p[0]+rnd(-.04,.04),p[1],p[2],rnd(.1,.3),rnd(.45,.7),rnd(-.05,.05),2.2,.16,2.2,false);
-  if(Math.random()<dt*26){ const an=Math.random()*6.28; spawnPart(GLOW,'#bfe9ff',L.fx,1.22,L.fz,Math.cos(an)*rnd(.25,.5),rnd(.9,1.5),Math.sin(an)*rnd(.25,.5),.75,.09,0,false); }
+  if(projHas('fontaine')&&Math.random()<dt*26){ const an=Math.random()*6.28; spawnPart(GLOW,'#bfe9ff',L.fx,1.22,L.fz,Math.cos(an)*rnd(.25,.5),rnd(.9,1.5),Math.sin(an)*rnd(.25,.5),.75,.09,0,false); }
   if(Math.random()<dt*.8){ const t=pick(L.trees); spawnPart(STAR,pick(['#e8a23a','#c9772e','#d9c04a','#b5653a']),t[0]+rnd(-.5,.5),rnd(1.6,2.3),t[1]+rnd(-.5,.5),rnd(-.3,.3),rnd(-.1,.2),rnd(-.2,.3),2.2,.1,0,false); } }
  if(L.water) L.water.position.y=.29+Math.sin(T*3)*.006; if(L.flag) L.flag.rotation.y=Math.sin(T*5)*.35;
  // pigeons
@@ -107,7 +107,7 @@ function lifeTick(dt,T){ const L=life; if(!L) return; { const h=!!(cine||visit.o
    b.position.set((u.sx+(u.tx-u.sx)*e)*(1-bl)+cx*bl,.02+bl*(2.2+Math.sin(u.ph)*.5),(u.sz+(u.tz-u.sz)*e)*(1-bl)+cz*bl); b.rotation.y=Math.atan2(b.position.x-px,b.position.z-pz); u.w.forEach((w,i)=>w.rotation.z=(i?-1:1)*Math.sin(T*26+u.ph)*.9); u.h.rotation.x=0; if(u.t<=0){ u.m=0; u.t=rnd(9,22); } } }
  // le chat sur le muret
  { const c=L.cat, u=c.userData; u.p-=dt; if(u.p>0){ u.t.rotation.z=Math.sin(T*2.2)*.5; u.h.rotation.y=Math.sin(T*.7)*.6; } else { u.x+=u.d*dt*.55; if(u.x>L.c+9||u.x<L.c-9){ u.d*=-1; } if(Math.random()<dt*.12) u.p=rnd(3,8); c.position.x=u.x; c.position.y=.27+Math.abs(Math.sin(T*7))*.012; c.rotation.y=u.d>0?Math.PI/2:-Math.PI/2; u.t.rotation.z=Math.sin(T*4)*.25; u.h.rotation.y=0; } }
- try{ lifeTick2(dt,T); }catch(e){ console.warn(e); }
+ try{ lifeTick2(dt,T); lifeProjVis(L); }catch(e){ console.warn(e); }
  // montgolfière et vol d'oiseaux
  if(L.bal){ L.bal.position.x+=dt*.22; L.bal.position.y=11+Math.sin(T*.4)*.5; L.bal.rotation.y+=dt*.05; if(L.bal.position.x>L.c+34) L.bal.position.x=L.c-34; }
  if(L.flockG){ const g=L.flockG; if(g.visible){ g.position.x+=dt*3.2; g.position.y=7+Math.sin(T*.8)*.3; for(const b of L.flock) b.userData.w.forEach((w,i)=>w.rotation.z=(i?-1:1)*Math.sin(T*9+b.position.z*3)*.6); if(g.position.x>S+34){ g.visible=false; L.flockT=rnd(14,30); } } else { L.flockT-=dt; if(L.flockT<=0){ g.visible=true; g.position.set(-28,7,rnd(-6,S*.4)); } } }

@@ -515,3 +515,5 @@ body.cine #evS{display:none}
 .mkHi{color:#27a05c;font-weight:600;margin:8px 0 2px}
 .row.mkR .tmF{align-self:center}
 .tier.t2{background:#ffe9b0;color:#a8680a}
+/* v0.85 : projets du quartier */
+.row.pjD{opacity:.72}.pjOk{align-self:center;font-weight:700;color:#27a05c;padding:0 10px}
