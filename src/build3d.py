@@ -15,7 +15,7 @@ def R(old,new):
 R(" if(Math.abs(dx+dy)>.01) a.back=(dx+dy)<0;"," if(Math.abs(dx+dy)>.01) a.back=(dx+dy)<0;\n if(dx||dy){ a.hx=dx; a.hy=dy; }")
 R("function faceTo(a,f){ const dx=f.x-a.x, dy=f.y-a.y;","function faceTo(a,f){ const dx=f.x-a.x, dy=f.y-a.y; a.hx=dx; a.hy=dy;")
 R("const TW=64, TH=32, WH=66;","")
-R("<p class=\"sub center\">Bistro Ville — prototype v0.2</p>","<p class=\"sub center\">Chez Odette — prototype v0.79</p>")
+R("<p class=\"sub center\">Bistro Ville — prototype v0.2</p>","<p class=\"sub center\">Chez Odette — prototype v0.80</p>")
 exec(open('src/logic_patch.py').read())
 exec(open('src/deco_patch.py').read())
 exec(open('src/bar_patch.py').read())
@@ -107,7 +107,9 @@ css="""#ov{position:fixed;inset:0;pointer-events:none;z-index:3;overflow:hidden}
 @keyframes flt{0%{transform:translate(-50%,0) scale(.4);opacity:0}14%{transform:translate(-50%,-14px) scale(1.15);opacity:1}28%{transform:translate(-50%,-20px) scale(1)}75%{opacity:1}100%{transform:translate(-50%,-62px);opacity:0}}
 </style>"""
 assert head.count('<title>Bistro Ville</title>')==1
-head=head.replace('<title>Bistro Ville</title>','<title>Chez Odette</title>')
+import base64 as _b64
+_ic=_b64.b64encode(open('brand/icone-96.png','rb').read()).decode()
+head=head.replace('<title>Bistro Ville</title>','<title>Chez Odette</title><link rel="icon" type="image/png" href="data:image/png;base64,'+_ic+'"><link rel="apple-touch-icon" href="data:image/png;base64,'+_ic+'">')
 head=head.replace('</style>',css.replace('</style>','')+open('src/deco.css').read()+open('src/calm.css').read()+open('src/ui2.css').read()+'</style>',1)
 old_eb='<div id="editbar" class="hide">\n  <div id="einfo"></div>\n  <div class="erow" id="ebtns"></div>\n</div>'
 assert old_eb in head
