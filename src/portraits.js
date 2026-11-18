@@ -12,9 +12,9 @@ const PORTRAIT={
  a:{age:2,hair:'short',hat:'beret',hatc:'#5a4632',glasses:'round',gcol:'#3a2a1f',expr:'warm',mous:'bushy',wr:1},
  z:{age:-1,fem:1,hair:'bob',hat:'bow',expr:'grin',frk:1},
 };
-function portraitSVG(k){
- const L=WHO_LOOK[k], P=PORTRAIT[k]||{}; if(!L) return ''; const o=L.outfit, sk=o.skin, skD=shade(sk,-.16), skL=shade(sk,.12), hc=o.hairC, hD=shade(hc,-.25), hL=shade(hc,.18), top=o.top, acc=o.accent||'#fff', ex=o.extras||[];
- const bg=(typeof SAGA_WHO!=='undefined'&&SAGA_WHO[k])?SAGA_WHO[k][1]:'#c98b52', id='p'+k, hw=P.wide?47:P.age<0?41:44, hh=P.age<0?46:50, cy=P.age<0?100:96;
+function portraitSVG(k,L0,P0,bg0){
+ const L=L0||WHO_LOOK[k], P=P0||PORTRAIT[k]||{}; if(!L) return ''; const o=L.outfit, sk=o.skin, skD=shade(sk,-.16), skL=shade(sk,.12), hc=o.hairC, hD=shade(hc,-.25), hL=shade(hc,.18), top=o.top, acc=o.accent||'#fff', ex=o.extras||[];
+ const bg=bg0||((typeof SAGA_WHO!=='undefined'&&SAGA_WHO[k])?SAGA_WHO[k][1]:'#c98b52'), id='p'+k, hw=P.wide?47:P.age<0?41:44, hh=P.age<0?46:50, cy=P.age<0?100:96;
  let s=`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200"><defs><radialGradient id="${id}b" cx=".5" cy=".4" r=".75"><stop offset="0" stop-color="${shade(bg,.55)}"/><stop offset="1" stop-color="${shade(bg,.08)}"/></radialGradient><radialGradient id="${id}s" cx=".42" cy=".36" r=".8"><stop offset="0" stop-color="${skL}"/><stop offset=".7" stop-color="${sk}"/><stop offset="1" stop-color="${skD}"/></radialGradient><linearGradient id="${id}h" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${hL}"/><stop offset="1" stop-color="${hD}"/></linearGradient><linearGradient id="${id}t" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${shade(top,.1)}"/><stop offset="1" stop-color="${shade(top,-.18)}"/></linearGradient><clipPath id="${id}c"><rect width="200" height="200"/></clipPath></defs><g clip-path="url(#${id}c)"><rect width="200" height="200" fill="url(#${id}b)"/><circle cx="100" cy="92" r="78" fill="#fff" opacity=".16"/>`;
  // cheveux derrière la tête
  if(P.hair==='bob') s+=`<path d="M${100-hw-7} ${cy-8} Q${100-hw-12} ${cy+46} ${100-hw+8} ${cy+52} L${100+hw-8} ${cy+52} Q${100+hw+12} ${cy+46} ${100+hw+7} ${cy-8} Q100 ${cy-70} ${100-hw-7} ${cy-8}Z" fill="url(#${id}h)"/>`;
@@ -91,3 +91,19 @@ function portraitSVG(k){
 }
 function portraitURL(k){ const s=portraitSVG(k); return s?'data:image/svg+xml;charset=utf-8,'+encodeURIComponent(s):''; }
 function portraitsInit(){ for(const k in WHO_LOOK) if(PORTRAIT[k]) try{ foodThumbs['who:'+k]=portraitURL(k); }catch(e){ console.warn(e); } }
+
+/* --- les habitués : douze portraits dessinés avec le même pinceau --- */
+const REGULARS=[
+ {k:'pichon',n:'Mme Pichon',fav:'tarte',t:'Institutrice à la retraite. Corrige les fautes du menu au stylo rouge.',c:'#c8553d',o:{skin:'#f1c9a5',hairC:'#d9d4cc',top:'#7a5c9a',accent:'#f2e2c4',extras:['scarf']},p:{age:2,fem:1,hair:'bob',glasses:'round',gcol:'#7a5c9a',expr:'warm',wr:1}},
+ {k:'gaston',n:'Gaston',fav:'steak',t:'Garagiste. Veut son steak saignant et son café serré.',c:'#3a82c8',o:{skin:'#e0a878',hairC:'#3a2a1f',top:'#3f5f8a',accent:'#f2b33d',extras:['buttons']},p:{age:1,hair:'short',expr:'grin',mous:'small',wide:1}},
+ {k:'lea',n:'Léa',fav:'salade',t:'Étudiante. Révise ses partiels à la table du fond.',c:'#57b86a',o:{skin:'#f6d0b1',hairC:'#8a5a2e',top:'#57b86a',accent:'#fff'},p:{age:0,fem:1,hair:'pony',expr:'smile',frk:1}},
+ {k:'docteur',n:'Dr Morel',fav:'soupe',t:'Médecin du quartier. Dix minutes pour manger, pas une de plus.',c:'#2fb5a8',o:{skin:'#c98e63',hairC:'#2a1b12',top:'#f4f6f8',accent:'#2fb5a8',extras:['tie']},p:{age:1,hair:'slick',glasses:'rect',gcol:'#2b2b30',expr:'smile'}},
+ {k:'jeanne',n:'Jeanne',fav:'crepe',t:'Fleuriste. Laisse toujours une fleur sur la table.',c:'#e0457f',o:{skin:'#eab48c',hairC:'#c8423a',top:'#f2a9c0',accent:'#57b86a',extras:['apron']},p:{age:1,fem:1,hair:'bun',expr:'warm',ear:'#f2b33d'}},
+ {k:'marius',n:'Marius',fav:'pizza',t:'Facteur. Connaît tout le monde, et tous les potins.',c:'#f2b33d',o:{skin:'#d49a6a',hairC:'#4a2e1b',top:'#2f4f8f',accent:'#f2c23d',extras:['buttons']},p:{age:1,hair:'short',hat:'cap',hatc:'#2f4f8f',expr:'grin'}},
+ {k:'nadia',n:'Nadia',fav:'curry',t:'Infirmière de nuit. Vient dîner quand les autres déjeunent.',c:'#9a5ce0',o:{skin:'#b07448',hairC:'#1d1612',top:'#8fdcd6',accent:'#fff'},p:{age:0,fem:1,hair:'curly',expr:'smile',ear:'#fffaf0'}},
+ {k:'bernard',n:'Bernard',fav:'omelette',t:'Pêcheur à la retraite. Raconte chaque fois la même prise, un peu plus grosse.',c:'#27496b',o:{skin:'#e0a878',hairC:'#e9e6e0',top:'#27496b',accent:'#fff',extras:['scarf']},p:{age:2,hair:'bald',expr:'gruff',beard:1,wr:1,wide:1}},
+ {k:'tom',n:'Tom',fav:'burger',t:'Dix ans. Compte ses pièces pour s’offrir un burger le mercredi.',c:'#ff8a3d',o:{skin:'#f6d0b1',hairC:'#c98b3a',top:'#ff8a3d',accent:'#fff'},p:{age:-1,hair:'short',expr:'grin',frk:1}},
+ {k:'colette',n:'Colette',fav:'gateau',t:'Chanteuse de cabaret. Fête son anniversaire quatre fois par an.',c:'#b8323a',o:{skin:'#f1c9a5',hairC:'#2a1b12',top:'#b8323a',accent:'#f2b33d',extras:['scarf']},p:{age:1,fem:1,hair:'bob',expr:'pursed',lips:'#b8323a',ear:'#f2b33d'}},
+ {k:'hugo',n:'Hugo',fav:'pates',t:'Livreur à vélo. Mange pour trois, toujours pressé.',c:'#3fb56d',o:{skin:'#8a5634',hairC:'#1d1612',top:'#3fb56d',accent:'#1d1d22'},p:{age:0,hair:'curly',hat:'cap',hatc:'#1d1d22',expr:'smile'}},
+ {k:'baronne',n:'La Baronne',fav:'poulet',t:'Personne ne sait d’où vient son titre. Elle laisse de gros pourboires.',c:'#d9b24a',o:{skin:'#f1c9a5',hairC:'#e9e6e0',top:'#3a2a4a',accent:'#d9b24a',extras:['scarf']},p:{age:2,fem:1,hair:'bun',hat:'beret',hatc:'#3a2a4a',glasses:'cat',gcol:'#d9b24a',expr:'smirk',ear:'#d9b24a',wr:1}}];
+const regImg=k=>{ if(!regImg.c) regImg.c={}; if(!regImg.c[k]){ const r=REGULARS.find(r=>r.k===k); try{ regImg.c[k]='data:image/svg+xml;charset=utf-8,'+encodeURIComponent(portraitSVG('r'+k,{outfit:r.o},r.p,r.c)); }catch(e){ regImg.c[k]=''; } } return regImg.c[k]; };
