@@ -690,7 +690,7 @@ function syncFurn(T,n){
  const seen=new Set();
  for(const f of state.furn){
   let o=fObjs.get(f.id);
-  const key=f.t+(kindOf(f)==='chair'?chairBackDir(f).join():kindOf(f)==='table'?tableJoin(f).join(''):'');
+  const key=f.t+(f.t==='odette'?'|'+souvN():'')+(kindOf(f)==='chair'?chairBackDir(f).join():kindOf(f)==='table'?tableJoin(f).join(''):'');
   if(o&&o.key!==key){ furnRoot.remove(o.g); disposeTree(o.g); o=null; }
   if(!o){ o={g:buildFurn(f.t,f),key}; furnRoot.add(o.g); fObjs.set(f.id,o); }
   const g=o.g, ud=g.userData; g.position.set(f.x+.5,0,f.y+.5);
@@ -1039,6 +1039,7 @@ function tap(sx,sy){
   if(tableOccupied(t)){ toast('Les clients sont encore à table'); return; }
   if(!spendHelp()) return;
   dirty.delete(id); freeSince.delete(id); cleaning.delete(id); sparkle(t.x,t.y,8,'#ffffff'); floatAt(t.x,t.y,'Propre ! +1 XP','#2f9e63'); addXP(1); sfx('pop'); return; }
+ for(const f of state.furn) if(f.t==='odette'&&(near(sx,sy,f.x+.5,.6,f.y+.5,34)||near(sx,sy,f.x+.5,1.15,f.y+.5,34))){ sfx('pop'); openPanel('souvenirs'); return; }
  for(const f of state.furn) if(kindOf(f)==='jukebox'&&near(sx,sy,f.x+.5,.5,f.y+.5,40)){ setTrack((state.track||0)+(state.music===false?0:1),f); sfx('pop'); return; }
  for(const it of items){ if(near(sx,sy,it.x+.5,.45,it.y+.5,38)){ state.inv[it.k]=(state.inv[it.k]||0)+1; items=items.filter(i=>i!==it); floatAt(it.x,it.y,'+1 '+ING[it.k].e,'#2f9e63'); sparkle(it.x,it.y,6); toast('Tu as trouvé : '+ING[it.k].e+' '+ING[it.k].n+' !'); sfx('pop'); return; } }
  for(const t of trash){ if(near(sx,sy,t.x+.5,.13,t.y+.5,32)){ trash=trash.filter(x=>x!==t); if(t.tg&&t.tg.job&&t.tg.job.t===t) t.tg.job=null; floatAt(t.x,t.y,'Propre ! +1 XP','#2f9e63'); addXP(1); sfx('pop'); return; } }
@@ -1177,6 +1178,7 @@ const WALL3D={
  coat(g,white,gold){ g.add(mesh(RB(.8,.1,.035,.012),M('#8a5730',{roughness:.6}),0,.1,.018,false)); for(let i=0;i<4;i++){ const x=-.3+i*.2; const k=mesh(CY(.012,.012,.08,6),gold,x,.07,.06,false); k.rotation.x=1.2; g.add(k); g.add(mesh(SP(.02,8,6),gold,x,.085,.1,false)); } const sc=mesh(RB(.09,.42,.04,.015),M('#c8423a',{roughness:.9}),-.1,-.13,.07,false); g.add(sc); const hat=mesh(CY(.1,.11,.07,16),M('#3a2a1f',{roughness:.8}),.3,.05,.11,false); hat.rotation.x=1.3; g.add(hat); return g; },
 };
 function decor3D(g,m,ud){
+ if(m==='odette'){ souvBuild(g,ud); return; }
  if(m==='bonsai'){ g.add(mesh(RB(.44,.12,.3,.02),M('#3a4a6a',{roughness:.4}),0,.06,0)); g.add(mesh(RB(.4,.02,.26,.008),M('#5b3a26'),0,.125,0,false)); const tr=M('#6b4a2a',{roughness:.8}); const a=mesh(CY(.03,.05,.3,8),tr,-.03,.27,0); a.rotation.z=.35; g.add(a); const b=mesh(CY(.02,.03,.24,8),tr,.06,.45,0); b.rotation.z=-.7; g.add(b); const gr=M('#4f8a4a',{flatShading:true,roughness:.8}); for(const [x,y,z,r] of [[-.12,.5,0,.13],[.17,.55,.02,.12],[.02,.66,-.03,.11]]){ const c=mesh(IC(r,1),gr,x,y,z); c.scale.y=.6; g.add(c); } return; }
  if(m==='andon'){ const dk=M('#3a2a1f',{roughness:.5}); for(const [x,z] of [[-.1,-.1],[.1,-.1],[-.1,.1],[.1,.1]]) g.add(mesh(new THREE.BoxGeometry(.022,.9,.022),dk,x,.45,z)); g.add(mesh(new THREE.BoxGeometry(.19,.5,.19),M('#fff6e0',{emissive:'#ffcf80',emissiveIntensity:.9,roughness:.9}),0,.6,0,false)); for(const y of [.34,.6,.86]) g.add(mesh(new THREE.BoxGeometry(.23,.02,.23),dk,0,y,0,false)); const L=new THREE.PointLight(0xffc070,0,4,1.5); L.position.y=.7; g.add(L); ud.light=L; return; }
  if(m==='gumball'){ const red=M('#e2574c',{roughness:.3}); g.add(mesh(CY(.13,.16,.05,16),red,0,.025,0)); g.add(mesh(CY(.03,.03,.5,10),M('#d9dde3',{metalness:.8,roughness:.2}),0,.3,0)); g.add(mesh(CY(.13,.11,.16,16),red,0,.62,0)); g.add(mesh(SP(.17,18,14),M('#e8f6ff',{transparent:true,opacity:.45,roughness:.05}),0,.85,0,false)); const cs=['#ff7aa8','#ffd23f','#3f9bd6','#57b86a','#b06fd8','#ff8a3d']; const r=seeded(7); for(let i=0;i<22;i++){ const a=r()*6.3, d=r()*.11, y=.74+r()*.12; g.add(mesh(SP(.03,8,6),M(cs[i%6],{roughness:.4}),Math.cos(a)*d,y,Math.sin(a)*d,false)); } g.add(mesh(CY(.06,.06,.04,12),red,0,1.03,0)); g.add(mesh(new THREE.BoxGeometry(.07,.05,.03),M('#d9dde3',{metalness:.8}),0,.6,.12,false)); return; }

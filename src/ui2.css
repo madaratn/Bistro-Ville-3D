@@ -565,3 +565,4 @@ body.watch #dx,body.visit #dx,body.watch #sMg,body.visit #sMg{opacity:0;pointer-
 .mgW.ok{background:#cdf2cf;border-color:#3fae52}.mgW.ko{background:#fbd0d0;border-color:#e5484d}
 @keyframes mgPop{from{transform:scale(.4)}to{transform:scale(1)}}
 .sagaR{margin:10px 0;padding:10px 12px;border-radius:14px;background:#fff6dd;border:2px solid #e9c46a;font-size:13px;color:#5a4028;display:grid;gap:3px}.sagaR b{font-size:14px;color:#a0611f}.sagaR u{text-decoration:none;font-weight:700;color:#1f8a4c}
+.souvH{display:flex;justify-content:center;margin:2px 0 6px}.souvH svg{filter:drop-shadow(0 4px 0 rgba(60,30,10,.25))}
