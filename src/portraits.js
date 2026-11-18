@@ -107,3 +107,17 @@ const REGULARS=[
  {k:'hugo',n:'Hugo',fav:'pates',t:'Livreur à vélo. Mange pour trois, toujours pressé.',c:'#3fb56d',o:{skin:'#8a5634',hairC:'#1d1612',top:'#3fb56d',accent:'#1d1d22'},p:{age:0,hair:'curly',hat:'cap',hatc:'#1d1d22',expr:'smile'}},
  {k:'baronne',n:'La Baronne',fav:'poulet',t:'Personne ne sait d’où vient son titre. Elle laisse de gros pourboires.',c:'#d9b24a',o:{skin:'#f1c9a5',hairC:'#e9e6e0',top:'#3a2a4a',accent:'#d9b24a',extras:['scarf']},p:{age:2,fem:1,hair:'bun',hat:'beret',hatc:'#3a2a4a',glasses:'cat',gcol:'#d9b24a',expr:'smirk',ear:'#d9b24a',wr:1}}];
 const regImg=k=>{ if(!regImg.c) regImg.c={}; if(!regImg.c[k]){ const r=REGULARS.find(r=>r.k===k); try{ regImg.c[k]='data:image/svg+xml;charset=utf-8,'+encodeURIComponent(portraitSVG('r'+k,{outfit:r.o},r.p,r.c)); }catch(e){ regImg.c[k]=''; } } return regImg.c[k]; };
+
+/* --- v0.72 : un visage par employé, tiré de son apparence en salle, avec l'humeur du moment --- */
+const STAFF_FEM=new Set(['Léa','Chloé','Inès','Manon','Camille','Sarah','Jade','Zoé','Lina','Emma']);
+function staffImg(s){ if(!s) return ''; const mo=s.mo===undefined?70:s.mo, ex=s.quit?'gruff':mo>=75?'grin':mo>=50?'smile':mo>=30?'flat':'stern', key=[s.id,s.role,ex,s.vet?1:0,s.name].join('|'); const C=staffImg.c||(staffImg.c={}); if(C[key]!==undefined) return C[key];
+ const fem=STAFF_FEM.has(s.name), h=(s.id*2654435761>>>0), r=n=>(h>>>n)&7, role=s.role;
+ const o={skin:s.skin||'#f1c27d',hairC:s.vet?'#cfcac2':(s.hair||'#5a3a1a'),
+  top:role==='chef'?'#fbfbfb':role==='waiter'?'#ffffff':role==='barman'?'#f4f1ea':'#2bb3b1',
+  accent:role==='chef'?'#c8d0d8':role==='waiter'?'#262833':role==='barman'?'#7a2f3a':'#e9fbfa',
+  extras:role==='chef'?['buttons']:role==='waiter'?['vest','bowtie']:role==='barman'?['vest','tie']:['apron']};
+ const P={age:s.vet?2:r(3)<3?0:1,fem:fem?1:0,expr:ex,hair:fem?['bob','pony','bun','curly'][r(6)&3]:(s.vet&&r(9)<3?'bald':['short','slick','curly','short'][r(6)&3])};
+ if(role==='chef') P.hat='toque'; else if(role==='cleaner'){ P.hat='cap'; P.hatc='#1f7d80'; }
+ if(r(12)<2){ P.glasses=fem?'round':'rect'; P.gcol='#3a2a22'; } if(r(15)<2&&P.age<2) P.frk=1; if(!fem&&r(18)<2) P.mous='small'; if(!fem&&s.vet&&r(21)<4) P.beard=1; if(s.vet) P.wr=1; if(fem&&r(24)<4) P.ear='#f2b33d'; if(!fem&&r(27)<2) P.wide=1;
+ const bg={chef:'#e5773d',waiter:'#5aa0d8',barman:'#9a5ce0',cleaner:'#2bb3b1'}[role]||'#c98b52';
+ try{ C[key]='data:image/svg+xml;charset=utf-8,'+encodeURIComponent(portraitSVG('s'+s.id,{outfit:o},P,bg)); }catch(e){ console.warn(e); C[key]=''; } return C[key]; }

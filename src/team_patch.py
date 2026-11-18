@@ -10,7 +10,7 @@ RX(" state.day={n:d.n+1,t:0,inc:{},exp:{},served:0,c0:state.coins,e0:state.earne
 RX("ACT.hire3=v=>{ const [r,q]=v.split(':'), T=TIERS[+q]; if(state.coins<T.fee||state.staff.length>=maxStaff()||state.level<T.u) return; state.coins-=T.fee; const s=mkStaffData(r); s.q=+q;","ACT.hire3=v=>{ const [r,q]=v.split(':'), T=TIERS[+q]; if(state.coins<T.fee||state.staff.length>=maxStaff()||state.level<T.u) return; state.coins-=T.fee; const s=mkStaffData(r); s.q=+q; s.d0=dayNow(); s.mo=75;")
 # fiche de chaque employé : galons, moral, statut, boutons
 RX("return `<div class=\"row\"><div class=\"info\"><div class=\"t\">${s.name} · ${R.n}</div><div class=\"sub\"><span class=\"tier t${s.q===undefined?1:s.q}\">${T.n}</span> niveau ${L}/5 · ${wageOf(s)} par jour</div></div>",
-   "return `<div class=\"row tm ${s.quit?'quit':''}\"><div class=\"info\"><div class=\"t\">${s.name} · ${R.n} ${teamStars(s)}</div><div class=\"sub\"><span class=\"tier t${s.q===undefined?1:s.q}\">${s.vet?'Ancien':T.n}</span> niveau ${L}/5 · ${wageOf(s)} par jour · ${teamAge(s)} j</div>${teamInfo(s)}${s.quit&&!s.vet?`<button class=\"b sm green tmK\" data-a=\"tkeep\" data-v=\"${s.id}\" ${state.coins<wageOf(s)*3?'disabled':''}>Le retenir · prime de ${wageOf(s)*3}</button>`:''}</div>")
+   "return `<div class=\"row tm ${s.quit?'quit':''}\"><div class=\"tmF\" style=\"border-color:${teamMood(s)[1]}\"><img src=\"${staffImg(s)}\" alt=\"\"></div><div class=\"info\"><div class=\"t\">${s.name} · ${R.n} ${teamStars(s)}</div><div class=\"sub\"><span class=\"tier t${s.q===undefined?1:s.q}\">${s.vet?'Ancien':T.n}</span> niveau ${L}/5 · ${wageOf(s)} par jour · ${teamAge(s)} j</div>${teamInfo(s)}${s.quit&&!s.vet?`<button class=\"b sm green tmK\" data-a=\"tkeep\" data-v=\"${s.id}\" ${state.coins<wageOf(s)*3?'disabled':''}>Le retenir · prime de ${wageOf(s)*3}</button>`:''}</div>")
 RX("function dayEnd(){",r"""// ===================== LA VIE DE L'ÉQUIPE =====================
 const dayNow=()=>state.day?state.day.n:1, teamAge=s=>Math.max(0,dayNow()-(s.d0||1)), teamOff=s=>s.off===dayNow();
 const teamRank=s=>{ const a=teamAge(s); return s.vet?3:a>=60?3:a>=30?2:a>=10?1:0; };
@@ -22,7 +22,7 @@ const teamMood=s=>s.mo>=75?['Ravi','#27a05c']:s.mo>=50?['Content','#6fae3a']:s.m
 function teamInfo(s){ const n=dayNow(); if(s.vet) return `<div class="sub tmN">${s.leave-n<=0?'Part ce soir':'Prend sa retraite dans '+(s.leave-n)+' jour'+(s.leave-n>1?'s':'')} · il faudra recruter</div>`;
  const m=teamMood(s); return `<div class="tmM"><span class="bar"><i style="width:${Math.max(4,s.mo)}%;background:${m[1]}"></i></span><em style="color:${m[1]}">${m[0]}</em></div>`+(s.quit?`<div class="sub tmN">A posé sa démission : part dans ${Math.max(0,s.quit-n)} jour${s.quit-n>1?'s':''}</div>`:teamOff(s)?'<div class="sub tmN">En repos aujourd’hui</div>':''); }
 function teamGo(s,txt){ state.staff=state.staff.filter(x=>x!==s); resetSim(); crew=crew.filter(a=>a.s!==s); try{ assignHomes(); }catch(e){} }
-const teamCard=(s,txt)=>`<div class="tmC"><div class="tmP"><img src="${foodThumbs['who:s']||''}" alt=""></div><div><b>${s.name}, ${ROLES[s.role].n.toLowerCase()}</b><p>${txt}</p></div></div>`;
+const teamCard=(s,txt)=>`<div class="tmC"><div class="tmP"><img src="${staffImg(s)||foodThumbs['who:s']||''}" alt=""></div><div><b>${s.name}, ${ROLES[s.role].n.toLowerCase()}</b><p>${txt}</p></div></div>`;
 function teamDay(d,net){ teamFix(); const n=dayNow(), perHead=d.served/Math.max(1,state.staff.length), list=state.staff.slice();
  for(const s of list){
   if(s.vet){ const left=s.leave-n;
