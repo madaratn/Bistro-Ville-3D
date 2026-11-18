@@ -733,6 +733,11 @@ function syncSmall(T){
 }
 
 /* --- mode déco : grille, sélection, fantôme, cases valides, poignée cuisine --- */
+let edWas=false, edPlan=false, edPitch0=.57; const _selBox=new THREE.Box3();
+const selArrow=new THREE.Group(); { const c1=new THREE.Mesh(new THREE.ConeGeometry(.2,.36,4),new THREE.MeshBasicMaterial({color:'#ffd23f',depthTest:false,transparent:true})); c1.renderOrder=10; const c0=new THREE.Mesh(new THREE.ConeGeometry(.27,.47,4),new THREE.MeshBasicMaterial({color:'#5e3719',depthTest:false,transparent:true})); c0.renderOrder=9; c0.position.y=.02; selArrow.add(c0,c1); } selArrow.rotation.x=Math.PI; selArrow.visible=false; scene.add(selArrow);
+function edPlanBtn(ed){ let b=$('#ePlan'); if(!b){ b=document.createElement('button'); b.id='ePlan'; b.setAttribute('aria-label','Vue de dessus'); document.body.appendChild(b); b.addEventListener('click',()=>{ audioInit(); sfx('pop'); edPlan=!edPlan; if(edPlan){ edPitch0=cam.pitchT; cam.pitchT=CAM_PMAX; } else cam.pitchT=edPitch0; b._k=null; }); } const k=(ed?'1':'0')+(edPlan?'1':'0'); if(b._k!==k){ b._k=k; b.className=(ed?'':'hide ')+(edPlan?'on':''); b.innerHTML=edPlan?'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17l9-5 9 5-9 5z"/><path d="M12 12V3M8 6l4-3 4 3"/></svg><span>Vue normale</span>':'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M4 12h16M12 4v16"/></svg><span>Vue de dessus</span>'; } }
+// toucher un meuble là où on le voit (et pas seulement sur sa case au sol)
+function pickFurn(sx,sy){ try{ _v2.set(sx/innerWidth*2-1,-(sy/innerHeight)*2+1); ray.setFromCamera(_v2,camera); const hits=ray.intersectObjects(furnRoot.children,true); for(const h of hits){ let o=h.object; if(o.isSprite||o.visible===false) continue; while(o&&o.parent!==furnRoot) o=o.parent; if(!o||o.visible===false) continue; for(const [id,v] of fObjs) if(v.g===o){ const f=state.furn.find(x=>x.id===id); if(f) return f; } } }catch(e){} return null; }
 const selMesh=new THREE.Mesh(new THREE.PlaneGeometry(.96,.96),new THREE.MeshBasicMaterial({color:'#ffd23f',transparent:true,opacity:.4,depthWrite:false})); selMesh.rotation.x=-Math.PI/2; scene.add(selMesh);
 const ghostTile=new THREE.Mesh(new THREE.PlaneGeometry(.96,.96),new THREE.MeshBasicMaterial({color:'#3bd16f',transparent:true,opacity:.45,depthWrite:false})); ghostTile.rotation.x=-Math.PI/2; scene.add(ghostTile);
 const ghostMat=new THREE.MeshStandardMaterial({color:'#7dffa6',transparent:true,opacity:.55,depthWrite:false});
@@ -755,7 +760,8 @@ function updEditVis(T){
  const ed=mode==='edit', zt=ed&&etab==='zone';
  if(gridLines) gridLines.visible=ed;
  if(kitTint){ kitTint.visible=ed; kitTint.material.opacity=zt?.32:.16; }
- selMesh.visible=ed&&!!sel; if(sel){ selMesh.position.set(sel.x+.5,.012,sel.y+.5); selMesh.material.opacity=.42; }
+ if(ed&&!edWas){ try{ centerCam(); cam.dist*=1.14; clampCam(); }catch(e){} } if(!ed&&edWas&&edPlan){ edPlan=false; cam.pitchT=edPitch0; } edWas=ed; edPlanBtn(ed);
+ selMesh.visible=ed&&!!sel; selArrow.visible=ed&&!!sel&&!odrag; if(sel){ const k=.5+.5*Math.sin(T*5); selMesh.position.set(sel.x+.5,.012,sel.y+.5); selMesh.material.opacity=.38+.3*k; selMesh.scale.setScalar(1+.06*k); const o=fObjs.get(sel.id); let top=1.1; if(o){ try{ _selBox.setFromObject(o.g); top=_selBox.max.y+.42; }catch(e){} } selArrow.position.set(sel.x+.5,top+.08*Math.sin(T*4),sel.y+.5); selArrow.rotation.y=T*1.5; }
  const gt=ed&&ghost?(placing||(sel&&sel.t)):null;
  if(gt!==ghostType){ if(ghostObj){ scene.remove(ghostObj); ghostObj=null; } ghostType=gt; if(gt){ ghostObj=buildFurn(gt,null); ghostObj.traverse(o=>{ if(o.isMesh){ o.material=ghostMat; o.castShadow=false; } if(o.isSprite) o.visible=false; }); scene.add(ghostObj); } }
  ghostTile.visible=!!gt;
@@ -798,7 +804,7 @@ function updHandle(){
 // en mode déco, la scène remonte pour ne pas être cachée par le catalogue
 let vOff=0;
 function viewShift(dt){
- const dock=$('#edock'), tgt=mode==='edit'&&dock?Math.min(innerHeight*.33,dock.offsetHeight*.8):0;
+ const dock=$('#edock'), tgt=mode==='edit'&&dock?Math.min(innerHeight*.4,dock.offsetHeight*.9):0;
  vOff+=(tgt-vOff)*Math.min(1,dt*7); if(Math.abs(tgt-vOff)<.5) vOff=tgt;
  const w=innerWidth, h=innerHeight;
  if(vOff<.5){ if(camera.view&&camera.view.enabled) camera.clearViewOffset(); if(camera.fov!==FOV0||Math.abs(camera.aspect-w/h)>1e-6){ camera.fov=FOV0; camera.aspect=w/h; camera.updateProjectionMatrix(); } return; }
@@ -940,7 +946,7 @@ function render(){
  for(const a of crew) if(a.job&&a.job.s==='work'&&a.job.st){ const j=a.job, o=j.o, sp=o.steps&&o.steps[o.si]; cookAt.set(j.st.id,o.dish); cookInfo.set(j.st.id,{k:j.T?Math.min(1,Math.max(0,1-j.t/j.T)):0,fin:!!(sp&&sp.f),last:!!(o.steps&&o.si>=o.steps.length-1)}); }
  for(const a of crew) if(a.job&&(a.job.s==='mix'||a.job.s==='wash')&&a.job.st) cookAt.set(a.job.st.id,true);
  syncFurn(T,n); syncAgents(dt,T); agentRoot.visible=mode!=='edit'&&mode!=='show'; syncSmall(T); updEditVis(T);
- const vis=visit.on; staticRoot.visible=furnRoot.visible=cityRoot.visible=fxRoot.visible=!vis; if(vis) agentRoot.visible=false; belRoot.visible=vis; if(vis) belUpdate(dt,T);
+ const vis=visit.on; staticRoot.visible=furnRoot.visible=cityRoot.visible=fxRoot.visible=!vis; agentRoot.visible=!vis&&mode!=='edit'; belRoot.visible=vis; if(vis) belUpdate(dt,T);
  for(const t of statAnim){ t.rotation.z=Math.sin(T*.8+t.userData.seed)*.015; }
  // jour / nuit
  hemi.intensity=.95-.7*n; scene.environmentIntensity=.25-.18*n; hemi.color.lerpColors(C_HEMI_D,C_HEMI_N,n);
@@ -977,7 +983,7 @@ cv.addEventListener('pointerdown',e=>{
  ptrs.set(e.pointerId,{x:e.clientX,y:e.clientY});
  holdStop(); if(ptrs.size===1&&mode==='play'&&!visit.on&&near(e.clientX,e.clientY,(DX+DXO+1)/2,1.02,S+.08,42)) holdStart(e.clientX,e.clientY);
  if(ptrs.size===1){ drag={x:e.clientX,y:e.clientY,lx:e.clientX,ly:e.clientY,orbit:e.button===2||e.shiftKey}; moved=false;
-  if(mode==='edit'&&!placing&&sel){ const g=screenToGrid(e.clientX,e.clientY), f=fAt(g[0],g[1]); if(f&&f===sel) drag.f=f; } }
+  if(mode==='edit'&&!placing&&sel){ const g=screenToGrid(e.clientX,e.clientY), f=pickFurn(e.clientX,e.clientY)||fAt(g[0],g[1]); if(f&&f===sel) drag.f=f; } }
  else if(ptrs.size===2){ pinch={d:pd(),dist:cam.dist,a:pa(),yaw:cam.yawT,cy:pcy(),pitch:cam.pitchT,rot:false,tilt:false}; moved=true; drag=null; if(odrag){ odrag=null; dragPt=null; ghost=null; editUI(); } }
 });
 cv.addEventListener('pointermove',e=>{
@@ -1014,7 +1020,7 @@ function tap(sx,sy){
  if(visit.on){ $('#vcard').classList.add('hide'); visit.sel=null; return; }
  if(mode==='play'&&!picked&&city.ready&&near(sx,sy,S+7.2,1.5,S,Math.max(46,innerHeight*.07))){ enterVisit(); return; }
  const [gx,gy]=screenToGrid(sx,sy);
- if(mode==='edit'){ if(!placing&&!(etab==='sols'&&tileMode)&&!(inRest(gx,gy)&&fAt(gx,gy))){ const h=wallHit(sx,sy); if(h) return wallPick(h.sd,h.i); } return editTap(gx,gy); }
+ if(mode==='edit'){ if(!placing&&!(etab==='sols'&&tileMode)){ const pf=pickFurn(sx,sy); if(pf&&!(sel&&pf!==sel&&!fAt(gx,gy)&&inRest(gx,gy)&&canPlace(gx,gy,sel,sel.t))) return editTap(pf.x,pf.y); } if(!placing&&!(etab==='sols'&&tileMode)&&!(inRest(gx,gy)&&fAt(gx,gy))){ const h=wallHit(sx,sy); if(h) return wallPick(h.sd,h.i); } return editTap(gx,gy); }
  if(picked&&(simT-picked.t>12||picked.o.cancel||picked.o.st!=='ready')) picked=null;
  if(picked){ const c=picked.o.c, hit=custs.find(k=>k.sitting&&k.table&&near(sx,sy,k.fx+.5,.6,k.fy+.5,42));
   if(hit===c){ if(!spendHelp()){ picked=null; return; } const it=picked.o; picked=null; if(it.k) serveDrink(it); else serve(it); it.w=null; sparkle(c.fx,c.fy,8); floatAt(c.fx,c.fy,'👍 +1 XP','#2f9e63'); addXP(1); return; }

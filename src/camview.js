@@ -39,9 +39,9 @@ function viewTag(){ // range chaque élément du décor : mur nord/ouest, haies,
 function viewUpdate(){
  if(viewStale){ viewStale=false; if(!staticRoot.children.some(o=>o.userData.wall==='E')) viewBuildWalls(); viewTag(); viewSig=''; }
  const sy=Math.sin(cam.yaw), cy=Math.cos(cam.yaw);
- const hN=cy<-.03, hW=sy<-.03, sig=Math.round(cam.yaw*40)+'|'+visit.on+'|'+(typeof cityRoot!=='undefined'?cityRoot.children.length:0);
+ const hN=cy<-.03, hW=sy<-.03, edM=mode==='edit', sig=Math.round(cam.yaw*40)+'|'+visit.on+'|'+edM+'|'+(typeof cityRoot!=='undefined'?cityRoot.children.length:0);
  if(sig===viewSig) return; viewSig=sig;
  const hid=o=>Math.abs(angNorm(o.userData.az-cam.yaw))<o.userData.azW;      // entre la caméra et la salle : on l'efface
- for(const o of staticRoot.children){ const t=o.userData.wall; if(!t||t==='-') continue; o.visible=t==='N'?!hN:t==='W'?!hW:t==='E'?hW:t==='S'?hN:t==='H'?!hN:t==='h'?!hW:!hid(o); }
+ for(const o of staticRoot.children){ const t=o.userData.wall; if(!t||t==='-') continue; o.visible=t==='N'?!hN:t==='W'?!hW:t==='E'?hW:t==='S'?hN:t==='H'?(!hN&&!edM):t==='h'?(!hW&&!edM):!hid(o); }
  if(typeof cityRoot!=='undefined') for(const o of cityRoot.children){ if(!o.userData.side){ viewStale=true; continue; } if(o.userData.side==='a') o.visible=!hid(o); }
 }
