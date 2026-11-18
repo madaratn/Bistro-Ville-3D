@@ -23,3 +23,6 @@ RX("""if(isOpen()){ wantEdit=true; queueModal(()=>({title:'Fermer pour aménager
  if(inHouse()){ wantEdit=true; toast('Encore '+inHouse()+' clients à table. Le mode Déco s’ouvrira dès qu’ils seront partis.'); return; }
 ""","wantEdit=false;\n")
 RX("if(layoutSig()!==editSig) freshService();","if(layoutSig()!==editSig){ const had=inHouse(); try{ for(const c of custs.slice()) if((c.st==='bill'||c.st==='eat')&&c.sitting) finishMeal(c); }catch(e){} freshService(); if(isOpen()&&had) toast('Nouvelle salle en place : les repas en cours sont encaissés et le service reprend.'); }")
+# v0.89 : la salle se remplit plus vite — l'entrée laisse passer plus de groupes à la fois, et on s'installe sans attendre trop longtemps le serveur
+RX("return s.size>=(rush?3:2);","return s.size>=Math.max(2,Math.ceil(seatCount()/5))+(rush?2:0);")
+RX("c.hostT>(rush?4:7)||!hostOn()","c.hostT>(rush?1.5:4)||!hostOn()")
