@@ -930,7 +930,7 @@ function render(){
  const key=[state.tv||0,S,state.floor,state.wall,state.name,state.menu.join(),KR.x0,KR.y0,KR.w,KR.d,state.furn.filter(f=>['counter','dish','fridge'].includes(kindOf(f))).map(f=>f.x+','+f.y).join(';')].join('|');
  if(key!==statKey){ statKey=key; rebuildStatic(); viewStale=true; }
  if(cityKey!==S){ cityKey=S; cityRoot.traverse(o=>{ if(o.userData&&o.userData.own){ o.geometry&&o.geometry.dispose(); if(o.material&&o.material!==cityWin){ o.material.map&&o.material.map.dispose(); o.material.dispose(); } } }); cityRoot.clear(); buildCity(cityRoot); }
- cityWin.emissiveIntensity=.12+n*1.25; bulbMat.emissiveIntensity=.5+n*2.2; cityGlass.emissiveIntensity=.04+n*.7;
+ cityWin.emissiveIntensity=.12+n*.85; bulbMat.emissiveIntensity=.5+n*2.2; cityGlass.emissiveIntensity=.04+n*.7;
  syncTerrace();
  tableItems=new Map(); readyAt=new Map(); cookAt=new Map(); cookInfo=new Map();
  for(const c of custs) if(c.st==='eat'&&c.table&&c.order){ const a=tableItems.get(c.table.id)||[]; a.push({e:DISHM[c.order.dish].e,dx:c.x-c.table.x,dz:c.y-c.table.y,pr:clamp(1-c.t/(c.eatT||8.5),0,.97)}); tableItems.set(c.table.id,a); }

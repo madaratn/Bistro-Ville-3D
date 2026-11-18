@@ -63,7 +63,7 @@ function buildCity(root){
  const bar={x0:-9.8,x1:-4.6,zf:Sx,dep:6,h:2.7,col:'#e9c48a'};
  cityBlock(root,bar); shopFront(root,{x0:bar.x0,x1:bar.x1,zf:Sx,door:-7.2,awn:'#a8463a',sign:'Le Comptoir',sbg:'#5a3a26',sw:2.2,sy:1.62,doorC:'#3f6b5a'});
  barrel(root,-4.95,Sx+.3); barrel(root,-9.45,Sx+.3); barrel(root,-9.1,Sx+.62,.75); lantern(root,-6.55,1.15,Sx+.2); lantern(root,-7.85,1.15,Sx+.2);
- const cin={x0:-20,x1:-10.6,zf:Sx,dep:7,h:3.7,col:'#f0dcb4',rh:1.7,roofC:'#a84a32'};
+ const cin={x0:-20,x1:-10.6,zf:Sx,dep:7,h:3.7,col:'#f0dcb4',rh:1.7,roofC:'#a84a32',side:false};
  cityBlock(root,cin); shopFront(root,{x0:cin.x0,x1:cin.x1,zf:Sx,door:-15.3,sign:'CINÉMA LUMIÈRE',sbg:'#7b1f2b',sfg:'#ffe7a8',sw:4.2,sy:2.0,doorC:'#7b1f2b'});
  root.add(mesh(new THREE.BoxGeometry(3.4,.2,1.1),M('#6b2a26',{roughness:.6}),-15.3,1.42,Sx+.55));
  for(let i=0;i<14;i++) root.add(mesh(SP(.035,8,6),bulbMat,-16.9+i*.245,1.31,Sx+1.1,false));
@@ -108,7 +108,7 @@ function buildCity(root){
  lantern(root,Sx+14.6,1.2,Sx+.2); lantern(root,Sx+16.4,1.2,Sx+.2);
  // --- derrière : les maisons du village ---
  { const cols=['#e9c48a','#dfa07c','#f1e4c8','#c9cf9c','#e8b877','#f0d2a0','#d9b08a'], r=seeded(77); let x=-15;
-  while(x<Sx+24){ const w=3+Math.floor(r()*3)*.7, h=2.6+Math.floor(r()*3)*.95; cityBlock(root,{x0:x,x1:x+w,zf:-4.4,dep:5+r()*1.5,h,col:cols[Math.floor(r()*cols.length)],side:r()<.5}); x+=w+(r()<.3?1.2:.12); } }
+  while(x<Sx+24){ const w=3+Math.floor(r()*3)*.7, h=2.6+Math.floor(r()*3)*.95, dep=5+r()*1.5, ci=Math.floor(r()*cols.length), sd=r()<.5, gap=r()<.3?1.2:.12; cityBlock(root,{x0:x,x1:x+w,zf:-4.4,dep,h,col:cols[ci],side:sd&&gap>1}); x+=w+gap; } }
  // --- en face : muret de pierres sèches, bottes de foin, parterres ---
  { const st=[M('#cdb89c',{roughness:.95}),M('#bfa888',{roughness:.95}),M('#d8c6ac',{roughness:.95})], r=seeded(31);
   for(let x=-20;x<Sx+28;x+=.55){ if(Math.abs(((x+40)%9)-4.5)<.7) continue; const hh=.2+r()*.1; cStone.push([x+r()*.05,hh/2,Sx+6.45+r()*.04,hh/.25]); }

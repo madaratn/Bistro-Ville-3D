@@ -19,7 +19,7 @@ function gfxRender(){
  if(!LITE&&!visit.on&&!cine){ const X=Math.round(cam.tx*2)/2, Z=Math.round(cam.tz*2)/2, sc=sun.shadow.camera, R=Math.max(S+6,15); sun.position.set(X-7,18,Z+12); sun.target.position.set(X,0,Z+1); if(sc.right!==R){ sc.left=-R; sc.right=R; sc.top=R; sc.bottom=-R; sc.updateProjectionMatrix(); } }
  if(!GFX.on||LITE||!GFX.ok){ renderer.render(scene,camera); return; }
  if(!GFX.comp){ gfxInit(); if(!GFX.comp){ renderer.render(scene,camera); return; } gfxResize(); }
- const n=visit.on?.6:nightF(); GFX.bloom.threshold=3.1-2.2*n; GFX.bloom.strength=.22+.55*n; GFX.fin.uniforms.tilt.value=cine?.5:1; GFX.fin.uniforms.vig.value=.22+.16*n;
+ const n=visit.on?.6:nightF(); GFX.bloom.threshold=3.1-1.9*n; GFX.bloom.strength=.22+.4*n; GFX.fin.uniforms.tilt.value=cine?.5:1; GFX.fin.uniforms.vig.value=.22+.16*n;
  try{ GFX.comp.render(); }catch(e){ console.warn('gfx',e); GFX.ok=false; renderer.render(scene,camera); } }
 // ===================== DÉCOR : herbe, fleurs des champs, forêt et collines au loin =====================
 function grassTex(){ const t=canvasTex(256,256,x=>{ x.fillStyle='#b9c766'; x.fillRect(0,0,256,256); const r=seeded(5); for(let i=0;i<260;i++){ const X=r()*256, Y=r()*256, s=8+r()*26; x.fillStyle=['rgba(140,170,70,.16)','rgba(210,215,120,.16)','rgba(120,160,80,.12)','rgba(230,220,140,.1)'][i%4]; for(const [ox,oy] of [[0,0],[256,0],[-256,0],[0,256],[0,-256]]){ x.beginPath(); x.ellipse(X+ox,Y+oy,s,s*.7,r()*3,0,7); x.fill(); } } for(let i=0;i<900;i++){ x.fillStyle=i%3?'rgba(110,150,60,.35)':'rgba(235,235,150,.3)'; x.fillRect(r()*256,r()*256,1.5,3); } },true); t.repeat.set(26,26); return t; }

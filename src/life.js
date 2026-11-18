@@ -94,7 +94,7 @@ function lifeTick(dt,T){ const L=life; if(!L) return; { const h=!!(cine||visit.o
   else if(a.keep){ a.idle-=dt; if(a.idle<=0){ a.idle=rnd(3,7); a.rotT=rnd(-.5,.5); if(Math.random()<.35) a.hop=.4; } } }
  if(!state.lifeHint2&&state.tuto&&mode==='play'&&L.t>25&&!ui.panel&&!ev){ state.lifeHint2=1; toast('Nouveau : la place du marché, en face du bistrot. Fais glisser la vue pour te promener dans le quartier, et touche tes voisins pour les saluer.'); }
  lifeSay-=dt; if(lifeSay<=0&&mode==='play'&&!ui.panel){ lifeSay=rnd(7,13); const K=pick(L.keep); if(K.a){ floatAt(K.x-.5,K.z-.5,pick(K.say),SAGA_WHO[K.k]?SAGA_WHO[K.k][1]:'#3a2a1f'); K.a.hop=.45; } }
- if(!LITE){ for(const p of L.smoke) if(Math.random()<dt*3) spawnPart(GLOW,'#f4efe6',p[0]+rnd(-.04,.04),p[1],p[2],rnd(.1,.3),rnd(.45,.7),rnd(-.05,.05),2.6,.3,3,false);
+ if(!LITE){ for(const p of L.smoke) if(Math.random()<dt*2.2) spawnPart(GLOW,'#f4efe6',p[0]+rnd(-.04,.04),p[1],p[2],rnd(.1,.3),rnd(.45,.7),rnd(-.05,.05),2.2,.16,2.2,false);
   if(Math.random()<dt*26){ const an=Math.random()*6.28; spawnPart(GLOW,'#bfe9ff',L.fx,1.22,L.fz,Math.cos(an)*rnd(.25,.5),rnd(.9,1.5),Math.sin(an)*rnd(.25,.5),.75,.09,0,false); }
   if(Math.random()<dt*.8){ const t=pick(L.trees); spawnPart(STAR,pick(['#e8a23a','#c9772e','#d9c04a','#b5653a']),t[0]+rnd(-.5,.5),rnd(1.6,2.3),t[1]+rnd(-.5,.5),rnd(-.3,.3),rnd(-.1,.2),rnd(-.2,.3),2.2,.1,0,false); } }
  if(L.water) L.water.position.y=.29+Math.sin(T*3)*.006; if(L.flag) L.flag.rotation.y=Math.sin(T*5)*.35;

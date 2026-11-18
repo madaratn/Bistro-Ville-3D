@@ -64,5 +64,5 @@ function lifeTick2(dt,T){ const L=life;
  if(L.acc){ L.acc.rotT=Math.PI*.9+Math.sin(T*2.4)*.25; if(Math.sin(T*2.4)>.995) L.acc.hop=.3; } if(L.painter){ L.painter.idle-=dt; if(L.painter.idle<=0){ L.painter.idle=rnd(2,5); L.painter.hop=.25; L.painter.rotT=Math.PI+rnd(-.3,.3); } }
  if(L.dog&&L.dogW){ const w=L.dogW, d=L.dog, tx=w.fx+.5+Math.sin(w.rot||0)*.75, tz=w.fy+.5+Math.cos(w.rot||0)*.75-.35, dx=tx-d.position.x, dz=tz-d.position.z, ds=Math.hypot(dx,dz); if(ds>.05){ const sp=Math.min(ds*3,1.6)*dt; d.position.x+=dx/ds*sp; d.position.z+=dz/ds*sp; d.rotation.y=Math.atan2(dx,dz); d.userData.legs.forEach((p,i)=>p.rotation.x=Math.sin(T*14+(i%3?Math.PI:0))*.55*Math.min(1,ds*3)); } d.position.y=Math.abs(Math.sin(T*14))*.012; d.userData.t.rotation.z=Math.sin(T*12)*.6; }
  try{ lifeTick3(dt,T); }catch(e){ console.warn(e); }
- if(!LITE) for(const p of L.chim||[]) if(Math.random()<dt*1.5) spawnPart(GLOW,'#f4efe6',p[0]+rnd(-.05,.05),p[1],p[2],rnd(.1,.3),rnd(.4,.6),rnd(-.05,.05),3.2,.35,3.2,false);
+ if(!LITE) for(const p of L.chim||[]) if(Math.random()<dt*1.5) spawnPart(GLOW,'#f4efe6',p[0]+rnd(-.05,.05),p[1],p[2],rnd(.1,.3),rnd(.4,.6),rnd(-.05,.05),2.6,.18,2.4,false);
 }
