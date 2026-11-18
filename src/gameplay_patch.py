@@ -18,3 +18,8 @@ js=js.replace("sont faits. Reviens demain !","sont faits. Ils reviennent à la p
 RX("Les missions et les coups de feu reviennent chaque jour à minuit.","Les missions reviennent chaque jour à minuit. L’énergie et les coups de feu reviennent à chaque nouvelle journée du bistrot.")
 # pourboires : ceux qu'on ne ramasse pas ne sont plus perdus (le serveur en récupère 60 %)
 RX("moms=moms.filter(m=>m.t>0);","for(const m of moms) if(m.k==='tip'&&m.t<=0&&m.v>0){ const v=Math.max(1,Math.round(m.v*.6)); earn(v); dayAdd('tip',v); try{ floatAt(m.gx,m.gy,'+'+v,'#b9772e'); }catch(e){} } moms=moms.filter(m=>m.t>0);")
+# v0.87 : on aménage et on achète sans fermer le restaurant
+RX("""if(isOpen()){ wantEdit=true; queueModal(()=>({title:'Fermer pour aménager ?',html:`<p class="center">On ne déplace pas les tables au milieu du service. Ferme le restaurant : les clients présents terminent leur repas, puis tu pourras installer tes meubles et ta déco.</p><p class="center"><button class="b red" data-a="closeResto">Fermer le restaurant</button> <button class="b alt" data-a="keepOpen">Rester ouvert</button></p>`})); return; }
+ if(inHouse()){ wantEdit=true; toast('Encore '+inHouse()+' clients à table. Le mode Déco s’ouvrira dès qu’ils seront partis.'); return; }
+""","wantEdit=false;\n")
+RX("if(layoutSig()!==editSig) freshService();","if(layoutSig()!==editSig){ const had=inHouse(); try{ for(const c of custs.slice()) if((c.st==='bill'||c.st==='eat')&&c.sitting) finishMeal(c); }catch(e){} freshService(); if(isOpen()&&had) toast('Nouvelle salle en place : les repas en cours sont encaissés et le service reprend.'); }")

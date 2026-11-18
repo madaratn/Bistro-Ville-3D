@@ -18,7 +18,7 @@ function showTuto(){
   {q:'#sSpd',t:'La vitesse. Touche pour passer en ×2 ou ×3 quand tu veux que la journée avance plus vite.'},
   {q:'#bottom [data-open="menu"]',t:'Le menu. Choisis les plats que tu sers. À force d’être servi, un plat gagne des étoiles de maîtrise et se vend plus cher.'},
   {q:'#bottom [data-open="staff"]',t:'L’équipe. Tes deux anciens ne resteront pas longtemps : c’est ici que tu recrutes. Un apprenti coûte peu, un expert travaille mieux mais son salaire tombe chaque soir.'},
-  {q:'#bEdit',t:'La déco. Ferme d’abord le bistrot, puis déplace les meubles, change les murs et le sol, et choisis un style. Une belle salle fait monter ta note.'},
+  {q:'#bEdit',t:'La déco. Déplace les meubles, change les murs et le sol, choisis un style : tu peux le faire même pendant le service. Une belle salle fait monter ta note.'},
   {q:'#bMore',t:'Ici : le jardin et le marché pour les ingrédients, les restaurants témoins, les ingrédients d’exception, les comptes et l’histoire.'},
   {q:'#goal',t:'Ton objectif du moment. Touche-le pour voir la liste « Aujourd’hui ». Quand tout est coché, ta journée est bouclée.'},
   {q:'#sCam',t:'La caméra. Ce bouton tourne la vue. Avec deux doigts, tu peux aussi pivoter, incliner et zoomer.'},
