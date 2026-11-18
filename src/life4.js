@@ -89,13 +89,14 @@ function buildLife4(root,L){ const c=L.c, zr=S+17.6;
  if(L.accP) L.taps.push({x:L.accP[0],y:.7,z:L.accP[1],r:34,fn:()=>{ L.acc.hop=.5; for(let i=0;i<10;i++) spawnPart(noteTex(),pick(['#b8323a','#2f5f8f','#3f8a4f','#8a5cc8']),L.accP[0]+rnd(-.3,.3),1,L.accP[1],rnd(-.6,.6),rnd(.6,1.3),rnd(-.6,.3),1.6,.22,0,false); sfx('coin'); }});
  L.taps.push({x:-3.2,y:.3,z:2.6,r:70,fn:()=>{ for(const h of L.hens||[]){ const u=h.userData; u.tx=clamp(u.x+rnd(-2,2),-4.1,-.9); u.tz=clamp(u.z+rnd(-2.5,2.5),.2,S-1.6); u.fast=2; } say(-3.2,2.6,'Cot cot codêêêt !','#c9772e'); sfx('pop'); }});
  for(const cw of L.cows) L.taps.push({o:cw,y:.5,r:40,fn:()=>{ say(cw.position.x,cw.position.z,'Meuuuh !','#3a2a1f'); cw.userData.jump=.5; sfx('pop'); }});
+ try{ buildLife5(root,L); }catch(e){ console.warn(e); }
  if(L.trainP) L.taps.push({x:L.trainP[0],y:.6,z:L.trainP[1],r:36,fn:()=>{ L.trainB=4; say(L.trainP[0],L.trainP[1],'Tchou tchou !','#c8423a'); sfx('pop'); }});
  L.taps.push({o:L.cat,y:.35,r:30,fn:()=>{ say(L.cat.position.x,L.cat.position.z,'Miaou !','#c9772e'); L.cat.userData.jump=.5; L.cat.userData.p=0; sfx('pop'); }});
 }
 function lifeTap(sx,sy){ const L=life; if(!L||!L.taps||mode!=='play'||visit.on||cine) return false; const p=groundAt(sx,sy); if(p&&p.x>-.6&&p.x<S+.6&&p.z>-.6&&p.z<S+1.3) return false;
  let best=null,bd=1e9; for(const t of L.taps){ const x=t.o?t.o.position.x:t.x, z=t.o?t.o.position.z:t.z; const [px,py,pz]=toScreen(x,t.y,z); if(pz>=1) continue; const d=Math.hypot(px-sx,py-sy); if(d<t.r&&d<bd){ bd=d; best=t; } } if(!best) return false; try{ best.fn(); }catch(e){ console.warn(e); } return true; }
 function lifeFirework(x,y,z){ const cols=[['#ff5d8f','#ffd23f'],['#4fc3f7','#ffffff'],['#7bd66c','#ffd23f'],['#b388ff','#ff8fb6'],['#ff9a3d','#ffe27a']][Math.floor(Math.random()*5)]; const n=LITE?22:46; for(let i=0;i<n;i++){ const a=Math.random()*6.28, b=Math.acos(2*Math.random()-1), v=rnd(1.6,3.2); spawnPart(STAR,cols[i%2],x,y,z,Math.sin(b)*Math.cos(a)*v,Math.cos(b)*v+1,Math.sin(b)*Math.sin(a)*v,rnd(.9,1.5),.26,0,true); } spawnPart(GLOW,'#ffffff',x,y,z,0,0,0,.3,3.2,0,true); }
-function lifeTick4(dt,T){ const L=life, n=nightF(), zr=S+17.6;
+function lifeTick4(dt,T){ const L=life, n=nightF(), zr=S+17.6; try{ lifeTick5(dt,T); }catch(e){ console.warn(e); }
  if(L.river) L.river.offset.x-=dt*.012;
  if(L.moor){ L.moor.position.y=-.12+Math.sin(T*1.6)*.02; L.moor.rotation.z=Math.sin(T*1.1)*.05; }
  if(L.row){ const g=L.row; g.position.x+=dt*.55; if(g.position.x>L.c+40) g.position.x=L.c-34; g.position.y=-.1+Math.sin(T*2)*.012; L.oars.forEach((p,i)=>{ p.rotation.y=Math.sin(T*2.2)*.6*(i?-1:1); p.rotation.z=(i?-1:1)*(.12+Math.max(0,Math.cos(T*2.2))*.25); }); }
@@ -118,5 +119,5 @@ function lifeTick4(dt,T){ const L=life, n=nightF(), zr=S+17.6;
  if(L.carB>0){ L.carB-=dt; L.car.rotation.y-=dt*2.2; } if(L.trainB>0){ L.trainB-=dt; L.train.rotation.y-=dt*4; }
  if(L.cat&&L.cat.userData.jump>0){ L.cat.userData.jump-=dt; L.cat.position.y=.27+Math.sin((1-L.cat.userData.jump/.5)*Math.PI)*.3; }
  for(const h of L.hens||[]) if(h.userData.fast>0){ const u=h.userData; u.fast-=dt; const dx=u.tx-u.x, dz=u.tz-u.z, d=Math.hypot(dx,dz); if(d>.06){ u.x+=dx/d*dt*1.4; u.z+=dz/d*dt*1.4; } }
- for(const a of lifeA) if(a.loop){ const o=aObjs.get(a); if(o&&a.prop&&!a.propOk){ a.propOk=1; o.root.add(a.prop()); } if(a.lw>0){ a.lw-=dt; a.moving=false; a.v=0; continue; } if(!a.path.length){ const P=a.loop.pts, p=P[a.loop.i%P.length]; if(a.loop.go){ a.loop.go=0; if(p[2]){ a.lw=p[2]; a.rotT=p[3]; a.hop=.3; } a.loop.i++; continue; } a.x=Math.round(a.fx); a.y=Math.round(a.fy); a.path=[[p[0]-.5,p[1]-.5,1]]; a.loop.go=1; } moveAgent(a,dt); if(a.sweep&&Math.random()<dt*3) spawnPart(GLOW,'#d9c9a8',a.fx+.5+Math.sin(a.rot||0)*.4,.08,a.fy+.5+Math.cos(a.rot||0)*.4,rnd(-.2,.2),.2,rnd(-.2,.2),.8,.16,2,false); }
+ for(const a of lifeA) if(a.loop&&!a.off){ const o=aObjs.get(a); if(o&&a.prop&&!a.propOk){ a.propOk=1; o.root.add(a.prop()); } if(a.lw>0){ a.lw-=dt; a.moving=false; a.v=0; continue; } if(!a.path.length){ const P=a.loop.pts, p=P[a.loop.i%P.length]; if(a.loop.go){ a.loop.go=0; if(p[2]){ a.lw=p[2]; a.rotT=p[3]; a.hop=.3; } a.loop.i++; continue; } a.x=Math.round(a.fx); a.y=Math.round(a.fy); a.path=[[p[0]-.5,p[1]-.5,1]]; a.loop.go=1; } moveAgent(a,dt); if(a.sweep&&Math.random()<dt*3) spawnPart(GLOW,'#d9c9a8',a.fx+.5+Math.sin(a.rot||0)*.4,.08,a.fy+.5+Math.cos(a.rot||0)*.4,rnd(-.2,.2),.2,rnd(-.2,.2),.8,.16,2,false); }
 }

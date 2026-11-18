@@ -660,7 +660,7 @@ function makeCar(c){
  g.position.set(c.x,0,c.z); g.rotation.y=c.v>0?0:Math.PI; return g;
 }
 function updCars(dt){
- carT-=dt; if(carT<=0){ carT=rnd(4,10); const d=evBusOn?-1:Math.random()<.5?1:-1; const c={x:d>0?-18:S+27,z:d>0?S+2.5:S+3.5,v:d*rnd(2.8,4.2),c:pick(CAR_COLS),k:Math.random()<.2}; { const q=Math.random(); c.t=q<.09?'tractor':q<.2?'scoot':q<.29?'van':q<.36?'bus':null; if(c.t==='tractor') c.v=d*1.5; } c.g=makeCar(c); fxRoot.add(c.g); cars.push(c); }
+ carT-=dt; if(carT<=0&&!lifeRoadBusy){ carT=rnd(4,10); const d=evBusOn?-1:Math.random()<.5?1:-1; const c={x:d>0?-18:S+27,z:d>0?S+2.5:S+3.5,v:d*rnd(2.8,4.2),c:pick(CAR_COLS),k:Math.random()<.2}; { const q=Math.random(); c.t=q<.09?'tractor':q<.2?'scoot':q<.29?'van':q<.36?'bus':null; if(c.t==='tractor') c.v=d*1.5; } c.g=makeCar(c); fxRoot.add(c.g); cars.push(c); }
  for(const c of cars){ c.x+=c.v*dt; c.g.position.x=c.x; if(c.x<-19||c.x>S+28){ fxRoot.remove(c.g); c.dead=1; } }
  cars=cars.filter(c=>!c.dead);
 }
