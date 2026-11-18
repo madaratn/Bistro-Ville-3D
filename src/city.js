@@ -37,7 +37,7 @@ function cityBlock(root,o){
 }
 function shopFront(root,o){
  const {x0,x1,zf}=o, cx=(x0+x1)/2, wood=M('#6b4630',{roughness:.8});
- for(let x=x0+.3;x<x1-.2;x+=1.1){ if(Math.abs(x+.4-o.door)<.7) continue; root.add(mesh(new THREE.BoxGeometry(.9,.8,.04),cityGlass,x+.45,.78,zf+.03,false)); root.add(mesh(new THREE.BoxGeometry(1,.06,.08),wood,x+.45,.36,zf+.04,false)); root.add(mesh(new THREE.BoxGeometry(.04,.8,.05),wood,x+.45,.78,zf+.05,false)); }
+ const nP=Math.floor((x1-x0-.5)/1.1), oP=(x1-x0-nP*1.1)/2+.1; for(let iP=0;iP<nP;iP++){ const x=x0+oP+iP*1.1; if(Math.abs(x+.45-o.door)<.85) continue; root.add(mesh(new THREE.BoxGeometry(.9,.8,.04),cityGlass,x+.45,.78,zf+.03,false)); root.add(mesh(new THREE.BoxGeometry(1,.06,.08),wood,x+.45,.36,zf+.04,false)); root.add(mesh(new THREE.BoxGeometry(.04,.8,.05),wood,x+.45,.78,zf+.05,false)); }
  root.add(mesh(new THREE.BoxGeometry(.74,1.1,.05),wood,o.door,.55,zf+.02,false));
  root.add(mesh(new THREE.BoxGeometry(.58,.9,.02),M(o.doorC||'#8a5a3a',{roughness:.6}),o.door,.49,zf+.05,false));
  root.add(mesh(SP(.022,8,6),M('#e3b04b',{metalness:.7,roughness:.3}),o.door+.2,.5,zf+.07,false));
@@ -96,7 +96,7 @@ function buildCity(root){
  cityBlock(root,mall);
  const post=M('#6b4630',{roughness:.85});
  for(let x=mall.x0+.2;x<mall.x1;x+=1.9){ root.add(mesh(new THREE.BoxGeometry(.14,1.3,.14),post,x,.65,Sx+.08)); }
- for(let x=mall.x0+.5;x<mall.x1-.4;x+=1.9) if(Math.abs(x+.75-(Sx+15.5))>1) root.add(mesh(new THREE.BoxGeometry(1.5,.95,.04),cityGlass,x+.75,.82,Sx+.03,false));
+ for(let x=mall.x0+.5;x<mall.x1-1.7;x+=1.9) if(Math.abs(x+.75-(Sx+15.5))>1) root.add(mesh(new THREE.BoxGeometry(1.5,.95,.04),cityGlass,x+.75,.82,Sx+.03,false));
  root.add(mesh(new THREE.BoxGeometry(1.4,1.25,.05),post,Sx+15.5,.63,Sx+.02,false)); root.add(mesh(new THREE.BoxGeometry(1.2,1.1,.02),cityGlass,Sx+15.5,.58,Sx+.06,false));
  { const sg=ownMesh(new THREE.PlaneGeometry(3,.62),new THREE.MeshStandardMaterial({map:signBoard('Galerie Soleil','#c9772e','#fff3dc',3,.62),transparent:true,roughness:.7}),Sx+15.5,1.75,Sx+.07,false); root.add(sg); }
  // étal de marché : fruits, légumes, citrouilles
