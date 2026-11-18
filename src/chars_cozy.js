@@ -60,6 +60,7 @@ function charSpec(a){
  if(r()<.14) S.extras.push('glasses'); if(r()<.09) S.hat=pk(['beret','strawhat','cap']); if(r()<.1) S.extras.push('scarf');
  if(S.kid){ S.hair=pk(['tuft','pigtails','bob','short','curly']); if(r()<.3) S.hat='bow'; S.extras=S.extras.filter(e=>e!=='glasses'); }
  if(a.s){ Object.assign(S,STAFF_LOOKS[a.s.variant]||STAFF_LOOKS[a.s.role]||{},a.s.outfit||{}); S.extras=[...(S.extras||[])]; if(!S.hat&&r()<0) S.hat=null; }
+ if(!a.s&&L.fit){ Object.assign(S,L.fit); S.extras=[...(S.extras||[])]; }
  return S;
 }
 function makeCharC(a){
