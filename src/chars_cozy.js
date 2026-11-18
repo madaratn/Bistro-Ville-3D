@@ -103,6 +103,9 @@ function makeCharC(a){
  const fork=new THREE.Group(); const sil=M('#d9dde3',{metalness:.8,roughness:.25}); fork.add(mesh(new THREE.BoxGeometry(.01,.11,.006),sil,0,-.2,0,false)); for(let i=-1;i<=1;i++) fork.add(mesh(new THREE.BoxGeometry(.005,.03,.005),sil,i*.008,-.265,0,false)); arms[0].add(fork);
  for(const p of [tray,tub,tab,tpe,menuB]){ p.visible=false; hold.add(p); } phone.visible=false; arms[0].add(phone); fork.visible=false;
  root.traverse(m=>{ if(m.isMesh) m.castShadow=false; }); torso.castShadow=hm.castShadow=hips.castShadow=true;
+ // fusion des pièces fixes : jambes, bras, buste, tête, yeux, joues (environ 28 objets dessinés -> une dizaine)
+ try{ for(const g of legs) bakeVC(g,'cL|'+S.bottom+'|'+S.shoes); for(const g of arms) bakeVC(g,'cA|'+S.top+'|'+S.skin); bakeVC(body,null); bakeVC(head,null,[smile,open]);
+  bakeSame(eyes,'cEyeD',dark); bakeSame(eyes,'cEyeW',white); bakeSame(arcs,'cArcs',dark); bakeSame(head,'cBlush',blushM); }catch(e){ console.warn('bake',e); }
  return {cozy:true,root,body,head,legs,arms,eyes,arcs,smile,open,tray,tsp,tub,tubPl,tab,tpe,menuB,phone,fork,role:a.s?a.s.role:null,sc,sx:0,sz:0,sitK:a.sitting?1:0,mv:0,blinkT:rnd(1,4),yaw:0,pit:0,P:{aL:0,aR:0,zL:0,zR:0,lean:0,legL:0,legR:0}};
 }
 const _mats2=new Map(); function geo2(k,f){ let m=_mats2.get(k); if(!m){ m=f(); _mats2.set(k,m); } return m; }

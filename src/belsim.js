@@ -35,7 +35,7 @@ const belStaff=(role,outfit,x,z,ry,extra)=>belAgent(Object.assign({s:{id:belId,r
 const belFaceRoom=(x,z)=>Math.atan2(BCX-x,BFZ-z);
 const belGuest=(x,z)=>belAgent({kind:'walk',look:randLook(),guest:true,spd:.92+Math.random()*.1},x,z,Math.PI);
 function belGo(a,x,z,cb){ a.path=belPath(a.fx+.5,a.fy+.5,x,z); a.cb=cb||null; a.blockT=0; }
-function belDrop(a){ a.dead=true; const o=visit.objs.get(a); if(o){ belRoot.remove(o.root); visit.objs.delete(a); } const i=visit.agents.indexOf(a); if(i>=0) visit.agents.splice(i,1); }
+function belDrop(a){ a.dead=true; const o=visit.objs.get(a); if(o){ belRoot.remove(o.root); try{ charFree(o); }catch(e){} visit.objs.delete(a); } const i=visit.agents.indexOf(a); if(i>=0) visit.agents.splice(i,1); }
 function belCarry(a,obj){ const o=visit.objs.get(a); if(a.belObj&&o) o.root.remove(a.belObj); a.belObj=null; a.belHold=false; if(obj&&o){ obj.position.set(0,.5,.21); obj.scale.setScalar(.62); o.root.add(obj); a.belObj=obj; a.belHold=true; } }
 // l'humeur de la tablée : ce que font les convives assis (lire la carte, lever la main, discuter, manger)
 function belMood(t,st){ if(!t.party) return; t.party.m.forEach((g,i)=>{ if(g.dead) return; g.st=st; g.hand=0; g.talk=false; g.lookAt=false; g.phone=st==='wait'&&(g.id%5===0); g.ph=g.id*1.7; }); t.talkT=1; }

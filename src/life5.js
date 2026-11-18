@@ -42,7 +42,7 @@ function lifeTick5(dt,T){ const L=life, n=nightF(), zr=S+17.6, W=lifeW; if(!life
  if(!LITE&&!navigator.webdriver){ L.ft=(L.ft===undefined?dt:L.ft*.985+dt*.015); if(L.t>(L.gt||25)&&L.ft>.05&&GFX.on){ GFX.on=false; L.gt=L.t+20; L.ft=.03; toast('Effets d’image coupés pour garder le jeu fluide.'); } else if(L.t>(L.gt||25)&&L.ft>.055){ LITE=true; try{ sun.castShadow=false; resize(); }catch(e){} for(const a of lifeA) if(!a.keep){ a.hide=true; a.off=1; } toast('Affichage allégé pour garder le jeu fluide.'); } }
  // ---- météo : averse, parapluies, arc-en-ciel, ombres de nuages ----
  W.t-=dt; if(W.rain<=0&&W.t<=0&&mode==='play'){ W.rain=rnd(32,48); W.T=W.rain; toast('Une averse ! Tout le monde sort son parapluie.'); }
- const rk=W.rain>0?Math.min(1,(W.T-W.rain)/3,W.rain/3):0;
+ const rk=W.rain>0?Math.min(1,((W.T||W.rain)-W.rain)/3+(W.T?0:1),W.rain/3):0;
  if(W.rain>0){ W.rain-=dt; if(W.rain<=0){ W.t=rnd(200,380); W.bow=55; } }
  { const g=lifeRainG, u=g.userData; g.visible=rk>0; if(g.visible){ g.material.opacity=.55*rk; const a=g.geometry.attributes.position, cx=cam.tx, cz=cam.tz; for(let i=0;i<u.N;i++){ const p=u.p[i]; p[1]-=dt*13; if(p[1]<0){ p[1]+=9; p[0]=Math.random()*26-13; p[2]=Math.random()*26-13; } a.setXYZ(i*2,cx+p[0],p[1],cz+p[2]); a.setXYZ(i*2+1,cx+p[0]-.1,p[1]+.42,cz+p[2]); } a.needsUpdate=true; } }
  for(const s of lifeShad){ s.position.x+=dt*.55; if(s.position.x>L.c+48) s.position.x=L.c-48; s.material.opacity=(.06+.11*rk)*(1-n*.8); s.visible=!visit.on&&!cine; }

@@ -26,9 +26,9 @@ const nbV=k=>(state.nb&&state.nb.v[k])||{p:0,c:0}, nbHearts=k=>{ const p=nbV(k).
 const nbOpen=()=>{ const pg=(state.story&&state.story.pages)||0; return Object.keys(NB).filter(k=>pg>=NB[k].after); };
 function nbToday(){ let L=nbOpen(); if(L.length>NB_MAX){ const r=seeded(dayOf().n*131+7); L=L.map(k=>[r(),k]).sort((a,b)=>a[0]-b[0]).slice(0,NB_MAX).map(x=>x[1]); } return L.sort((a,b)=>NB[a].h-NB[b].h); }
 const nbHour=h=>Math.floor(h)+' h'+(h%1?' 30':'');
-let nbTry=0;
-function nbTick(){ if(warming||!state.story||mode!=='play'||dayOf().night) return; const now=performance.now()/1000; if(now<nbTry) return; nbTry=now+3; const st=nbS(), h=gameHour();
- for(const c of custs) if(c.nb&&!c.dead&&c.sitting&&Math.random()<.5) floatAt(c.fx,c.fy-.75,'♥ '+NB[c.nb].s,'#c8553d');
+let nbLast=-99;
+function nbTick(){ if(warming||!state.story||!state.tuto||tutS||mode!=='play'||dayOf().night) return; const gt=dayOf().t||0; if(Math.abs(gt-nbLast)<6) return; nbLast=gt; const st=nbS(), h=gameHour();   // cadencé sur le temps du jeu : pareil en ×1 et en ×3
+ for(const c of custs) if(c.nb&&!c.dead&&c.sitting&&Math.random()<.75) floatAt(c.fx,c.fy-.75,'♥ '+NB[c.nb].s,'#c8553d');
  for(const k of nbToday()){ if(st.done[k]) continue; const N=NB[k]; if(h<N.h) continue; if(h>N.h+1.5){ st.done[k]=3; continue; }
   if(!isOpen()||rush||cine||(typeof visit!=='undefined'&&visit.on)) continue; const W=WHO_LOOK[k]; if(!W) { st.done[k]=3; continue; }
   const id=uid++, ok=spawnCust(false,{sx:Math.random()<.5?0:S-1,looks:[Object.assign(randLook(),{fit:W.outfit})],ids:[id],kids:[!!N.kid]}); if(!ok) return;
@@ -36,15 +36,18 @@ function nbTick(){ if(warming||!state.story||mode!=='play'||dayOf().night) retur
 function nbMeal(c,d,price,sat){ const k=c.nb, N=NB[k]; if(!N||warming) return; const st=nbS(), v=st.v[k]||(st.v[k]={p:0,c:0}); st.done[k]=2;
  if(sat<50){ toast(N.n+' repart sans sourire. Soigne mieux la prochaine visite.'); return; }
  const favOn=state.menu.includes(N.fav), h0=nbHearts(k), bonus=Math.max(10+state.level*4,Math.round(price*(favOn?2:1))); v.c++; v.p+=favOn?2:1; earn(bonus); dayAdd('tip',bonus);
- const g=N.g; let gt=''; if(g[0]==='xp'){ addXP(g[1]); gt='+'+g[1]+' XP'; } else if(g[0]==='ing'&&ING[g[1]]){ state.inv[g[1]]=(state.inv[g[1]]||0)+g[2]; gt='+'+g[2]+' '+ING[g[1]].n; } else if(g[0]==='coin'){ earn(g[1]); gt='+'+g[1]+' pièces'; } else if(g[0]==='sat'){ for(let i=0;i<g[1];i++) addSat(100); gt='ta réputation monte'; } else if(g[0]==='en'){ energyTick(); state.en.v=Math.min(EN_MAX,state.en.v+g[1]); gt='+'+g[1]+' énergie'; }
- floatAt(c.fx,c.fy-.7,N.s+' ♥ +'+bonus,null,true); sparkle(c.fx,c.fy,10,'#ff8fb0'); sfx('coin');
+ const g=N.g; let gt='', extra=0; if(g[0]==='xp'){ addXP(g[1]); gt='+'+g[1]+' XP'; } else if(g[0]==='ing'&&ING[g[1]]){ state.inv[g[1]]=(state.inv[g[1]]||0)+g[2]; gt='+'+g[2]+' '+ING[g[1]].n; } else if(g[0]==='coin'){ earn(g[1]); extra=g[1]; } else if(g[0]==='sat'){ for(let i=0;i<g[1];i++) addSat(100); gt='ta réputation monte'; } else if(g[0]==='en'){ energyTick(); state.en.v=Math.min(EN_MAX,state.en.v+g[1]); gt='+'+g[1]+' énergie'; }
+ floatAt(c.fx,c.fy-.7,N.s+' ♥ +'+(bonus+extra),null,true); sparkle(c.fx,c.fy,10,'#ff8fb0'); sfx('coin');
  const h=nbHearts(k);
  if(h>h0){ const rw=[150,400,1000][h-1]; earn(rw); if(typeof MK!=='undefined'&&MK[k]){ const F=state.fr||(state.fr={}); F[k]=(F[k]||0)+3; }
   say([[k,N.up[h-1]]],N.n+' · '+'♥'.repeat(h)); queueModal(()=>({title:h===3?'Un ami pour la vie':'Un voisin fidèle',html:`<div class="nbBig"><img src="${foodThumbs['who:'+k]||''}" alt=""><b>${N.n}</b><em>${'♥'.repeat(h)}<u>${'♥'.repeat(3-h)}</u></em></div><p class="center">+${rw} pièces${typeof MK!=='undefined'&&MK[k]?' · ses prix baissent au marché':''}</p><p class="center sub">${h<3?'Encore quelques bons repas et vous serez inséparables.':'Une table l’attend chez toi, pour toujours.'}</p><p class="center"><button class="b" data-a="close">Continuer</button></p>`})); }
- else toast(N.n+' a adoré'+(favOn?' (son plat préféré est à ta carte)':'')+' : +'+bonus+' pièces'+(gt?', '+gt:'')+'.'); save(); hud(); }
+ else toast(N.n+' a adoré'+(favOn?' (son plat préféré est à ta carte)':'')+' : +'+(bonus+extra)+' pièces'+(gt?', '+gt:'')+'.'); save(); hud(); }
 function nbHTML(){ if(!state.story) return ''; const st=nbS(), op=nbOpen(), td=nbToday(), pg=state.story.pages||0, h=gameHour(), nx=Object.keys(NB).filter(k=>pg<NB[k].after).sort((a,b)=>NB[a].after-NB[b].after)[0];
  let html='<h3>Les voisins du quartier</h3><p class="center sub">Ils viennent manger à leur heure, une fois leur chapitre terminé. Sers-les bien : ils laissent un gros pourboire, un petit cadeau, et deviennent des amis. Leur plat préféré à la carte compte double.</p><div class="rgG">';
  html+=op.map(k=>{ const N=NB[k], v=nbV(k), hh=nbHearts(k), d=st.done[k], on=td.includes(k), sta=d===2?'Venu aujourd’hui':d===1?'À table en ce moment':d===3?'Pas pu venir aujourd’hui':!on?'Ne passe pas aujourd’hui':'Attendu vers '+nbHour(N.h);
   return `<div class="rgC nbC" style="--rc:${SAGA_WHO[k][1]}"><span class="rgP"><img src="${foodThumbs['who:'+k]||''}" alt=""></span><b>${N.n}</b><em>${'♥'.repeat(hh)}<u>${'♥'.repeat(3-hh)}</u></em><small class="${d===1?'nbOn':''}">${sta}</small><small class="rgF">Adore : ${DISHM[N.fav]?DISHM[N.fav].n:''}${state.menu.includes(N.fav)?'':' (pas à la carte)'}</small><small>${v.c} repas chez toi</small></div>`; }).join('');
  if(nx) html+=`<div class="rgC lock"><span class="rgP">?</span><b>Un voisin de plus</b><small>À rencontrer après le chapitre ${NB[nx].after}.</small></div>`;
  return html+'</div><h3>Les habitués</h3>'; }
+
+// annonce du nouveau voisin dans la fenêtre de fin de chapitre
+function nbNewHTML(ch){ const k=Object.keys(NB).find(k=>NB[k].after===ch+1); return k?'<p class="nbNew"><img src="'+(foodThumbs['who:'+k]||'')+'" alt=""><span><b>'+NB[k].n+'</b> viendra désormais manger chez toi, vers '+nbHour(NB[k].h)+'.</span></p>':''; }

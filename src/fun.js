@@ -1,6 +1,6 @@
 // ===================== DE QUOI S'OCCUPER TOUTE LA JOURNÉE (v0.91) : défis express et mini-jeux =====================
-const DX_GAP=170, DX_MAX=5;
-let dx=null, dxNext=0, dxStreak=0, dxMsg=null, dxRate={t:0,s:0,e:0,rs:0,re:0}, dxLast='';
+const DX_GAP=480, DX_MAX=5;        // 480 s de jeu = 2 h d'horloge entre deux défis
+let dx=null, dxStreak=0, dxMsg=null, dxRate={t:0,s:0,e:0,rs:0,re:0}, dxLast='';
 const DXS=[
  {k:'served',dur:70,t:n=>'Sers '+n+' clients',n:R=>Math.max(2,Math.ceil(R.rs*70*1.15))},
  {k:'happy',dur:80,t:n=>'Rends '+n+' clients ravis',n:R=>Math.max(2,Math.ceil(R.rs*80*.55))},
@@ -8,18 +8,18 @@ const DXS=[
  {k:'help',dur:60,t:n=>'Donne '+n+' coups de main en salle',n:()=>5,need:()=>state.en&&state.en.v>=6},
  {k:'earned',dur:70,t:n=>'Encaisse '+n+' pièces',n:R=>Math.max(30,Math.round(R.re*70*1.1/10)*10)}];
 function dxOk(){ return isOpen()&&mode==='play'&&!rush&&!ev&&!cine&&!ui.panel&&state.tuto&&!tutS&&!(typeof visit!=='undefined'&&visit.on)&&!warming&&!mgOn; }
-function dxTick(){ const now=performance.now()/1000, T=state.tot||(state.tot={}); if(warming) return;
+function dxTick(){ const now=performance.now()/1000, T=state.tot||(state.tot={}), DD=dayOf(), gt=DD.t||0; if(warming) return;
  if(!dxRate.t){ dxRate.t=now; dxRate.s=T.served||0; dxRate.e=T.earned||0; } else if(now-dxRate.t>20){ const d=now-dxRate.t, rs=((T.served||0)-dxRate.s)/d, re=((T.earned||0)-dxRate.e)/d; dxRate.rs=dxRate.rs?dxRate.rs*.5+rs*.5:rs; dxRate.re=dxRate.re?dxRate.re*.5+re*.5:re; dxRate.t=now; dxRate.s=T.served||0; dxRate.e=T.earned||0; }
  const el=dxEl(), ok=dxOk();
  if(dxMsg){ if(now>dxMsg.t){ dxMsg=null; } }
  if(dx){ if(!ok){ dx.t0+=now-(dx.lt||now); dx.lt=now; } else { dx.lt=now; const v=(T[dx.k]||0)-dx.base, left=dx.dur-(now-dx.t0);
-   if(v>=dx.n){ dxStreak++; const rw=Math.round((15+state.level*5)*(1+.15*Math.min(dxStreak-1,5))); earn(rw); energyTick(); state.en.v=Math.min(EN_MAX,state.en.v+2); addXP(3); sfx('level'); dxMsg={t:now+2.6,h:'<b class="ok">Défi réussi !</b><span>+'+rw+' pièces · +2 énergie'+(dxStreak>1?' · série ×'+dxStreak:'')+'</span>'}; dx=null; dxNext=now+DX_GAP; hud(); }
-   else if(left<=0){ dxStreak=0; dxMsg={t:now+2.2,h:'<b class="ko">Défi manqué</b><span>Le prochain arrive.</span>'}; dx=null; dxNext=now+DX_GAP; } } }
- else if(ok&&now>dxNext&&!dxMsg&&dxRate.rs>0&&dxDay()<DX_MAX){ if(!dxNext){ dxNext=now+75; } else { state.dxd.c++; const L=DXS.filter(D=>D.k!==dxLast&&(!D.need||D.need())), D=L[Math.floor(Math.random()*L.length)], n=D.n(dxRate); dxLast=D.k; dx={k:D.k,n,base:T[D.k]||0,t0:now,lt:now,dur:D.dur,txt:D.t(n)}; sfx('pop'); } }
+   if(v>=dx.n){ dxStreak++; const rw=Math.round((15+state.level*5)*(1+.15*Math.min(dxStreak-1,5))); earn(rw); energyTick(); state.en.v=Math.min(EN_MAX,state.en.v+2); addXP(3); sfx('level'); dxMsg={t:now+2.6,h:'<b class="ok">Défi réussi !</b><span>+'+rw+' pièces · +2 énergie'+(dxStreak>1?' · série ×'+dxStreak:'')+'</span>'}; dx=null; dxDay(); state.dxd.nt=gt+DX_GAP; hud(); }
+   else if(left<=0){ dxStreak=0; dxMsg={t:now+2.2,h:'<b class="ko">Défi manqué</b><span>Le prochain arrive.</span>'}; dx=null; dxDay(); state.dxd.nt=gt+DX_GAP; } } }
+ else if(ok&&!dxMsg&&dxRate.rs>0&&dxDay()<DX_MAX&&!DD.closing&&!DD.night&&gt>=(state.dxd.nt||150)&&gt<DAY_LEN-300){ { state.dxd.c++; const L=DXS.filter(D=>D.k!==dxLast&&(!D.need||D.need())), D=L[Math.floor(Math.random()*L.length)], n=D.n(dxRate); dxLast=D.k; dx={k:D.k,n,base:T[D.k]||0,t0:now,lt:now,dur:D.dur,txt:D.t(n)}; sfx('pop'); } }
  const show=mode==='play'&&!cine&&(dx||dxMsg)&&!rush&&!mgOn&&!(typeof visit!=='undefined'&&visit.on), key=!show?'':dxMsg?'m'+dxMsg.t:'d'+dx.k+dx.n+'|'+Math.min(dx.n,(T[dx.k]||0)-dx.base)+'|'+Math.ceil(dx.dur-(now-dx.t0));
  if(el._k!==key){ el._k=key; el.className=show?(dxMsg?'msg':''):'hide'; if(show) el.innerHTML=dxMsg?dxMsg.h:`<em>DÉFI</em><b>${dx.txt}</b><span>${Math.min(dx.n,(T[dx.k]||0)-dx.base)}/${dx.n} · ${Math.max(0,Math.ceil(dx.dur-(now-dx.t0)))} s</span><i><u style="width:${Math.min(100,100*((T[dx.k]||0)-dx.base)/dx.n)}%"></u></i>`; }
  mgBtn(); }
-function dxDay(){ const n=state.day?state.day.n:1; if(!state.dxd||state.dxd.n!==n) state.dxd={n,c:0}; return state.dxd.c; }
+function dxDay(){ const n=funDay(); if(!state.dxd||state.dxd.n!==n) state.dxd={n,c:0}; return state.dxd.c; }
 setInterval(()=>{ try{ if(typeof mode!=='undefined'&&mode!=='play'){ const a=$('#dx'), b=$('#sMg'); if(a&&a.className!=='hide'){ a.className='hide'; a._k='x'; } if(b&&!b.classList.contains('hide')){ b.classList.add('hide'); b._k='x'; } } }catch(e){} },200);
 function dxEl(){ let el=$('#dx'); if(!el){ el=document.createElement('div'); el.id='dx'; el.className='hide'; document.body.appendChild(el); } return el; }
 // ---------- mini-jeux : ils rendent de l'énergie ----------
@@ -30,16 +30,19 @@ const MG_MAX=3, MGS=[
  {k:'eye',n:'Le coup d’œil',d:'Trouve vite le plat demandé.'},
  {k:'sum',n:'L’addition, s’il vous plaît',d:'Calcule le total de la table.'},
  {k:'wash',n:'La plonge express',d:'Touche les assiettes sales, pas les propres.'}];
-function mgDay(){ const n=state.day?state.day.n:1; if(!state.mgd||state.mgd.n!==n) state.mgd={n,c:{}}; return state.mgd.c; }
+// la nuit (après le bilan), on reste sur les compteurs de la journée qui vient de finir : ils repartent à l'ouverture
+function funDay(){ const d=dayOf(); return d.n-(d.night?1:0); }
+function mgDay(){ const n=funDay(); if(!state.mgd||state.mgd.n!==n) state.mgd={n,c:{}}; return state.mgd.c; }
 function mgLeft(k){ return Math.max(0,MG_MAX-(mgDay()[k]||0)); }
+function mgTotal(){ return MGS.reduce((a,M)=>a+mgLeft(M.k),0); }
 function mgIds(){ return (state.menu.length>=4?state.menu:DISH.map(d=>d.id)).slice(0,4); }
 function mgNext(G,ms,f){ const tk=++G.tk; setTimeout(()=>{ if(mgOn===G&&G.tk===tk) f(); },ms); }
-function mgBtn(){ let b=$('#sMg'); if(!b){ b=document.createElement('button'); b.id='sMg'; b.setAttribute('aria-label','Mini-jeux'); document.body.appendChild(b); b.addEventListener('click',()=>{ audioInit(); const w=mgCd-performance.now()/1000; if(w>0) return toast('Les mini-jeux reviennent dans '+Math.ceil(w)+' s.'); sfx('pop'); mgOpen(); }); }
- const w=Math.ceil(mgCd-performance.now()/1000), show=mode==='play'&&!cine&&!rush&&state.tuto&&!tutS&&!(typeof visit!=='undefined'&&visit.on), k=(show?1:0)+'|'+(w>0?w:0);
- if(b._k!==k){ b._k=k; b.className=(show?'':'hide ')+(w>0?'cd':''); b.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="7" width="18" height="11" rx="4"/><path d="M8 10.500v4M6 12.500h4"/><circle cx="15.500" cy="11.500" r="1" fill="currentColor"/><circle cx="18" cy="14" r="1" fill="currentColor"/></svg><span>'+(w>0?w+' s':'Jeux')+'</span>'; } }
+function mgBtn(){ let b=$('#sMg'); if(!b){ b=document.createElement('button'); b.id='sMg'; b.setAttribute('aria-label','Mini-jeux'); document.body.appendChild(b); b.addEventListener('click',()=>{ audioInit(); const w=mgCd-performance.now()/1000; if(w>0) return toast('Les mini-jeux reviennent dans '+Math.ceil(w)+' s.'); if(!mgTotal()){ sfx('bad'); return toast('Tu as joué toutes tes parties d’aujourd’hui. Les mini-jeux reviennent demain matin.'); } sfx('pop'); mgOpen(); }); }
+ const w=Math.ceil(mgCd-performance.now()/1000), left=mgTotal(), low=left>0&&w<=0&&!mgOn&&state.en&&state.en.v<=3, show=mode==='play'&&!cine&&!rush&&(state.tuto||tutS)&&!(typeof visit!=='undefined'&&visit.on), k=(show?1:0)+'|'+(w>0?w:0)+'|'+left+'|'+(low?1:0);
+ if(b._k!==k){ b._k=k; b.className=(show?'':'hide ')+(w>0||!left?'cd':'')+(low?' call':''); b.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="7" width="18" height="11" rx="4"/><path d="M8 10.500v4M6 12.500h4"/><circle cx="15.500" cy="11.500" r="1" fill="currentColor"/><circle cx="18" cy="14" r="1" fill="currentColor"/></svg><span>'+(w>0?w+' s':'Jeux')+'</span>'+(left&&w<=0?'<i>'+left+'</i>':''); } }
 function mgEl(){ let el=$('#mg'); if(!el){ el=document.createElement('div'); el.id='mg'; el.className='hide'; document.body.appendChild(el); el.addEventListener('pointerdown',e=>{ const b=e.target.closest('[data-m]'); if(b){ e.preventDefault(); mgAct(b.dataset.m,b.dataset.v); } else if(mgOn&&mgOn.g==='cook'&&mgOn.run) { e.preventDefault(); mgCookTap(); } }); } return el; }
 function mgOpen(){ mgOn={g:'menu'}; const el=mgEl(); el.className=''; el.innerHTML=`<div class="mgB"><h3>Une petite pause ?</h3><p>Chaque point gagné te rend 1 point d’énergie, et quelques pièces.</p><p class="mgN">${MG_MAX} parties par jeu et par journée.</p>${MGS.map(M=>{ const l=mgLeft(M.k); return `<button class="mgC${l?'':' off'}" data-m="${M.k}"><em>${l}/${MG_MAX}</em><b>${M.n}</b><span>${M.d}</span></button>`; }).join('')}<button class="b alt" data-m="quit">Retour au service</button></div>`; }
-function mgEnd(pts,max,name){ const e=state.en||(state.en={v:0,t:Date.now()}), ge=Math.min(pts,EN_MAX-e.v), gc=pts*(4+state.level*2); energyTick(); e.v=Math.min(EN_MAX,e.v+pts); if(gc) earn(gc); if(pts) addXP(pts); mgCd=performance.now()/1000+20; sfx(pts?'level':'pop'); mgOn={g:'end'};
+function mgEnd(pts,max,name){ const e=state.en||(state.en={v:0,t:Date.now()}), ge=Math.min(pts,EN_MAX-e.v), gc=pts*(2+state.level); energyTick(); e.v=Math.min(EN_MAX,e.v+pts); if(gc) earn(gc); if(pts) addXP(pts); mgCd=performance.now()/1000+20; sfx(pts?'level':'pop'); mgOn={g:'end'};
  mgEl().innerHTML=`<div class="mgB"><h3>${name}</h3><div class="mgS">${pts} / ${max}</div><p>${pts?'+'+pts+' énergie'+(gc?' · +'+gc+' pièces':''):'Pas de chance cette fois.'}</p><button class="b green" data-m="quit">Retour au service</button></div>`; hud(); }
 function mgAct(m,v){ if(m==='quit'){ mgOn=null; mgEl().className='hide'; return; }
  if(MGS.some(M=>M.k===m)){ if(!mgOn||mgOn.g!=='menu') return; if(!mgLeft(m)){ sfx('bad'); return toast('Tu as déjà joué '+MG_MAX+' fois à ce jeu aujourd’hui. Il revient demain.'); } const c=mgDay(); c[m]=(c[m]||0)+1; }

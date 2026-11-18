@@ -106,7 +106,42 @@ const cityRoot=new THREE.Group(); scene.add(cityRoot); let cityKey=-1; const ter
 function syncTerrace(){ for(const s of city.terr){ let sp=terrSp.get(s); if(!sp){ sp=emoSprite('🍺',.22); fxRoot.add(sp); terrSp.set(s,sp); } sp.visible=!!s.drink; if(s.drink){ setEmo(sp,s.drink); sp.position.set(s.tx+(s.x-s.tx)*.45,.78,s.z); } } for(const [s,sp] of terrSp) if(!city.terr.includes(s)){ fxRoot.remove(sp); terrSp.delete(s); } }
 let kitTint=null, statKey='', winMat=null, shaftMat=null, streetLights=[], gridLines=null, statAnim=[];
 const WH=1.45, WT=.14;
-function disposeTree(o){ o.traverse(c=>{ if(c.userData.own){ c.geometry&&c.geometry.dispose(); if(c.material){ c.material.map&&c.material.map.dispose(); c.material.dispose(); } } }); }
+function disposeTree(o){ o.traverse(c=>{ if(c.userData.own){ c.geometry&&c.geometry.dispose(); if(c.material){ c.material.map&&c.material.map.dispose(); c.material.dispose(); } } else if(c.userData.cg&&c.geometry) c.geometry.dispose(); }); }
+// ---------- fusion des pièces fixes (v0.95) : beaucoup moins d'objets à dessiner, même rendu ----------
+// Un meuble ou un personnage est fait de nombreuses petites pièces. Celles qui ne bougent jamais les unes
+// par rapport aux autres sont soudées en un seul objet : par matière pour les meubles (rendu identique),
+// avec la couleur portée par les sommets pour les personnages.
+const BAKE=(()=>{ try{ return localStorage.getItem('bv_nobake')!=='1'; }catch(e){ return true; } })();
+const _bkInv=new THREE.Matrix4(), _bkRel=new THREE.Matrix4(), _bkCache=new Map();
+let _vcMat=null; const vcMat=()=>_vcMat||(_vcMat=new THREE.MeshStandardMaterial({vertexColors:true,roughness:.8,metalness:0}));
+function bakeClone(m,mat,col){ if(mat.determinant()<0) return null; const g=m.geometry.clone(); for(const k of Object.keys(g.attributes)) if(k!=='position'&&k!=='normal') g.deleteAttribute(k); if(!g.attributes.normal) g.computeVertexNormals(); g.morphAttributes={}; g.clearGroups();
+ if(!g.index){ const n=g.attributes.position.count, ix=new (n>65535?Uint32Array:Uint16Array)(n); for(let i=0;i<n;i++) ix[i]=i; g.setIndex(new THREE.BufferAttribute(ix,1)); }
+ g.applyMatrix4(mat);
+ if(col){ const n=g.attributes.position.count, c=new Float32Array(n*3); for(let i=0;i<n;i++){ c[i*3]=col.r; c[i*3+1]=col.g; c[i*3+2]=col.b; } g.setAttribute('color',new THREE.BufferAttribute(c,3)); }
+ return g; }
+function bakeMerge(list){ const out=mergeGeometries(list,false); list.forEach(g=>g.dispose()); return out; }
+// par matière, sur tout un meuble (les sous-groupes cités dans `skip`, ou invisibles, ne sont pas touchés)
+function bakeByMat(root,skip,key){ if(!BAKE) return;
+ const pick=[]; const walk=o=>{ for(const c of o.children){ if(!c.visible||(skip&&skip.has(c))) continue; const t=c.material;
+   if(c.isMesh){ if(!c.isInstancedMesh&&!c.children.length&&t&&!Array.isArray(t)&&!t.transparent&&!c.userData.keep&&!c.userData.own) pick.push(c); }
+   else if(!c.isSprite&&!c.isLight&&!c.isLine&&!c.isPoints&&c.children.length) walk(c); } }; walk(root);
+ if(pick.length<2) return;
+ let C=key?_bkCache.get(key):null;
+ if(!C){ root.updateWorldMatrix(true,true); _bkInv.copy(root.matrixWorld).invert(); const by=new Map();
+  pick.forEach((m,i)=>{ const k=m.material.uuid+(m.castShadow?'c':'')+(m.receiveShadow?'r':''); let b=by.get(k); if(!b){ b={mat:m.material,cast:m.castShadow,recv:m.receiveShadow,l:[],idx:[]}; by.set(k,b); } const g=bakeClone(m,_bkRel.multiplyMatrices(_bkInv,m.matrixWorld),null); if(g){ b.l.push(g); b.idx.push(i); } });
+  C=[]; for(const b of by.values()){ if(b.l.length<2){ b.l.forEach(g=>g.dispose()); continue; } const geo=bakeMerge(b.l); if(geo) C.push({geo,mat:b.mat,cast:b.cast,recv:b.recv,idx:b.idx}); }
+  if(key) _bkCache.set(key,C); }
+ for(const b of C){ for(const i of b.idx){ const m=pick[i]; if(m&&m.parent) m.parent.remove(m); } const me=new THREE.Mesh(b.geo,b.mat); me.castShadow=b.cast; me.receiveShadow=b.recv; if(!key) me.userData.cg=1; root.add(me); } }
+// personnages : les pièces directes d'un groupe, soudées en une seule avec leurs couleurs
+function bakeVCOK(m){ const t=m.material; return !!(m.isMesh&&m.visible&&!m.children.length&&t&&!Array.isArray(t)&&t.isMeshStandardMaterial&&!t.transparent&&!t.map&&!t.vertexColors&&!t.flatShading&&(t.metalness||0)<.5&&t.side===THREE.FrontSide&&!(t.emissive&&t.emissiveIntensity>0&&(t.emissive.r+t.emissive.g+t.emissive.b)>0)); }
+function bakeVC(grp,key,skip){ if(!BAKE) return null; const list=grp.children.filter(m=>bakeVCOK(m)&&!(skip&&skip.includes(m))); if(list.length<2) return null;
+ let g=key?_bkCache.get(key):null; if(!g){ const l=[]; for(const m of list){ m.updateMatrix(); const c=bakeClone(m,m.matrix,m.material.color); if(!c){ l.forEach(x=>x.dispose()); return null; } l.push(c); } g=bakeMerge(l); if(!g) return null; if(key) _bkCache.set(key,g); }
+ const me=new THREE.Mesh(g,vcMat()); me.castShadow=list.some(m=>m.castShadow); me.receiveShadow=true; if(!key) me.userData.cg=1; for(const m of list) grp.remove(m); grp.add(me); return me; }
+// pièces identiques d'une même matière (yeux, joues) : géométrie commune à tous les personnages
+function bakeSame(grp,key,mat){ if(!BAKE) return null; const list=grp.children.filter(m=>m.isMesh&&m.visible&&m.material===mat&&!m.children.length); if(list.length<2) return null;
+ let g=_bkCache.get(key); if(!g){ const l=[]; for(const m of list){ m.updateMatrix(); const c=bakeClone(m,m.matrix,null); if(!c){ l.forEach(x=>x.dispose()); return null; } l.push(c); } g=bakeMerge(l); if(!g) return null; _bkCache.set(key,g); }
+ const me=new THREE.Mesh(g,mat); me.castShadow=false; me.receiveShadow=list[0].receiveShadow; for(const m of list) grp.remove(m); grp.add(me); return me; }
+function charFree(o){ if(o&&o.root) o.root.traverse(c=>{ if(c.userData.cg&&c.geometry) c.geometry.dispose(); }); }
 function ownMesh(g,m,x,y,z,cast){ const o=mesh(g,m,x,y,z,cast); o.userData.own=1; return o; }
 function makeWindow(){
  const g=new THREE.Group(), white=M('#fffaf3',{roughness:.5});
@@ -686,13 +721,15 @@ function updFx(dt){
 /* --- synchronisation scène / jeu --- */
 const fObjs=new Map(), aObjs=new Map(), tObjs=new Map(), iObjs=new Map();
 let tableItems=new Map(),readyAt=new Map(),cookAt=new Map(),cookInfo=new Map();
+const FURN_STILL=['kind','top','plates','items'];
+function furnBake(g,key){ const ud=g.userData; if(!BAKE||Object.keys(ud).some(k=>!FURN_STILL.includes(k))) return; const skip=new Set(); if(ud.items) skip.add(ud.items); if(ud.plates) for(const p of ud.plates) skip.add(p); bakeByMat(g,skip,'F|'+key); }
 function syncFurn(T,n){
  const seen=new Set();
  for(const f of state.furn){
   let o=fObjs.get(f.id);
   const key=f.t+(f.t==='odette'?'|'+souvN():'')+(kindOf(f)==='chair'?chairBackDir(f).join():kindOf(f)==='table'?tableJoin(f).join(''):'');
   if(o&&o.key!==key){ furnRoot.remove(o.g); disposeTree(o.g); o=null; }
-  if(!o){ o={g:buildFurn(f.t,f),key}; furnRoot.add(o.g); fObjs.set(f.id,o); }
+  if(!o){ o={g:buildFurn(f.t,f),key}; try{ furnBake(o.g,key); }catch(e){ console.warn('bake',f.t,e); } furnRoot.add(o.g); fObjs.set(f.id,o); }
   const g=o.g, ud=g.userData; g.position.set(f.x+.5,0,f.y+.5);
   if(ud.kind==='chair'){ const t=seatTable(f); if(t){ const off=.43-.25*(f.pull||0); g.position.x+=(t.x-f.x)*off; g.position.z+=(t.y-f.y)*off; } } g.visible=!((sel===f||ghostChairs.has(f))&&ghost);
   g.rotation.y=furnRot(f)*Math.PI/2;
@@ -713,14 +750,14 @@ function syncAgents(dt,T){
  const seen=new Set();
  for(const a of crew.concat(custs,city.walkers,evA,lifeA)){
   let o=aObjs.get(a);
-  if(o&&a.s&&o.role!==a.s.role){ agentRoot.remove(o.root); o=null; }
+  if(o&&a.s&&o.role!==a.s.role){ agentRoot.remove(o.root); charFree(o); o=null; }
   if(!o){ o=makeCharC(a); agentRoot.add(o.root); aObjs.set(a,o); }
   animCharC(a,o,dt,T); seen.add(a);
   o.root.visible=!a.spawnWait&&!a.hide;
  }
  // décalages d'évitement calculés par la logique
  for(const [a,o] of aObjs){ o.sx=a.offX||0; o.sz=a.offY||0; }
- for(const [a,o] of aObjs) if(!seen.has(a)){ agentRoot.remove(o.root); aObjs.delete(a); }
+ for(const [a,o] of aObjs) if(!seen.has(a)){ agentRoot.remove(o.root); charFree(o); aObjs.delete(a); }
 }
 function syncSmall(T){
  const seen=new Set();
@@ -1015,6 +1052,10 @@ cv.addEventListener('wheel',e=>{ e.preventDefault(); cam.dist*=e.deltaY<0?.9:1.1
 function near(sx,sy,x,y,z,r){ const [px,py,pz]=toScreen(x,y,z); return pz<1&&Math.hypot(px-sx,py-sy)<r; }
 function tap(sx,sy){
  if(mode==='show') return;
+ // le vaisselier d'Odette, adossé au mur : il passe avant le décor du quartier qui se trouve derrière lui à l'écran,
+ // mais après les clients et les tables à débarrasser (le service d'abord)
+ if(mode==='play'&&!visit.on&&!picked&&!cine){ const f=state.furn.find(f=>f.t==='odette');
+  if(f&&(near(sx,sy,f.x+.5,.6,f.y+.5,30)||near(sx,sy,f.x+.5,1.15,f.y+.5,30))&&!custs.some(k=>!k.dead&&((k.st==='host'||(k.st==='look'&&k.seat))||(k.sitting&&k.table&&((k.st==='order'&&!k.orderBy)||(k.st==='bill'&&!k.billBy))))&&near(sx,sy,k.fx+.5,.55,k.fy+.5,40))&&![...dirty].some(([id,n])=>{ if(n<=0) return false; const t=state.furn.find(x=>x.id===id); return !!t&&near(sx,sy,t.x+.5,.42,t.y+.5,36); })){ sfx('pop'); openPanel('souvenirs'); return; } }
  try{ if(lifeTap(sx,sy)) return; }catch(e){}
  if(mode==='play'&&!visit.on&&!picked&&near(sx,sy,(DX+DXO+1)/2,1.02,S+.08,26)){ toast('Garde le doigt appuyé 2 secondes sur le panneau pour '+(isOpen()?'fermer':'ouvrir')+'.'); return; }
  if(visit.on){ $('#vcard').classList.add('hide'); visit.sel=null; return; }

@@ -570,3 +570,45 @@ body.watch #dx,body.visit #dx,body.watch #sMg,body.visit #sMg{opacity:0;pointer-
 .nbC small.nbOn{color:#1f8a4c;font-weight:700}
 .nbBig{display:flex;flex-direction:column;align-items:center;gap:4px;margin:4px 0 8px}.nbBig img{width:96px;height:96px;border-radius:50%;border:4px solid #e0457f;background:#fff}.nbBig b{font-size:19px}.nbBig em{font-style:normal;color:#e0457f;font-size:22px;letter-spacing:2px}.nbBig u{text-decoration:none;color:#e6d5c4}
 .nbNew{display:flex;align-items:center;gap:10px;text-align:left;background:#fff0f5;border:2px solid #f3b6cb;border-radius:14px;padding:8px 10px;font-size:13px}.nbNew img{width:44px;height:44px;border-radius:50%;flex:none;background:#fff}
+/* ===================== v0.95 : passe de finition ===================== */
+/* barre du haut : tout tient sur un écran de 360 px (le bouton Réglages sortait de l'écran) */
+#top{grid-template-columns:auto minmax(0,1fr) auto auto auto}
+#top #pLvl{min-width:0;width:100%;max-width:170px;justify-self:center}
+#pLvl .lvb{flex:none}
+#pLvl .xpw{flex:1 1 auto;min-width:12px;width:auto}
+@media (max-width:420px){
+ #top{gap:4px;padding-left:6px;padding-right:6px}
+ #top .pill{padding:0 9px 0 3px;font-size:16px;gap:4px}
+ #top .pill .coin{width:27px;height:27px}
+ #top .pill .star{width:24px;height:24px}
+ #top .pill.round{width:38px;height:38px;padding:0}
+}
+/* équipe : sur petit écran, les boutons passent sous le texte au lieu de l'écraser */
+.row.tm{flex-wrap:wrap}
+.row.tm .info{flex:1 1 150px;min-width:0}
+.row.tm>button{flex:0 0 auto}
+@media (max-width:420px){ .row.tm .info{flex-basis:calc(100% - 80px)} .row.tm>button:first-of-type{margin-left:auto} }
+.row.tm>.info:first-child{flex-basis:100%}
+.sub.mnP{margin-top:2px}.sub.mnP b{color:#a0611f}
+/* fin de chapitre : souvenir et nouveau voisin dans la même fenêtre */
+.souvC{display:flex;gap:10px;align-items:flex-start;text-align:left;margin:10px 0;padding:10px 12px;border-radius:14px;background:#fff6dd;border:2px solid #e9c46a}
+.souvC>i{flex:none;width:14px;height:14px;margin-top:5px;border-radius:50%;border:2px solid #7a4a2a}
+.souvC em{display:block;font-style:normal;font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:#a0611f}
+.souvC b{display:block;font-size:15px;color:#5a3520}.souvC span{display:block;font-size:13px;font-style:italic;color:#7a5a3a;margin:2px 0 4px}
+.souvC u{display:block;text-decoration:none;font-size:12.5px;font-weight:700;color:#1f8a4c}
+.nbNew{margin:8px 0}
+/* bouton Jeux : compteur de parties, et petit appel quand l'énergie est basse */
+#sMg{overflow:visible}
+#sMg i{position:absolute;right:-5px;top:-6px;min-width:19px;height:19px;padding:0 4px;border-radius:10px;background:#fff;color:#177a72;border:2px solid #177a72;font:700 11px/15px Fredoka,system-ui,sans-serif;font-style:normal;text-align:center}
+#sMg.call{animation:mgCall 1.6s ease-in-out infinite}
+@keyframes mgCall{0%,100%{transform:scale(1)}12%{transform:scale(1.1) rotate(-4deg)}24%{transform:scale(1.1) rotate(4deg)}36%{transform:scale(1)}}
+.mgB{max-height:calc(100vh - 24px);overflow:auto}
+/* bandeau d'événement replié : une pastille au centre, entre les deux colonnes de boutons */
+#evb em{display:none;font-style:normal}
+#evb.mini{width:auto;max-width:calc(100vw - 196px);padding:5px 12px 6px;border-radius:999px;border-width:2.5px;box-shadow:0 3px 0 var(--ec),0 6px 12px rgba(0,0,0,.2);animation:none}
+#evb.mini b,#evb.mini span,#evb.mini .evP{display:none}
+#evb.mini em{display:block;font-size:13px;font-weight:700;color:var(--ec);filter:brightness(.8);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#evb.mini .evBar{margin-top:3px;height:4px}
+/* écran titre : les options tiennent sur un écran court */
+#title{overflow-y:auto}
+@media (max-height:760px){ #title.v-opt .tiLogo,#title.v-wipe .tiLogo span,#title.v-multi .tiLogo span{display:none} #title.v-opt .tiO{padding-top:7px;padding-bottom:7px} #title.v-opt .tiBox{margin-top:10px} }

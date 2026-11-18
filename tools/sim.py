@@ -20,5 +20,6 @@ async def main():
     print('days',len(log),'time',round(time.time()-t0),'err',errs[:2], await D("BOT.err||''"))
     print('n   rev  cost    net  coins lvl rat sat seat staff             S mn  occ  kq   wq  ml eq  ch.st serv tips   debt')
     for r in log: print(f"{r['n']:2d} {r['rev']:5d} {r['cost']:5d} {r['net']:6d} {r['coins']:6d} {r['lvl']:3d} {r['rating']:.1f} {r['sat']:3d} {r['seats']:4d} {r['staff']:17s} {r['S']:2d} {r['menu']:2d} {r['occ']:.2f} {r['kq']:4.1f} {r['wq']:.2f} {r['ml']:.1f} {r['eq']} {r['ch']:2d}.{r['st']} {r['served']:4d} {r['tips']:4d} {r.get('debt',0):6d}")
+    print('NEW:', await D("JSON.stringify({nb:state.nb&&state.nb.v,pages:state.story&&state.story.pages,dresser:state.furn.some(f=>f.t==='odette'),souvTip:souvTip(),carnet:carnetMul(),fr:state.fr,proj:state.proj})"))
     await b.close()
 asyncio.run(main())
