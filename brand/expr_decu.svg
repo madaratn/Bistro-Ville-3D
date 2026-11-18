@@ -10,7 +10,7 @@
 <path d="M62 420 Q58 318 112 286 Q180 262 248 286 Q302 318 298 420Z" fill="url(#hdedecu)"/>
 <path d="M112 286 Q180 262 248 286 Q226 322 180 326 Q134 322 112 286Z" fill="#c9561f" opacity=".55"/>
 <path d="M160 318 q-3 34 -8 52 M200 318 q3 34 8 52" stroke="#fff3dc" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="152" cy="372" r="5" fill="#fff3dc"/><circle cx="208" cy="372" r="5" fill="#fff3dc"/>
-<g transform="translate(232 352) scale(.2)"><path d="M100 14 L170 54 V146 L100 186 L30 146 V54 Z" fill="#2a1a14" stroke="url(#lgedecu)" stroke-width="12" stroke-linejoin="round"/><path d="M58 138 V68 L100 112 L142 68 V138" fill="none" stroke="url(#lgedecu)" stroke-width="18" stroke-linecap="round" stroke-linejoin="round"/></g>
+<g transform="translate(232 352) scale(.2)"><path d="M100 14 L170 54 V146 L100 186 L30 146 V54 Z" fill="#2a1a14" stroke="url(#lgedecu)" stroke-width="12" stroke-linejoin="round"/><path d="M74 140 V66 H134 M74 104 H122" fill="none" stroke="url(#lgedecu)" stroke-width="18" stroke-linecap="round" stroke-linejoin="round"/></g>
 <path d="M82 318 Q52 360 70 420" fill="none" stroke="url(#hdedecu)" stroke-width="44" stroke-linecap="round"/><g><path d="M156 262 h48 v30 q-24 14 -48 0Z" fill="#d39b72"/>
 <ellipse cx="86" cy="178" rx="15" ry="20" fill="url(#skedecu)"/><ellipse cx="274" cy="178" rx="15" ry="20" fill="url(#skedecu)"/><path d="M82 170 q8 8 2 18 M278 170 q-8 8 -2 18" stroke="#d39b72" stroke-width="3" fill="none" stroke-linecap="round"/>
 <path d="M88 168 Q86 74 180 72 Q274 74 272 168 Q272 236 232 262 Q180 286 128 262 Q88 236 88 168Z" fill="url(#skedecu)"/>

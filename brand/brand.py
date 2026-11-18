@@ -11,7 +11,7 @@ def logo():
     m=inner(mascot('lg'))
     return f'''<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 460"><defs><radialGradient id="lbg" cx=".3" cy=".45" r=".9"><stop offset="0" stop-color="#3a2116"/><stop offset="1" stop-color="#110a07"/></radialGradient><linearGradient id="ltx" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff3d6"/><stop offset="1" stop-color="#ffb347"/></linearGradient></defs>
 <rect width="1200" height="460" rx="40" fill="url(#lbg)"/><g transform="translate(40 20)">{m}</g>
-<text x="430" y="238" font-family="Fredoka, 'Arial Rounded MT Bold', Arial, sans-serif" font-weight="700" font-size="104" letter-spacing="6" fill="url(#ltx)">MADARATN</text>
+<text x="430" y="238" font-family="Fredoka, 'Arial Rounded MT Bold', Arial, sans-serif" font-weight="700" font-size="124" letter-spacing="10" fill="url(#ltx)">FARGATI</text>
 <text x="436" y="312" font-family="Fredoka, Arial, sans-serif" font-weight="600" font-size="44" letter-spacing="25" fill="#e5484d">PRODUCTION</text><rect x="436" y="340" width="150" height="8" rx="4" fill="#ff8a3d"/></svg>'''
 open('icone.svg','w').write(icon('i')); open('logo.svg','w').write(logo())
 ex=[('content','Content'),('gourmand','Gourmand'),('surpris','Surpris'),('decu','Déçu')]
@@ -26,7 +26,7 @@ async def main():
     await shot(wrap(icon('a'),1024,1024),1024,1024,'icone-1024.png',True)
     await shot(wrap(icon('b',False),1024,1024),1024,1024,'icone-carree-1024.png')
     await shot(wrap(icon('c'),192,192),192,192,'icone-192.png',True)
-    await shot(wrap(logo(),1200,460),1200,460,'logo-madaratn.png',True)
+    await shot(wrap(logo(),1200,460),1200,460,'logo-fargati.png',True)
     await shot(wrap(mascot('t'),720,840),720,840,'mascotte-transparente.png',True)
     await shot(open('expr.html').read(),1200,380,'expressions.png')
     await b.close()

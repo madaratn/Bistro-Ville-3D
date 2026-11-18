@@ -17,7 +17,7 @@ def mascot(uid='m',expr='content',anim=False,slice_=True,thumb=True,stars=True,b
 <path d="M62 420 Q58 318 112 286 Q180 262 248 286 Q302 318 298 420Z" fill="url(#hd{uid})"/>
 <path d="M112 286 Q180 262 248 286 Q226 322 180 326 Q134 322 112 286Z" fill="#c9561f" opacity=".55"/>
 <path d="M160 318 q-3 34 -8 52 M200 318 q3 34 8 52" stroke="#fff3dc" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="152" cy="372" r="5" fill="#fff3dc"/><circle cx="208" cy="372" r="5" fill="#fff3dc"/>
-<g transform="translate(232 352) scale(.2)"><path d="M100 14 L170 54 V146 L100 186 L30 146 V54 Z" fill="#2a1a14" stroke="url(#lg{uid})" stroke-width="12" stroke-linejoin="round"/><path d="M58 138 V68 L100 112 L142 68 V138" fill="none" stroke="url(#lg{uid})" stroke-width="18" stroke-linecap="round" stroke-linejoin="round"/></g>
+<g transform="translate(232 352) scale(.2)"><path d="M100 14 L170 54 V146 L100 186 L30 146 V54 Z" fill="#2a1a14" stroke="url(#lg{uid})" stroke-width="12" stroke-linejoin="round"/><path d="M74 140 V66 H134 M74 104 H122" fill="none" stroke="url(#lg{uid})" stroke-width="18" stroke-linecap="round" stroke-linejoin="round"/></g>
 '''
     if thumb:
         o+=f'''<path d="M82 318 Q46 352 60 396" fill="none" stroke="url(#hd{uid})" stroke-width="44" stroke-linecap="round"/>

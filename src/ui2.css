@@ -414,7 +414,7 @@ body.cine:has(#prolog.cine:not(.load)) canvas{}
 #tut .tuSkip{background:none;border:0;color:#8a6a4a;font:600 13px Fredoka,system-ui,sans-serif;text-decoration:underline;cursor:pointer;padding:8px 2px}
 .tdH{margin-top:18px}
 
-/* --- écran de démarrage : Madara TN Production --- */
+/* --- écran de démarrage : Fargati Production --- */
 #splash{position:fixed;inset:0;z-index:100;display:flex;flex-direction:column;align-items:center;justify-content:center;background:radial-gradient(circle at 50% 42%,#2b1a13,#0d0806 70%);font-family:Fredoka,system-ui,sans-serif;color:#fff;transition:opacity .7s;overflow:hidden}
 #splash.out{opacity:0;pointer-events:none}
 #splash .spGlow{position:absolute;left:50%;top:38%;width:340px;height:340px;margin:-170px 0 0 -170px;border-radius:50%;background:radial-gradient(circle,rgba(255,138,61,.42),transparent 65%);animation:spGl 2.4s ease-in-out infinite;opacity:0;animation-delay:.9s;animation-fill-mode:both}

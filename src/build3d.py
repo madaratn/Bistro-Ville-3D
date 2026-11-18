@@ -15,7 +15,7 @@ def R(old,new):
 R(" if(Math.abs(dx+dy)>.01) a.back=(dx+dy)<0;"," if(Math.abs(dx+dy)>.01) a.back=(dx+dy)<0;\n if(dx||dy){ a.hx=dx; a.hy=dy; }")
 R("function faceTo(a,f){ const dx=f.x-a.x, dy=f.y-a.y;","function faceTo(a,f){ const dx=f.x-a.x, dy=f.y-a.y; a.hx=dx; a.hy=dy;")
 R("const TW=64, TH=32, WH=66;","")
-R("<p class=\"sub center\">Bistro Ville — prototype v0.2</p>","<p class=\"sub center\">Chez Odette — prototype v0.81</p>")
+R("<p class=\"sub center\">Bistro Ville — prototype v0.2</p>","<p class=\"sub center\">Chez Odette — prototype v0.82</p>")
 exec(open('src/logic_patch.py').read())
 exec(open('src/deco_patch.py').read())
 exec(open('src/bar_patch.py').read())
