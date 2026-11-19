@@ -1,6 +1,6 @@
 **Jouer en ligne : https://madaratn.github.io/Bistro-Ville-3D/**
 
-# Chez Odette — prototype v0.96
+# Chez Odette — prototype v0.97
 
 Jeu mobile de gestion de restaurant (Android + iOS), inspiré des mécaniques de Restaurant City,
 avec un nom, des graphismes et des personnages 100 % originaux.
@@ -23,6 +23,15 @@ avec un nom, des graphismes et des personnages 100 % originaux.
 | Quartier | Bar avec terrasse, cinéma, galerie marchande, immeubles (fenêtres éclairées la nuit). Passants qui vont au cinéma, au bar, font les boutiques ou traversent le trottoir d'en face ; les clients arrivent du quartier et y repartent |
 | Ambiance | Carnet de commandes compact et repliable, bulles discrètes, rien qui clignote, mode « Regarder » (interface masquée, caméra qui se promène) |
 | Divers | Sauvegarde automatique, gains hors-ligne (jusqu'à 8 h), sons, tutoriel, réglages |
+
+### Nouveautés v0.97 : les personnages et l'image
+- **Des personnages refaits de la tête aux pieds** : chaque client, chaque employé et les onze personnages de l'histoire sont maintenant de vraies figurines articulées (épaules, coudes, genoux, pieds), avec un visage détaillé (yeux brillants, paupières, sourcils, bouche qui parle et qui mâche), des coiffures peignées mèche par mèche, des tenues complètes (gilets, tabliers, foulards, lunettes, moustaches, chapeaux). Un seul maillage par personnage : c'est plus beau, et il y a moins d'objets à afficher qu'avant.
+- **Des gros plans vivants dans les dialogues** : le médaillon dessiné laisse la place au personnage lui-même, en 3D. Il cligne des yeux, articule pendant que le texte s'écrit, et change d'expression à chaque réplique (sourire, moue, surprise, tristesse…). Les mêmes portraits servent dans les fiches des voisins et le tutoriel.
+- **Une image plus riche** : ombres de contact sous les meubles, les assiettes et les personnages (occlusion ambiante), sol en relief avec joints creusés, veinage du bois et reflets, nuances d'un carreau à l'autre.
+- **Tous les mécanismes sont conservés** : service, histoire, élan, étoiles, ardoise, mini-jeux, Belmont… rien ne change côté règles ni côté sauvegarde.
+- **Réglable** : Plus → Réglages → « Personnages détaillés » permet de revenir aux personnages d'avant, à chaud. Si l'appareil peine, le jeu coupe de lui-même les ombres de contact, puis les effets d'image. En mode léger, les personnages sont allégés et le sol reste simple.
+
+Code : `src/chars_hd.js` (géométrie, squelette, matière et animation des personnages), `src/bust.js` (gros plans des scènes et portraits), l'occlusion ambiante dans `src/gfx.js`, le sol dans `src/render3d.js` (`floorDet`, `floorMat`), le réglage dans `src/hd_patch.py`.
 
 ### Nouveautés v0.96 : l'histoire et le service
 - **Des scènes, plus des fenêtres** : chaque dialogue se joue en bandes cinéma, avec le portrait du personnage, ses expressions, le texte qui s'écrit, une carte de titre à chaque chapitre et une musique d'ambiance pour les moments forts. Le service se met en pause pendant qu'on lit.

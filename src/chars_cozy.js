@@ -63,7 +63,19 @@ function charSpec(a){
  if(!a.s&&L.fit){ Object.assign(S,L.fit); S.extras=[...(S.extras||[])]; }
  return S;
 }
+// objets tenus (plateau, bac, tablette, terminal, carte, téléphone, fourchette) : les mêmes pour tous les personnages
+function charProps(){
+ const tray=new THREE.Group(); tray.add(mesh(CY(.15,.15,.012,24),M('#cfd4db',{metalness:.6,roughness:.25}),0,0,0)); tray.add(mesh(CY(.09,.065,.015,20),M('#ffffff'),0,.014,0,false)); const tsp=emoSprite('🍽️',.24); tsp.position.y=.1; tray.add(tsp); tray.position.set(0,.22,.25);
+ const tub=new THREE.Group(); const tubM=M('#8d969f',{roughness:.6}); tub.add(mesh(RB(.34,.012,.24,.01),tubM,0,0,0,false)); for(const [w,d,x,z] of [[.34,.012,0,.115],[.34,.012,0,-.115],[.012,.24,.165,0],[.012,.24,-.165,0]]) tub.add(mesh(new THREE.BoxGeometry(w,.09,d),tubM,x,.045,z,false));
+ const tubPl=new THREE.Group(); for(let i=0;i<3;i++) tubPl.add(mesh(CY(.08,.06,.012,16),M('#f6f3ee',{roughness:.3}),-.06+i*.06,.02+i*.013,(i%2)*.02,false)); tub.add(tubPl); tub.position.set(0,.16,.27);
+ const tab=new THREE.Group(); tab.add(mesh(RB(.2,.012,.14,.008),M('#25282e',{roughness:.35}),0,0,0,false)); tab.add(mesh(new THREE.BoxGeometry(.18,.002,.12),M('#dff3ff',{emissive:'#8fd0ff',emissiveIntensity:.7,roughness:.3}),0,.007,0,false)); tab.position.set(0,.22,.2); tab.rotation.x=-.6;
+ const tpe=new THREE.Group(); tpe.add(mesh(RB(.08,.022,.14,.008),M('#2b2e34',{roughness:.4}),0,0,0,false)); tpe.add(mesh(new THREE.BoxGeometry(.06,.002,.045),M('#bfe8c9',{emissive:'#7fdc9a',emissiveIntensity:.6}),0,.012,-.03,false)); tpe.position.set(0,.22,.2); tpe.rotation.x=-.6;
+ const menuB=new THREE.Group(); const cov=M('#7a2e2a',{roughness:.7}), pg=M('#fbf6ea',{roughness:.9}); for(const sd of [-1,1]){ const hh=new THREE.Group(); hh.add(mesh(new THREE.BoxGeometry(.1,.004,.14),cov,sd*.05,0,0,false)); hh.add(mesh(new THREE.BoxGeometry(.092,.003,.13),pg,sd*.05,.0035,0,false)); hh.rotation.z=sd*-.28; menuB.add(hh); } menuB.position.set(0,.27,.2); menuB.rotation.x=-1.0;
+ const phone=new THREE.Group(); phone.add(mesh(RB(.05,.09,.01,.005),M('#22252b',{roughness:.3}),0,0,0,false)); phone.add(mesh(new THREE.BoxGeometry(.04,.072,.002),M('#9fd6ff',{emissive:'#6fb8ff',emissiveIntensity:.8}),0,0,-.006,false)); phone.position.set(.034,-.168,.036); phone.rotation.set(2.22,0,.3); phone.scale.setScalar(1.2);   // tenu dans la main droite, écran tourné vers le visage
+ const fork=new THREE.Group(); const sil=M('#d9dde3',{metalness:.8,roughness:.25}); fork.add(mesh(new THREE.BoxGeometry(.01,.11,.006),sil,0,-.2,0,false)); for(let i=-1;i<=1;i++) fork.add(mesh(new THREE.BoxGeometry(.005,.03,.005),sil,i*.008,-.265,0,false));
+ return {tray,tsp,tub,tubPl,tab,tpe,menuB,phone,fork}; }
 function makeCharC(a){
+ if(HD.on){ try{ return makeCharHD(a); }catch(e){ console.warn('hd',e); HD.on=false; } }
  const S=charSpec(a), root=new THREE.Group(), sc=S.kid?.8:1.1; root.scale.setScalar(sc);
  const skin=_cm(S.skin,{roughness:.85}), top=_cm(S.top), bot=_cm(S.bottom), shoe=_cm(S.shoes,{roughness:.6}), hairM=_cm(S.hairC,{roughness:.9});
  // jambes
@@ -93,14 +105,7 @@ function makeCharC(a){
  arcs.visible=false; head.add(eyes,arcs,smile,open);
  // objets tenus (devant le corps)
  const hold=new THREE.Group(); body.add(hold);
- const tray=new THREE.Group(); tray.add(mesh(CY(.15,.15,.012,24),M('#cfd4db',{metalness:.6,roughness:.25}),0,0,0)); tray.add(mesh(CY(.09,.065,.015,20),M('#ffffff'),0,.014,0,false)); const tsp=emoSprite('🍽️',.24); tsp.position.y=.1; tray.add(tsp); tray.position.set(0,.22,.25);
- const tub=new THREE.Group(); const tubM=M('#8d969f',{roughness:.6}); tub.add(mesh(RB(.34,.012,.24,.01),tubM,0,0,0,false)); for(const [w,d,x,z] of [[.34,.012,0,.115],[.34,.012,0,-.115],[.012,.24,.165,0],[.012,.24,-.165,0]]) tub.add(mesh(new THREE.BoxGeometry(w,.09,d),tubM,x,.045,z,false));
- const tubPl=new THREE.Group(); for(let i=0;i<3;i++) tubPl.add(mesh(CY(.08,.06,.012,16),M('#f6f3ee',{roughness:.3}),-.06+i*.06,.02+i*.013,(i%2)*.02,false)); tub.add(tubPl); tub.position.set(0,.16,.27);
- const tab=new THREE.Group(); tab.add(mesh(RB(.2,.012,.14,.008),M('#25282e',{roughness:.35}),0,0,0,false)); tab.add(mesh(new THREE.BoxGeometry(.18,.002,.12),M('#dff3ff',{emissive:'#8fd0ff',emissiveIntensity:.7,roughness:.3}),0,.007,0,false)); tab.position.set(0,.22,.2); tab.rotation.x=-.6;
- const tpe=new THREE.Group(); tpe.add(mesh(RB(.08,.022,.14,.008),M('#2b2e34',{roughness:.4}),0,0,0,false)); tpe.add(mesh(new THREE.BoxGeometry(.06,.002,.045),M('#bfe8c9',{emissive:'#7fdc9a',emissiveIntensity:.6}),0,.012,-.03,false)); tpe.position.set(0,.22,.2); tpe.rotation.x=-.6;
- const menuB=new THREE.Group(); const cov=M('#7a2e2a',{roughness:.7}), pg=M('#fbf6ea',{roughness:.9}); for(const sd of [-1,1]){ const hh=new THREE.Group(); hh.add(mesh(new THREE.BoxGeometry(.1,.004,.14),cov,sd*.05,0,0,false)); hh.add(mesh(new THREE.BoxGeometry(.092,.003,.13),pg,sd*.05,.0035,0,false)); hh.rotation.z=sd*-.28; menuB.add(hh); } menuB.position.set(0,.27,.2); menuB.rotation.x=-1.0;
- const phone=new THREE.Group(); phone.add(mesh(RB(.05,.09,.01,.005),M('#22252b',{roughness:.3}),0,0,0,false)); phone.add(mesh(new THREE.BoxGeometry(.04,.072,.002),M('#9fd6ff',{emissive:'#6fb8ff',emissiveIntensity:.8}),0,0,-.006,false)); phone.position.set(.034,-.168,.036); phone.rotation.set(2.22,0,.3); phone.scale.setScalar(1.2);   // tenu dans la main droite, écran tourné vers le visage
- const fork=new THREE.Group(); const sil=M('#d9dde3',{metalness:.8,roughness:.25}); fork.add(mesh(new THREE.BoxGeometry(.01,.11,.006),sil,0,-.2,0,false)); for(let i=-1;i<=1;i++) fork.add(mesh(new THREE.BoxGeometry(.005,.03,.005),sil,i*.008,-.265,0,false)); arms[0].add(fork);
+ const {tray,tsp,tub,tubPl,tab,tpe,menuB,phone,fork}=charProps(); arms[0].add(fork);
  for(const p of [tray,tub,tab,tpe,menuB]){ p.visible=false; hold.add(p); } phone.visible=false; arms[0].add(phone); fork.visible=false;
  root.traverse(m=>{ if(m.isMesh) m.castShadow=false; }); torso.castShadow=hm.castShadow=hips.castShadow=true;
  // fusion des pièces fixes : jambes, bras, buste, tête, yeux, joues (environ 28 objets dessinés -> une dizaine)
@@ -147,12 +152,13 @@ function animCharC(a,o,dt,T){
  if(a.scoot>.01) y+=a.scoot*.02;
  if(a.yOff) y+=a.yOff;
  o.root.position.set(px+o.sx,y,pz+o.sz); o.root.rotation.y=o.ry;
+ if(o.hd&&k>.01&&!a.seatGeo){ o.root.position.x+=Math.sin(o.ry)*.05*k; o.root.position.z+=Math.cos(o.ry)*.05*k; }      // assis : le dos ne traverse pas le dossier
  // ----- pose cible -----
  const seated=k>.5&&a.sitting, talking=a.talk&&a.sitting, laughing=a.grp&&a.grp.laugh>0&&a.sitting, still=!a.moving&&k<.3;
  let aL=.05,aR=.05,zL=.12,zR=.12,lean=(a.lean||0),pit=0,gz, eating=false;
  const breathe=1+Math.sin(T*1.6+id)*.012;
  // marche : bras qui balancent
- aL+=sw*.55*mv*sp; aR-=sw*.55*mv*sp;
+ aL-=sw*.55*mv*sp; aR+=sw*.55*mv*sp;
  if(seated){
   if(a.st==='queue'){ aL=aR=.5; }
   else { aL=aR=1.05; zL=zR=.0; lean+=.06;
@@ -214,25 +220,27 @@ function animCharC(a,o,dt,T){
  // ----- application lissée -----
  const s=Math.min(1,dt*10), P=o.P;
  P.aL+=(aL-P.aL)*s; P.aR+=(aR-P.aR)*s; P.zL+=(zL-P.zL)*s; P.zR+=(zR-P.zR)*s; P.lean+=(lean-P.lean)*Math.min(1,dt*6);
+ if(o.hd) hdLimbs(a,o,dt,T,k,sw,mv,sp,breathe); else {
  // bras : [0] = main droite (x<0), [1] = main gauche
  o.arms[0].rotation.set(-P.aR,0,-P.zR); o.arms[1].rotation.set(-P.aL,0,P.zL);
  const lg=-1.45*k; o.legs[0].rotation.x=lg+sw*.75*mv*sp; o.legs[1].rotation.x=lg-sw*.75*mv*sp;
  const tap=a.sitting&&a.st==='wait'&&a.pat<35?Math.max(0,Math.sin(T*11))*.25:0; o.legs[0].rotation.x-=tap;
- o.body.rotation.x=P.lean; o.body.rotation.z=sw*.07*mv; o.body.scale.y=breathe;
+ o.body.rotation.x=P.lean; o.body.rotation.z=sw*.07*mv; o.body.scale.y=breathe; }
  // tête
  let hT=a.headT||0;
  if(a.lookAt&&a.sitting){ const L2=a.lookAt; hT=clamp(angDiff(a.rot,Math.atan2(L2.fx-a.fx,L2.fy-a.fy)),-1.1,1.1); }
  if(a.s&&!job&&!a.moving) hT=Math.sin(T*.45+(a.ph||0))*.55;
  if(gz!==undefined) hT=gz;
  o.yaw+=(hT-o.yaw)*Math.min(1,dt*4.5); o.pit+=(pit-o.pit)*Math.min(1,dt*6);
- o.head.rotation.set(o.pit,o.yaw,Math.sin(T*.9+id)*.03+sw*.03*mv);
+ o.head.rotation.set(o.pit,o.yaw+(o.hd?sw*.07*mv:0),Math.sin(T*.9+id)*.03+sw*.03*mv);
  // visage
  o.blinkT-=dt; if(o.blinkT<=0) o.blinkT=rnd(2,5.5);
  const happy=a.mood==='happy'||laughing||a.thankT>0||(a.s&&a.wave>0)||eating;
  const sad=a.mood==='angry'||(!a.s&&a.pat<35&&(a.st==='wait'||a.st==='order'||a.st==='queue'));
  const op=laughing||(talking&&Math.sin(T*13+id)>.1)||(a.st==='look'&&a.t>.6);
+ if(o.hd) hdFace(a,o,dt,T,{happy,sad,op,laughing,eating,talking,hT,chew:a.st==='eat'&&a.sitting&&!talking}); else {
  o.eyes.visible=!happy; o.arcs.visible=happy; o.eyes.scale.y=o.blinkT<.12?.12:1; o.eyes.position.y=o.blinkT<.12?.132:0;
- o.smile.visible=!op; o.open.visible=op; o.smile.rotation.z=sad?0:Math.PI; o.smile.position.y=sad?.06:.085; o.open.scale.y=laughing?1.25:.8;
+ o.smile.visible=!op; o.open.visible=op; o.smile.rotation.z=sad?0:Math.PI; o.smile.position.y=sad?.06:.085; o.open.scale.y=laughing?1.25:.8; }
  // objets
  o.tray.visible=!!a.carry; if(a.carry) setFood(o.tray,o.tsp,a.carry,.022);
  o.tub.visible=!!a.tub&&!a.carry&&!a.wipe; o.tubPl.visible=a.tub===2;

@@ -22,7 +22,12 @@ RX("<div class=\"sub\">${end?SAGA.length:st.ch} chapitres terminés sur ${SAGA.l
 
 # les joueurs qui reprennent une ancienne partie : Odette présente les nouveautés une fois, et fait signer le registre
 RX("function storyCheck(){\n","""function storyNews(){ if(state.n96===undefined){ const s0=state.story; state.n96=(s0&&s0.v&&((s0.pages||0)>0||s0.seen===s0.ch))?0:1; }
- if(state.n96!==0||warming||!state.tuto||mode!=='play'||ui.panel||modalQ.length||scBusy()||(typeof visit!=='undefined'&&visit.on)||(typeof rush!=='undefined'&&rush)||(typeof titleOn!=='undefined'&&titleOn)) return; state.n96=1;
+ if(state.n97===undefined){ const s0=state.story; state.n97=(s0&&s0.v&&((s0.pages||0)>0||s0.seen===s0.ch))?0:1; }
+ if((state.n96!==0&&state.n97!==0)||warming||!state.tuto||mode!=='play'||ui.panel||modalQ.length||scBusy()||(typeof visit!=='undefined'&&visit.on)||(typeof rush!=='undefined'&&rush)||(typeof titleOn!=='undefined'&&titleOn)) return;
+ if(state.n96!==0){ state.n97=1; sceneQ({title:'Le bistrot s’est fait beau',lines:[['o/grin','Regarde-moi ça ! On a tous refait notre portrait. Tu as vu ? Je cligne des yeux, maintenant. Et je te parle pour de vrai.'],
+  ['s','Nouvelles tenues, nouvelles coiffures : toute l’équipe est passée chez le tailleur, Chef. Les clients aussi, on dirait.'],
+  ['o/warm','La salle a suivi : le carrelage brille, les ombres sont plus douces. Si ton téléphone peine, tout se règle dans Plus, puis Réglages.']]}); return; }
+ state.n96=1;
  sceneQ({title:'Du nouveau au bistrot',lines:[['o/grin','Ah, te voilà ! J’ai remis de l’ordre dans mes vieux papiers, et j’ai retrouvé trois habitudes de la maison.'],
   ['o','L’ardoise : chaque matin, on y écrit le plat du jour. Il part deux fois plus vite, et il se paie mieux. Tu la trouveras dans ton menu.'],
   ['o','L’élan : tant que tes clients repartent contents, les pourboires grimpent. Un seul qui s’en va fâché, et tout retombe à zéro.'],

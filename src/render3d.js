@@ -70,11 +70,34 @@ function floorTex(F,flat){
    for(let i=0;i<=S;i++){ x.beginPath(); x.moveTo(i*T,0); x.lineTo(i*T,S*T); x.moveTo(0,i*T); x.lineTo(S*T,i*T); x.stroke(); }
   }
   const r=seeded(3); for(let i=0;i<S*S*6;i++){ x.fillStyle=`rgba(${r()<.5?255:0},${r()<.5?255:0},${r()<.5?255:0},.025)`; x.fillRect(r()*S*T,r()*S*T,3,3); }
+  if(!LITE){ const q=seeded(41); if(F.pat==='plank'){ for(let rr=0;rr<S*3;rr++){ const o=((rr*7)%3)/3; for(let i=-1;i<S;i++){ const a=q()*.09; x.fillStyle=q()<.5?`rgba(255,240,215,${a})`:`rgba(70,40,15,${a})`; x.fillRect((i+o)*T,rr*T/3,T,T/3); } for(let n=0;n<S*2;n++){ x.fillStyle=`rgba(80,45,18,${.03+q()*.05})`; x.fillRect(q()*S*T,rr*T/3+2+q()*(T/3-4),14+q()*40,1); } } }
+   else for(let j=0;j<S;j++) for(let i=0;i<S;i++){ const a=q()*.07; x.fillStyle=q()<.5?`rgba(255,250,235,${a})`:`rgba(70,45,20,${a})`; x.fillRect(i*T+1,j*T+1,T-2,T-2); } }
   if(flat) return;
   let g=x.createLinearGradient(0,0,0,T); g.addColorStop(0,'rgba(60,35,15,.3)'); g.addColorStop(1,'rgba(60,35,15,0)'); x.fillStyle=g; x.fillRect(0,0,S*T,T);
   g=x.createLinearGradient(0,0,T,0); g.addColorStop(0,'rgba(60,35,15,.3)'); g.addColorStop(1,'rgba(60,35,15,0)'); x.fillStyle=g; x.fillRect(0,0,T,S*T);
  });
 }
+// ----- v0.97 : le sol prend du relief (joints creusés, veinage du bois) et de la brillance, sans texture géante : un seul carreau qui se répète -----
+const floorDetC={};
+function floorDet(F){ if(LITE) return null; const key=F.pat; if(floorDetC[key]) return floorDetC[key];
+ const N=128, G=32, H=new Float32Array(N*N), R=new Float32Array(N*N), rnd0=seeded(77), gn=[]; for(let i=0;i<G*G;i++) gn.push(rnd0());
+ const noise=(u,v,fu,fv)=>{ const x=u*fu, y=v*fv, xi=Math.floor(x), yi=Math.floor(y), fx=x-xi, fy=y-yi, sx=fx*fx*(3-2*fx), sy=fy*fy*(3-2*fy), g=(a,b)=>gn[(a%fu)+(b%fv)*G]; return (g(xi,yi)*(1-sx)+g(xi+1,yi)*sx)*(1-sy)+(g(xi,yi+1)*(1-sx)+g(xi+1,yi+1)*sx)*sy; };
+ const sm=(a,b,x)=>{ const t=Math.min(1,Math.max(0,(x-a)/(b-a))); return t*t*(3-2*t); };
+ for(let j=0;j<N;j++) for(let i=0;i<N;i++){ const u=(i+.5)/N, v=(j+.5)/N, k=j*N+i; let h, ro;
+  if(F.pat==='plank'){ const rr=Math.min(2,Math.floor(v*3)), vv=v*3-rr, o=rr/3, du=Math.min(Math.abs(u-o),1-Math.abs(u-o)), dv=Math.min(vv,1-vv)/3, gr=noise(u,v,4,32)*.65+noise(u,v,8,16)*.35, e=sm(0,.013,dv)*sm(0,.011,du);
+   h=e*(.86+.14*gr); ro=e<.6?.92:.48+.18*gr; }
+  else { const d=Math.min(u,1-u,v,1-v), w=F.pat==='tile'?.034:.021, e=sm(0,w,d), wv=noise(u,v,4,4);
+   h=e*(.93+.07*wv); ro=e<.6?.9:.42+.12*noise(u,v,8,8)+.04*wv; }
+  H[k]=h; R[k]=ro; }
+ const mk=(fill)=>{ const c=document.createElement('canvas'); c.width=c.height=N; const x=c.getContext('2d'), im=x.createImageData(N,N), d=im.data; for(let j=0;j<N;j++) for(let i=0;i<N;i++){ const p=fill(i,j), q=(j*N+i)*4; d[q]=p[0]; d[q+1]=p[1]; d[q+2]=p[2]; d[q+3]=255; } x.putImageData(im,0,0);
+  const t=new THREE.CanvasTexture(c); t.wrapS=t.wrapT=THREE.RepeatWrapping; t.anisotropy=Math.min(8,renderer.capabilities.getMaxAnisotropy()); return t; };
+ const at=(i,j)=>H[((j+N)%N)*N+((i+N)%N)], K=1.5;
+ const n=mk((i,j)=>{ const nx=-(at(i+1,j)-at(i-1,j))*.5*K, ny=(at(i,j+1)-at(i,j-1))*.5*K, l=Math.hypot(nx,ny,1); return [Math.round((nx/l*.5+.5)*255),Math.round((ny/l*.5+.5)*255),Math.round((1/l*.5+.5)*255)]; });
+ const r=mk((i,j)=>{ const g=Math.round(R[j*N+i]*255); return [g,g,g]; });
+ return floorDetC[key]={n,r}; }
+function floorMat(F,flat){ const D=floorDet(F), m=new THREE.MeshStandardMaterial({map:floorTex(F,flat),roughness:.55});
+ if(D){ D.n.repeat.set(S,S); D.r.repeat.set(S,S); m.normalMap=D.n; m.normalScale=new THREE.Vector2(.85,.85); m.roughnessMap=D.r; m.roughness=1; }
+ return m; }
 function wallTex(W){
  return canvasTex(128,128,(x)=>{
   x.fillStyle=W.c; x.fillRect(0,0,128,128);
@@ -141,7 +164,7 @@ function bakeVC(grp,key,skip){ if(!BAKE) return null; const list=grp.children.fi
 function bakeSame(grp,key,mat){ if(!BAKE) return null; const list=grp.children.filter(m=>m.isMesh&&m.visible&&m.material===mat&&!m.children.length); if(list.length<2) return null;
  let g=_bkCache.get(key); if(!g){ const l=[]; for(const m of list){ m.updateMatrix(); const c=bakeClone(m,m.matrix,null); if(!c){ l.forEach(x=>x.dispose()); return null; } l.push(c); } g=bakeMerge(l); if(!g) return null; _bkCache.set(key,g); }
  const me=new THREE.Mesh(g,mat); me.castShadow=false; me.receiveShadow=list[0].receiveShadow; for(const m of list) grp.remove(m); grp.add(me); return me; }
-function charFree(o){ if(o&&o.root) o.root.traverse(c=>{ if(c.userData.cg&&c.geometry) c.geometry.dispose(); }); }
+function charFree(o){ if(o&&o.root) o.root.traverse(c=>{ if(c.userData.cg&&c.geometry) c.geometry.dispose(); if(c.isSkinnedMesh&&c.skeleton){ try{ c.skeleton.dispose(); }catch(e){} } }); }
 function ownMesh(g,m,x,y,z,cast){ const o=mesh(g,m,x,y,z,cast); o.userData.own=1; return o; }
 function makeWindow(){
  const g=new THREE.Group(), white=M('#fffaf3',{roughness:.5});
@@ -186,7 +209,7 @@ function rebuildStatic(){
  // sol extérieur
  const ground=ownMesh(new THREE.PlaneGeometry(260,260),new THREE.MeshStandardMaterial({map:grassTex(),roughness:1}),S/2,-.02,S/2,false); ground.receiveShadow=true; ground.rotation.x=-Math.PI/2; staticRoot.add(ground);
  // sol du resto
- const floor=ownMesh(new THREE.PlaneGeometry(S,S),new THREE.MeshStandardMaterial({map:floorTex(F),roughness:.55}),S/2,.001,S/2,false); floor.rotation.x=-Math.PI/2; staticRoot.add(floor);
+ const floor=ownMesh(new THREE.PlaneGeometry(S,S),floorMat(F),S/2,.001,S/2,false); floor.rotation.x=-Math.PI/2; staticRoot.add(floor);
  const mat=mesh(RB(.8,.02,.6,.008),M('#b0443a',{roughness:.95}),DX+.5,.01,S-.5,false); staticRoot.add(mat); if(DXO!==DX) staticRoot.add(mesh(RB(.8,.02,.6,.008),M('#4f8f5b',{roughness:.95}),DXO+.5,.01,S-.5,false));
  // rayons de soleil
  const shaft=(pts)=>{ const sh=new THREE.Shape(pts.map(([x,z])=>new THREE.Vector2(x,-z))); const m=ownMesh(new THREE.ShapeGeometry(sh),shaftMat,0,.004,0,false); m.rotation.x=-Math.PI/2; m.receiveShadow=false; staticRoot.add(m); };
@@ -215,7 +238,7 @@ function rebuildStatic(){
  { const by={}; const T=state.tiles||{}; for(const k in T){ const [x,y]=k.split(',').map(Number); if(x<S&&y<S&&FLOORS[T[k]]&&T[k]!==state.floor) (by[T[k]]=by[T[k]]||[]).push([x,y]); }
   for(const fi in by){ const cells=by[fi], pos=[], uv=[], idx=[], nor=[]; cells.forEach(([x,y],n)=>{ pos.push(x,0,y, x+1,0,y, x+1,0,y+1, x,0,y+1); uv.push(x/S,1-y/S,(x+1)/S,1-y/S,(x+1)/S,1-(y+1)/S,x/S,1-(y+1)/S); nor.push(0,1,0,0,1,0,0,1,0,0,1,0); idx.push(n*4,n*4+2,n*4+1,n*4,n*4+3,n*4+2); });
    const g=new THREE.BufferGeometry(); g.setAttribute('position',new THREE.Float32BufferAttribute(pos,3)); g.setAttribute('uv',new THREE.Float32BufferAttribute(uv,2)); g.setAttribute('normal',new THREE.Float32BufferAttribute(nor,3)); g.setIndex(idx);
-   const m=ownMesh(g,new THREE.MeshStandardMaterial({map:floorTex(FLOORS[fi],true),roughness:.55}),0,.0025,0,false); staticRoot.add(m); } }
+   const m=ownMesh(g,floorMat(FLOORS[fi],true),0,.0025,0,false); staticRoot.add(m); } }
  // haies
  const planter=M('#e9cfa8'), b1=M('#86bf45',{roughness:.9}), b2=M('#73ad3c',{roughness:.9});
  const hedge=(x,z,alongX)=>{ const g=new THREE.Group(); g.add(mesh(RB(alongX?.98:.24,.2,alongX?.24:.98,.04),planter,0,.1,0)); for(let k=0;k<2;k++){ const o=k?.24:-.24; g.add(mesh(SP(.19,12,10),k?b1:b2,alongX?o:0,.3,alongX?0:o)); } g.position.set(x,0,z); staticRoot.add(g); };
@@ -747,7 +770,7 @@ function syncFurn(T,n){
  for(const [id,o] of fObjs) if(!seen.has(id)){ furnRoot.remove(o.g); disposeTree(o.g); fObjs.delete(id); }
 }
 function syncAgents(dt,T){
- const seen=new Set();
+ const seen=new Set(); try{ HD.rim.w=.32*(1-.55*nightF()); }catch(e){}      // la nuit, le liseré de lumière sur les personnages s'efface
  for(const a of crew.concat(custs,city.walkers,evA,lifeA)){
   let o=aObjs.get(a);
   if(o&&a.s&&o.role!==a.s.role){ agentRoot.remove(o.root); charFree(o); o=null; }
@@ -1091,7 +1114,7 @@ function tap(sx,sy){
 /* --- vignettes boutique --- */
 let thumbsReady=false;
 function makeThumbs(){ const g=makeThumbsGen(); let auto=false; try{ auto=!!navigator.webdriver; }catch(e){}
- const fin=()=>{ thumbsReady=true; try{ icoRe=null; }catch(e){} try{ if(typeof hud==='function'&&state) hud(); }catch(e){} };
+ const fin=()=>{ thumbsReady=true; try{ bustShots(); }catch(e){} try{ icoRe=null; }catch(e){} try{ if(typeof hud==='function'&&state) hud(); }catch(e){} };
  if(auto){ try{ for(const _ of g){} }catch(e){ console.warn(e); } return fin(); }
  const step=()=>{ const t0=performance.now(); try{ while(performance.now()-t0<16){ if(g.next().done) return fin(); } }catch(e){ console.warn(e); return fin(); } setTimeout(step,4); }; step(); }
 function* makeThumbsGen(){

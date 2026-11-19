@@ -39,7 +39,7 @@ function lifeParade(L,k){ const P=L.par={k,t:0,A:[]}, mk=(o,x,z,sp)=>{ const a=l
 }
 function lifeTick5(dt,T){ const L=life, n=nightF(), zr=S+17.6, W=lifeW; if(!lifeRainG) lifeRainInit();
  // ---- garde-fou : si l'appareil peine, on allège tout seul ----
- if(!LITE&&!navigator.webdriver){ L.ft=(L.ft===undefined?dt:L.ft*.985+dt*.015); if(L.t>(L.gt||25)&&L.ft>.05&&GFX.on){ GFX.on=false; L.gt=L.t+20; L.ft=.03; toast('Effets d’image coupés pour garder le jeu fluide.'); } else if(L.t>(L.gt||25)&&L.ft>.055){ LITE=true; try{ sun.castShadow=false; resize(); }catch(e){} for(const a of lifeA) if(!a.keep){ a.hide=true; a.off=1; } toast('Affichage allégé pour garder le jeu fluide.'); } }
+ if(!LITE&&!navigator.webdriver){ L.ft=(L.ft===undefined?dt:L.ft*.985+dt*.015); if(L.t>(L.gt||25)&&L.ft>.05&&GFX.on){ if(GFX.ao&&GFX.ao.enabled){ GFX.ao.enabled=false; L.gt=L.t+12; L.ft=.035; } else { GFX.on=false; L.gt=L.t+20; L.ft=.03; toast('Effets d’image coupés pour garder le jeu fluide.'); } } else if(L.t>(L.gt||25)&&L.ft>.055){ LITE=true; try{ sun.castShadow=false; resize(); }catch(e){} for(const a of lifeA) if(!a.keep){ a.hide=true; a.off=1; } toast('Affichage allégé pour garder le jeu fluide.'); } }
  // ---- météo : averse, parapluies, arc-en-ciel, ombres de nuages ----
  let stm=false, fete=false; try{ const am=storyAmb(); stm=am==='rain'; fete=am==='fete'; }catch(e){} if(stm&&W.rain<=0&&W.t>30) W.t=30;
  W.t-=dt; if(W.rain<=0&&W.t<=0&&mode==='play'){ W.rain=stm?rnd(70,100):rnd(32,48); W.T=W.rain; toast(stm?'La tempête se lève sur le port. On se réfugie chez toi.':'Une averse ! Tout le monde sort son parapluie.'); }

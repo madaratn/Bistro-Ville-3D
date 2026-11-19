@@ -720,3 +720,9 @@ body.scn #ov,body.scn #top,body.scn #bottom,body.scn #side,body.scn #sideL,body.
 .duelR.l i{background:#c8423a}
 .axB{display:flex;height:10px;border-radius:5px;overflow:hidden;margin:5px 0 3px;background:#eee}.axB i{background:linear-gradient(90deg,#ff8fb0,#e0457f)}.axB u{background:linear-gradient(90deg,#ffd23f,#e5a53a)}
 #sc.kb .scStage{bottom:auto;top:calc(9vh + 4px)}#sc.kb .scPo{width:76px;margin-bottom:-18px}#sc.kb .scName{left:96px;max-width:calc(100% - 110px)}#sc.kb .scTxt{display:none}#sc.kb .scBox{padding-top:26px}
+
+/* v0.97 : le médaillon des scènes accueille un buste 3D vivant */
+.scPo canvas{position:absolute;inset:0;width:100%;height:100%;display:block;opacity:0;transition:opacity .16s}
+.scPo.b3d{background:radial-gradient(circle at 50% 40%,#fff8ea,#f1dcc0)}
+.scPo.b3d img{visibility:hidden}
+.scPo:not(.b3d) canvas{display:none}
