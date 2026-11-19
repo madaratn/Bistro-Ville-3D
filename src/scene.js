@@ -13,7 +13,7 @@ function scBusy(){ try{ return !!scOn; }catch(e){ return false; } }
 function vib(p){ try{ if(state.vib!==false&&navigator.vibrate) navigator.vibrate(p); }catch(e){} }
 const meG=()=>!!state.me&&state.me.g==='f', meN=()=>(state.me&&state.me.n)||'';
 const scFl=()=>state.fl||(state.fl={}), scAx=()=>state.ax||(state.ax={h:0,p:0});
-const axTip=()=>1+.01*Math.min(12,(state.ax&&state.ax.p)||0);          // le panache fait grimper les pourboires (le cœur, lui, ramène le quartier : voir storyShare)
+const axTip=()=>(1+.01*Math.min(12,(state.ax&&state.ax.p)||0))*(typeof mpTip==='function'?mpTip():1);          // le panache fait grimper les pourboires (le cœur, lui, ramène le quartier : voir storyShare)
 function scT(s){ return String(s).replace(/\{\{N\}\}/g,meN()||(meG()?'ma grande':'mon grand')).replace(/\{\{([^|}]*)\|([^}]*)\}\}/g,(m,a,b)=>meG()?b:a).replace(/ ([:;!?»%])/g,' $1').replace(/« /g,'« '); }
 function scFace(k,ex){ const key=k+'|'+(ex||''); if(!scFaceC[key]){ let u=''; try{ u=ex&&PORTRAIT[k]?'data:image/svg+xml;charset=utf-8,'+encodeURIComponent(portraitSVG(k,null,Object.assign({},PORTRAIT[k],{expr:ex}))):(foodThumbs['who:'+k]||portraitURL(k)); }catch(e){ u=foodThumbs['who:'+k]||''; } scFaceC[key]=u; } return scFaceC[key]; }
 const SC_VOICE={o:330,b:233,c:494,j:440,s:392,p:220,l:277,r:466,y:196,a:247,z:587};

@@ -1,6 +1,6 @@
 **Jouer en ligne : https://madaratn.github.io/Bistro-Ville-3D/**
 
-# Chez Odette — prototype v0.98
+# Chez Odette — prototype v0.99
 
 Jeu mobile de gestion de restaurant (Android + iOS), inspiré des mécaniques de Restaurant City,
 avec un nom, des graphismes et des personnages 100 % originaux.
@@ -23,6 +23,24 @@ avec un nom, des graphismes et des personnages 100 % originaux.
 | Quartier | Bar avec terrasse, cinéma, galerie marchande, immeubles (fenêtres éclairées la nuit). Passants qui vont au cinéma, au bar, font les boutiques ou traversent le trottoir d'en face ; les clients arrivent du quartier et y repartent |
 | Ambiance | Carnet de commandes compact et repliable, bulles discrètes, rien qui clignote, mode « Regarder » (interface masquée, caméra qui se promène) |
 | Divers | Sauvegarde automatique, gains hors-ligne (jusqu'à 8 h), sons, tutoriel, réglages |
+
+### Nouveautés v0.99 : La Ville (multijoueur)
+- **Une ville partagée** : une carte de six quartiers (Le Vieux-Port, Les Halles, La Gare, La Butte, Les Jardins, Le Belvédère), 120 emplacements. Chaque joueur y installe son bistrot ; on se promène sur la carte (glisser, pincer), on ouvre la fiche de n'importe quel bistrot.
+- **Visiter les autres** : un vrai tour dans le bistrot d'un autre joueur, avec son aménagement, puis retour chez soi sans rien perdre. Cinq coups de cœur à donner par jour.
+- **Les confréries** : en fonder une (500 pièces, nom, sigle, emblème, couleur) ou en rejoindre une, tableau de messages, demande de coup de main et entraide (énergie pour l'un, pièces et points pour l'autre), objectif de la semaine à quatre paliers, exclusion par le fondateur.
+- **Classements de la semaine** : bistrots et confréries, quatre ligues (Diamant, Or, Argent, Bronze), récompense à réclamer la semaine suivante. Chaque client servi vaut un point.
+- **La guerre des quartiers** : la confrérie qui marque le plus de points dans un quartier le tient la semaine suivante ; ses membres installés là touchent 5 % de pourboires en plus.
+- **Jouable seul** : sans connexion, la ville est peuplée de 36 voisins et de 3 confréries du jeu, clairement signalés comme tels.
+- **Trois connexions, un seul code** (`src/net.js`) :
+  - la page publiée sur claude.ai utilise sa base de données partagée (le propriétaire de la page et les personnes qu'il y invite en écriture jouent ensemble ; un simple visiteur regarde) ;
+  - la version web libre et l'application Android se branchent sur le serveur du dossier `server/` (Node, sans dépendance, à héberger soi-même : voir `server/README.md`) ;
+  - sans l'un ni l'autre, le jeu reste hors ligne avec les voisins du jeu.
+- **Sauvegarde en ligne** de la partie, privée, pour la retrouver après une réinstallation.
+- **Sécurité de base** : chaque joueur n'écrit que ses propres documents (sa fiche, son bistrot, sa confrérie) ; tout le reste se calcule en lisant ceux des autres, et ce qui vient des autres est nettoyé avant affichage. Le serveur plafonne les bonds de points et le débit d'écriture.
+
+Limites connues : une ville = 120 bistrots ; pas de modération des messages ni d'anti-triche sérieux (sur claude.ai, les points sont déclarés par chaque joueur) ; pas de combat ni d'échanges en temps réel ; la connexion claude.ai n'a été essayée que sur une imitation de sa base, pas en conditions réelles.
+
+Code : `src/net.js` (connexions), `src/ville.js` (carte, visites, classements, quartiers), `src/guilde.js` (confréries, panneau « La Ville »), `server/` (serveur), `tools/mp_test.py` et `tools/mp_test_claude.py` (essais à plusieurs joueurs).
 
 ### Nouveautés v0.98 : la mise en scène, la carte, les options
 - **Des dialogues joués par les personnages** : deux acteurs 3D en pied se font face au-dessus du texte. Celui qui parle est dans la lumière, fait des gestes selon son humeur (il salue, croise les bras, lève les mains), l'autre l'écoute dans l'ombre. Une petite bulle marque l'émotion du moment.
@@ -114,7 +132,7 @@ Change aussi `appId` dans `capacitor.config.json` pour un identifiant à toi.
 
 ## Feuille de route proposée
 
-1. **Social (le cœur de Restaurant City)** : comptes joueurs et backend (Firebase ou Supabase), amis embauchés comme employés, visites de restos, cadeaux d'ingrédients, classements.
+1. **Social, la suite** (la ville, les visites, les confréries et les classements existent depuis la v0.99) : comptes avec reprise sur un autre appareil, plusieurs villes par serveur, amis embauchés comme employés, cadeaux d'ingrédients, modération des messages, événements de ville.
 2. **Avatar** : personnalisation du joueur et des employés (coiffures, tenues).
 3. **Contenu** : plus de recettes et de meubles, déco murale (cadres, fenêtres), objets sur plusieurs cases, tabourets de bar où les clients s'assoient, thèmes saisonniers.
 4. **Graphismes** : remplacer le dessin par code par de vrais sprites (illustrateur ou pack d'assets), animations, musique.

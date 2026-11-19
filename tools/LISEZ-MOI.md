@@ -26,3 +26,20 @@ Depuis la v0.96, le robot joue aussi les scènes (il signe le registre, répond 
 - Les chemins `/tmp/aud/` sont à adapter si on le lance ailleurs.
 
 `partie.py` fait tourner une vraie partie en accéléré, sans rien neutraliser, et liste tous les messages et fenêtres que le joueur verrait dans la journée. Les scènes y sont jouées réplique par réplique (lignes `S`), les étapes de l'histoire validées (lignes `*`) et chaque nuit résumée (lignes `=`).
+
+
+# Essais du multijoueur (v0.99)
+
+`mp_test.py` lance le serveur du dossier `server/` sur un port local, ouvre trois joueurs dans trois navigateurs sans écran et déroule une semaine en ville : installation, confrérie, messages, coup de main, points, quartiers, visite, coup de cœur, tentatives de triche, exclusion, deux bistrots sur la même place, quartier complet, départ.
+
+    DEBUG=1 OUT=/tmp/dbg.html python3 src/build3d.py
+    python3 tools/mp_test.py /tmp/dbg.html /tmp/save.json
+
+`mp_test_claude.py` fait jouer deux joueurs à travers le pilote de la page claude.ai, branché sur une imitation de sa base de données (mêmes fonctions, documents gelés, écritures refusées chez les autres).
+
+    python3 tools/mp_test_claude.py /tmp/dbg.html /tmp/save.json
+
+- Il faut Node 18 ou plus, Playwright pour Python et Chrome (`CHROME=/chemin/vers/chrome` s'il est ailleurs).
+- La sauvegarde est le contenu de la clé `bistroville_v2` d'une partie déjà commencée.
+- Les captures vont dans `/tmp/aud` (`OUT_DIR=…` pour changer).
+

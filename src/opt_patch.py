@@ -45,3 +45,11 @@ RX(" carnet:()=>{ closeModal(); openPanel('carnet'); },"," carnet:()=>{ closeMod
 RX("const PANELS={","const PANELS={\n scenes(){ return scGalPanel(); },")
 RX(" if((state.n96!==0&&state.n97!==0)||warming||!state.tuto||"," if(warming||!state.tuto||")
 RX("(typeof titleOn!=='undefined'&&titleOn)) return;\n if(state.n96!==0){ state.n97=1;","(typeof titleOn!=='undefined'&&titleOn)) return;\n if(!storyRecap.done){ try{ storyRecap(); }catch(e){} if(modalQ.length||scBusy()) return; }\n if(state.n96!==0&&state.n97!==0) return;\n if(state.n96!==0){ state.n97=1;")
+
+# v0.99 : la Ville (multijoueur) : après chaque rendu de panneau on rebranche la carte ; le bouton d'accès suit l'état du jeu
+RX("typoEl($('#mc')); try{ uiFresh(); }catch(e){} }","typoEl($('#mc')); try{ uiFresh(); }catch(e){} try{ mpAfter(); }catch(e){} }")
+RX(" updFx(dt);\n try{ flowF++; coinTick(dt); }catch(e){}"," updFx(dt);\n try{ flowF++; coinTick(dt); }catch(e){}\n try{ mpButton(); }catch(e){}")
+
+# v0.99 : une courte scène annonce l'ouverture de la ville aux joueurs qui ont déjà une partie
+RX("if(!storyRecap.done){ try{ storyRecap(); }catch(e){} if(modalQ.length||scBusy()) return; }\n if(state.n96!==0&&state.n97!==0) return;",
+   "if(!storyRecap.done){ try{ storyRecap(); }catch(e){} if(modalQ.length||scBusy()) return; }\n if(state.n99===undefined){ const s0=state.story; state.n99=(s0&&s0.v&&((s0.pages||0)>0||s0.seen===s0.ch))?0:1; }\n if(state.n96!==0&&state.n97!==0){ if(state.n99===0){ state.n99=1; sceneQ({title:'La ville s’ouvre',lines:[['j/grin','Édition spéciale de la Gazette ! Toute la ville tient désormais sur une seule carte : chaque bistrot y a son adresse, et le tien aussi.'],['o/warm','Installe-toi dans un quartier, {{N}}, et va voir les voisins. Une confrérie, c’est une tablée de patrons qui se serrent les coudes : rejoins-en une, ou fonde la tienne.'],['j','Le bouton « Ville » est à gauche de l’écran. Chaque client servi compte pour ta semaine, pour ta confrérie et pour le quartier qu’elle défend.']]}); } return; }")

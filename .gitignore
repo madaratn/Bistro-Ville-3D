@@ -3,3 +3,4 @@ build/node_modules/
 build/bundle.js
 build/main.js
 *.zip
+server/data/
