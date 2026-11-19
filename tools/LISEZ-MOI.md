@@ -4,10 +4,11 @@
 
     DEBUG=1 OUT=/tmp/dbg.html python3 src/build3d.py
     python3 tools/sim.py 45 '{}' /tmp/out.json /tmp/dbg.html 270                      # bon joueur
-    python3 tools/sim.py 34 '{"help":0.15,"invest":1}' /tmp/out.json /tmp/dbg.html 180  # joueur occasionnel
+    python3 tools/sim.py 30 '{"help":0.15,"invest":2,"maxLvl":3,"pdjP":0.5}' /tmp/out.json /tmp/dbg.html 400  # joueur occasionnel
     python3 tools/sim.py 34 '{"help":0,"invest":0}' /tmp/out.json /tmp/dbg.html 180     # joueur qui n'investit jamais
 
 Chaque ligne du tableau est une journée : recettes, dépenses, résultat, caisse, niveau, note, satisfaction, couverts, équipe, taille de salle, file en cuisine, chapitre de l'histoire, clients servis, dette restante.
+Depuis la v0.96, le robot joue aussi les scènes (il signe le registre, répond aux choix au hasard, accepte les commandes), écrit l'ardoise le matin et rembourse la dette quand l'histoire le demande. Un second tableau donne, jour par jour, les étoiles du service, la meilleure série d'élan et sa cible, les clients perdus, la part des pourboires, les plats du jour vendus et les commandes livrées.
 (Les chemins `/tmp/sim/bot.js` dans `sim.py` sont à adapter si on le lance ailleurs.)
 
 
@@ -24,4 +25,4 @@ Chaque ligne du tableau est une journée : recettes, dépenses, résultat, caiss
 - `etapes.json` : une liste d'objets `{"name", "js", "wait", "shot", "print"}` ; `js` est exécuté dans le jeu.
 - Les chemins `/tmp/aud/` sont à adapter si on le lance ailleurs.
 
-`partie.py` fait tourner une vraie partie en accéléré, sans rien neutraliser, et liste tous les messages et fenêtres que le joueur verrait dans la journée.
+`partie.py` fait tourner une vraie partie en accéléré, sans rien neutraliser, et liste tous les messages et fenêtres que le joueur verrait dans la journée. Les scènes y sont jouées réplique par réplique (lignes `S`), les étapes de l'histoire validées (lignes `*`) et chaque nuit résumée (lignes `=`).

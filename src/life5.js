@@ -41,7 +41,8 @@ function lifeTick5(dt,T){ const L=life, n=nightF(), zr=S+17.6, W=lifeW; if(!life
  // ---- garde-fou : si l'appareil peine, on allège tout seul ----
  if(!LITE&&!navigator.webdriver){ L.ft=(L.ft===undefined?dt:L.ft*.985+dt*.015); if(L.t>(L.gt||25)&&L.ft>.05&&GFX.on){ GFX.on=false; L.gt=L.t+20; L.ft=.03; toast('Effets d’image coupés pour garder le jeu fluide.'); } else if(L.t>(L.gt||25)&&L.ft>.055){ LITE=true; try{ sun.castShadow=false; resize(); }catch(e){} for(const a of lifeA) if(!a.keep){ a.hide=true; a.off=1; } toast('Affichage allégé pour garder le jeu fluide.'); } }
  // ---- météo : averse, parapluies, arc-en-ciel, ombres de nuages ----
- W.t-=dt; if(W.rain<=0&&W.t<=0&&mode==='play'){ W.rain=rnd(32,48); W.T=W.rain; toast('Une averse ! Tout le monde sort son parapluie.'); }
+ let stm=false, fete=false; try{ const am=storyAmb(); stm=am==='rain'; fete=am==='fete'; }catch(e){} if(stm&&W.rain<=0&&W.t>30) W.t=30;
+ W.t-=dt; if(W.rain<=0&&W.t<=0&&mode==='play'){ W.rain=stm?rnd(70,100):rnd(32,48); W.T=W.rain; toast(stm?'La tempête se lève sur le port. On se réfugie chez toi.':'Une averse ! Tout le monde sort son parapluie.'); }
  const rk=W.rain>0?Math.min(1,((W.T||W.rain)-W.rain)/3+(W.T?0:1),W.rain/3):0;
  if(W.rain>0){ W.rain-=dt; if(W.rain<=0){ W.t=rnd(200,380); W.bow=55; } }
  { const g=lifeRainG, u=g.userData; g.visible=rk>0; if(g.visible){ g.material.opacity=.55*rk; const a=g.geometry.attributes.position, cx=cam.tx, cz=cam.tz; for(let i=0;i<u.N;i++){ const p=u.p[i]; p[1]-=dt*13; if(p[1]<0){ p[1]+=9; p[0]=Math.random()*26-13; p[2]=Math.random()*26-13; } a.setXYZ(i*2,cx+p[0],p[1],cz+p[2]); a.setXYZ(i*2+1,cx+p[0]-.1,p[1]+.42,cz+p[2]); } a.needsUpdate=true; } }
@@ -69,7 +70,7 @@ function lifeTick5(dt,T){ const L=life, n=nightF(), zr=S+17.6, W=lifeW; if(!life
   for(const w of L.wed){ w.x+=w.v*dt; w.g.position.x=w.x; if(w.lead){ if(!LITE&&Math.random()<dt*5) spawnPart(heartTex(),pick(['#ff5d8f','#ff8fb6','#ffffff']),w.x-.6,.6,S+2.5,rnd(-.6,-.1),rnd(.5,1.1),rnd(-.4,.4),1.5,.2,0,false); if(!w.said&&w.x>S/2-2){ w.said=1; floatAt(w.x-.5,S+2,'Vive les mariés !','#e0457f'); sfx('level'); } } if(w.x>S+29){ fxRoot.remove(w.g); w.dead=1; } } L.wed=L.wed.filter(w=>!w.dead);
   if(!live&&!L.pel.length&&!L.wed.length&&P.t>2){ lifeA=lifeA.filter(a=>!a.gone); L.par=null; L.parT=rnd(80,140); } }
  else if(L.parWait>0){ L.parWait-=dt; if(L.parWait<=0||!cars.length){ L.parWait=0; lifeParade(L,L.parNext); } }
- else if(mode==='play'&&!cine&&!visit.on&&!ev&&rk<=0&&projHas('fanfare')){ L.parT-=dt; if(L.parT<=0){ const ks=['band','peloton','school','wedding'].filter(k=>k!==L.parLast&&(!LITE||k==='peloton'||k==='wedding')); L.parNext=L.parLast=pick(ks); if(L.parNext==='school') lifeParade(L,'school'); else L.parWait=32; } }
+ else if(mode==='play'&&!cine&&!visit.on&&!ev&&rk<=0&&(projHas('fanfare')||fete)){ L.parT-=dt*(fete?3:1); if(L.parT<=0){ const ks=['band','peloton','school','wedding'].filter(k=>k!==L.parLast&&(!LITE||k==='peloton'||k==='wedding')); L.parNext=L.parLast=pick(ks); if(L.parNext==='school') lifeParade(L,'school'); else L.parWait=32; } }
  // ---- ambiance sonore discrète ----
  if(state.sound&&typeof AC!=='undefined'&&AC&&mode==='play'&&!cine){ L.snd=(L.snd===undefined?4:L.snd)-dt; if(L.snd<=0){ try{ if(n<.5&&rk<=0){ L.snd=rnd(5,13); const f=rnd(2300,3400); for(let i=0;i<(2+Math.floor(Math.random()*3));i++) tone(f+i*rnd(-180,220),i*.11,.07,'sine',.01); } else if(n>=.5){ L.snd=rnd(2.5,5); for(let i=0;i<4;i++) tone(4300,i*.07,.03,'sine',.005); } else L.snd=3; }catch(e){ L.snd=10; } }
   if(L.bellT>4.9&&!L.bellS){ L.bellS=1; try{ tone(392,0,1.6,'sine',.028); tone(196,0,1.8,'sine',.02); tone(392,.9,1.6,'sine',.022); }catch(e){} } if(L.bellT<4) L.bellS=0; }

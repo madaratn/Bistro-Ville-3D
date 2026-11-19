@@ -43,11 +43,13 @@ function portraitSVG(k,L0,P0,bg0){
  const ey=cy-3, iris=k==='b'?'#4a5a3a':k==='z'?'#4f9a54':k==='c'?'#3f6f9a':'#5a3a22', sq=P.expr==='warm'||P.expr==='grin';
  for(const d of [-1,1]){ const x=100+d*18;
   if(sq) s+=`<path d="M${x-9} ${ey+2} Q${x} ${ey-9} ${x+9} ${ey+2}" stroke="#3a2a22" stroke-width="3.2" fill="none" stroke-linecap="round"/>`;
-  else { const ry=P.expr==='stern'||P.expr==='smirk'||P.expr==='pursed'?6.4:P.age<0?9.5:8; s+=`<ellipse cx="${x}" cy="${ey}" rx="9" ry="${ry}" fill="#fff"/><circle cx="${x+(P.expr==='smirk'?d*1.5+2:0)}" cy="${ey+.6}" r="${Math.min(ry-.4,5.6)}" fill="${iris}"/><circle cx="${x+(P.expr==='smirk'?d*1.5+2:0)}" cy="${ey+.6}" r="2.8" fill="#1d1612"/><circle cx="${x+2.2}" cy="${ey-2}" r="1.7" fill="#fff"/><path d="M${x-10} ${ey-ry+2.4} Q${x} ${ey-ry-3.2} ${x+10} ${ey-ry+2.4}" stroke="#3a2a22" stroke-width="2.6" fill="none" stroke-linecap="round"/>`;
+  else { const ry=P.expr==='oh'?9.8:P.expr==='stern'||P.expr==='smirk'||P.expr==='pursed'?6.4:P.age<0?9.5:8; s+=`<ellipse cx="${x}" cy="${ey}" rx="9" ry="${ry}" fill="#fff"/><circle cx="${x+(P.expr==='smirk'?d*1.5+2:0)}" cy="${ey+.6}" r="${Math.min(ry-.4,5.6)}" fill="${iris}"/><circle cx="${x+(P.expr==='smirk'?d*1.5+2:0)}" cy="${ey+.6}" r="2.8" fill="#1d1612"/><circle cx="${x+2.2}" cy="${ey-2}" r="1.7" fill="#fff"/><path d="M${x-10} ${ey-ry+2.4} Q${x} ${ey-ry-3.2} ${x+10} ${ey-ry+2.4}" stroke="#3a2a22" stroke-width="2.6" fill="none" stroke-linecap="round"/>`;
    if(P.fem) s+=`<path d="M${x+d*9} ${ey-ry+2} l${d*5} -4 M${x+d*6} ${ey-ry} l${d*3} -5" stroke="#3a2a22" stroke-width="1.8" stroke-linecap="round"/>`; }
   // sourcils
   const bc=P.age>=2?shade(hc,-.12):hD, by=ey-(sq?13:15), tl=P.expr==='stern'?d*-3:P.expr==='smirk'&&d>0?-5:P.expr==='pursed'?d*2:0;
-  s+=`<path d="M${x-d*10} ${by+(P.expr==='stern'?4:1)+(-tl*.3)} Q${x} ${by-4+tl*.4} ${x+d*10} ${by+(P.expr==='stern'?-2:2)+tl}" stroke="${bc}" stroke-width="${P.fem?2.6:P.age>=2?4.6:3.8}" fill="none" stroke-linecap="round"/>`; }
+  let yi=by+(P.expr==='stern'?4:1)+(-tl*.3), ym=by-4+tl*.4, yo=by+(P.expr==='stern'?-2:2)+tl;
+  if(P.expr==='sad'){ yi=by-4; ym=by-1; yo=by+5; } else if(P.expr==='oh'){ yi-=4; ym-=6; yo-=4; }
+  s+=`<path d="M${x-d*10} ${yi} Q${x} ${ym} ${x+d*10} ${yo}" stroke="${bc}" stroke-width="${P.fem?2.6:P.age>=2?4.6:3.8}" fill="none" stroke-linecap="round"/>`; }
  // nez
  s+=`<path d="M97 ${cy+3} q-6 12 2 15 q5 1 8 -2" stroke="${skD}" stroke-width="2.4" fill="none" stroke-linecap="round"/><ellipse cx="103" cy="${cy+12}" rx="5" ry="3" fill="#fff" opacity=".25"/>`;
  // bouche
@@ -57,6 +59,8 @@ function portraitSVG(k,L0,P0,bg0){
  else if(P.expr==='smirk') s+=`<path d="M86 ${my+3} Q100 ${my+6} 118 ${my-5}" stroke="${lip}" stroke-width="3.2" fill="none" stroke-linecap="round"/>`;
  else if(P.expr==='pursed') s+=`<path d="M91 ${my+1} q9 -5 18 0 q-9 7 -18 0Z" fill="${lip}"/><path d="M91 ${my+1} q9 2 18 0" stroke="${shade(lip,-.25)}" stroke-width="1.2" fill="none"/>`;
  else if(P.expr==='gruff') s+=`<path d="M87 ${my+2} Q100 ${my+8} 113 ${my+1}" stroke="${lip}" stroke-width="3" fill="none" stroke-linecap="round"/>`;
+ else if(P.expr==='sad') s+=`<path d="M88 ${my+7} Q100 ${my-2} 112 ${my+7}" stroke="${lip}" stroke-width="3.2" fill="none" stroke-linecap="round"/>`;
+ else if(P.expr==='oh') s+=`<ellipse cx="100" cy="${my+4}" rx="6" ry="7.5" fill="#7a2a22"/><ellipse cx="100" cy="${my+7}" rx="3.6" ry="3" fill="#e5787a"/>`;
  else s+=`<path d="M88 ${my+3} Q100 ${my} 112 ${my+3}" stroke="${lip}" stroke-width="3" fill="none" stroke-linecap="round"/>`;
  for(const d of [-1,1]) if(P.expr==='warm'||P.expr==='smile'||P.expr==='grin') s+=`<path d="M${100+d*20} ${my-4} q${d*4} 3 ${d*1} 8" stroke="${skD}" stroke-width="1.5" fill="none" opacity=".55"/>`;
  // barbe et moustaches

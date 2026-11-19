@@ -17,7 +17,9 @@ window.botMenu=function(){ const slots=menuSlots(); const un=DISH.filter(d=>d.u<
 window.botEquip=function(t){ const F=FURN[t]; if(!F||state.level<(F.u||1)||state.coins<F.p) return false; let f=null; try{ f=autoPlace(t); }catch(e){} if(!f) return false; state.coins-=F.p; try{ fixZones(); assignHomes(); }catch(e){} return true; }
 window.botUpg=function(spare){ let did=false; for(const id of state.menu){ const d=DISHM[id], L=lvl(id); if(L>=BOT.cfg.maxLvl) continue; let cost=0; for(const k of d.ing){ const need=Math.max(0,L-(state.inv[k]||0)); cost+=need*(ING[k].b||Math.round(ING[k].g.c*1.3)); } if(d.ing.some(k=>ING[k].r>=3)) continue; if(cost>spare) continue; for(const k of d.ing){ const need=Math.max(0,L-(state.inv[k]||0)); state.inv[k]=(state.inv[k]||0)+need; } state.coins-=cost; dayAdd('ing',cost); spare-=cost; ACT.upg(id); did=true; } return did; }
 window.botMorning=function(){ const d=dayOf(); botMenu(); if(state.story) delete state.story.doneDay;
-  const fixed=wagesCost()+elecCost()+LOAN; if(state.tot){ } try{ dailyAdd('help',6); dailyAdd('harvest',1); if(d.n%2===0){ dailyAdd('rush',120+d.n*8,true); } }catch(e){} let guard=0; const kq=BOT.kq||0, I=BOT.cfg.invest;
+  const fixed=wagesCost()+elecCost()+LOAN; if(state.tot){ } try{ dailyAdd('help',6); dailyAdd('harvest',1); if(d.n%2===0){ dailyAdd('rush',120+d.n*8,true); if(storyDuel()) dailyAdd('duel',1); } }catch(e){}
+  try{ if(BOT.cfg.pdj!==0&&state.menu.length>1&&(!state.pdj||!pdjId()||Math.random()<(BOT.cfg.pdjP===undefined?1:BOT.cfg.pdjP))){ const C=state.cmd, id=C&&state.menu.includes(C.dish)?C.dish:state.menu.slice().sort((a,b)=>dishPrice(DISHM[b])-dishPrice(DISHM[a]))[0]; state.pdj={id,n:d.n}; }
+       const sg=storyStep(), need=!!sg&&sg.S.g.k==='debt'&&!sg.ok; if(BOT.cfg.debt||need){ let g2=0; while(g2++<12&&state.coins>=(need?1000:8000)&&debtLeft()>0) ACT.debtpay(); } }catch(e){ BOT.err='matin '+e; } let guard=0; const kq=BOT.kq||0, I=BOT.cfg.invest;
   while(guard++<14){ const seats=botSeats(), st=state.staff, chefs=st.filter(s=>s.role==='chef').length, waiters=st.filter(s=>s.role==='waiter').length, spare=state.coins-fixed*0.6;
     if(spare<160&&st.filter(s=>s.role==='chef').length&&st.filter(s=>s.role==='waiter').length) break;
     const q=state.level>=4&&spare>900?2:state.level>=2&&spare>400?1:0, kind=k=>state.furn.filter(f=>kindOf(f)===k).length;
@@ -34,7 +36,15 @@ window.botMorning=function(){ const d=dayOf(); botMenu(); if(state.story) delete
     break; }
   BOT.kfix=0; BOT.wfix=0; BOT.dfix=0;
   if(!isOpen()) setOpen(true); }
-window.botStory=function(){ try{ const st=state.story; if(!st||storyEnd()) return; if(storyLocked()) return; if(st.seen!==st.ch){ st.seen=st.ch; return; } const s=storyStep(); if(s&&s.ok) ACT.sstep(); }catch(e){ BOT.err=String(e); } }
+window.botDrive=function(){ let g=0;
+  while(scOn&&g++<400){ const S2=scOn;
+    if(S2.wait==='ask'){ const O=S2.ask[2], id=S2.ask[1]; let i=id[0]==='~'?(BOT.cfg.cmd===0?O.length-1:0):(BOT.cfg.pick==null?Math.floor(Math.random()*O.length):Math.min(BOT.cfg.pick,O.length-1)); if(scCost(O[i][1])>state.coins) i=(i+1)%O.length; (BOT.picks=BOT.picks||[]).push(id+':'+i); scPick(i); }
+    else if(S2.wait==='me'){ const inp=document.querySelector('.scMe input'); if(inp) inp.value='bot'; scSign(BOT.cfg.g||'m'); }
+    else if(S2.wait==='card'||S2.wait==='card2') scTap();
+    else scSkip(); }
+  if(scOn){ BOT.err='scène bloquée : '+(scOn.wait||'?'); scOn=null; } }
+window.botScene=function(o){ if(scOn) botDrive(); scenePlay(o,()=>{ try{ o.after&&o.after(); }catch(e){} }); botDrive(); ui.panel=null; BOT.scN=(BOT.scN||0)+1; }
+window.botStory=function(){ try{ const st=state.story; if(!st||storyEnd()) return; if(storyLocked()) return; if(st.seen!==st.ch){ storyIntro(); return; } const s=storyStep(); if(s&&s.ok) ACT.sstep(); }catch(e){ BOT.err=String(e); } }
 window.botRun=function(steps){ // steps de 0,1 s
   for(let i=0;i<steps;i++){ const d=dayOf();
     if(d.night||(!isOpen()&&!d.closing)){ botDayLog(); botMorning(); }
@@ -43,8 +53,9 @@ window.botRun=function(steps){ // steps de 0,1 s
       BOT.occN=(BOT.occN||0)+1; BOT.occS=(BOT.occS||0)+custs.filter(c=>c.sitting).length/Math.max(1,botSeats()); BOT.qS=(BOT.qS||0)+custs.filter(c=>c.st==='queue').length; BOT.kS=(BOT.kS||0)+orders.filter(o=>o.st==='wait').length; BOT.wS=(BOT.wS||0)+custs.filter(c=>c.sitting&&(c.st==='menu'||c.st==='call'||c.st==='seated')).length/Math.max(1,botSeats());
       for(const m of moms.slice()) if(Math.random()<BOT.cfg.help*.25){ try{ if(m.k==='tip'){ BOT.tipC++; BOT.tipV+=m.v||0; } moms=moms.filter(x=>x!==m); if(!evMom(m,m.x||0,m.z||0)){ if(m.k==='tip'){ earn(m.v); dayAdd('tip',m.v); } else if(m.fn) m.fn(); } }catch(e){} }
       if(trash.length>3&&Math.random()<BOT.cfg.help) trash.shift();
-      botStory(); while(modalQ.length){ const f=modalQ.shift(); try{ const r=typeof f==='function'?f():f; if(r&&typeof r.html!=='string') throw new Error('modal sans html'); }catch(e){ (BOT.merr=BOT.merr||[]).push(String(e).slice(0,160)); } } }
+      if(scOn){ botDrive(); ui.panel=null; } botStory(); while(modalQ.length){ const f=modalQ.shift(); try{ if(f&&f.scene){ botScene(f.scene); continue; } const r=typeof f==='function'?f():f; if(r&&typeof r.html!=='string') throw new Error('modal sans html'); }catch(e){ (BOT.merr=BOT.merr||[]).push(String(e).slice(0,160)); } } }
   } return BOT.log.length; }
-window.botDayLog=function(){ const d=dayOf(), h=d.hist[d.hist.length-1]; if(!h||h.n===BOT.lastN) return; BOT.lastN=h.n; BOT.full=BOT.occN?BOT.occS/BOT.occN:0; BOT.kq=BOT.kS/Math.max(1,BOT.occN); BOT.wq=BOT.wS/Math.max(1,BOT.occN);
-  BOT.log.push({n:h.n,rev:h.rev,cost:h.cost,net:h.net,served:h.served,coins:state.coins,lvl:state.level,xp:state.xp,rating:+rating.toFixed(2),sat:Math.round(state.sat),seats:botSeats(),staff:state.staff.map(s=>s.role[0]+(s.q===undefined?1:s.q)+(s.vet?'v':'')).join(''),S,menu:state.menu.length,occ:+BOT.full.toFixed(2),q:+(BOT.qS/Math.max(1,BOT.occN)).toFixed(2),debt:state.debt,ch:state.story?state.story.ch:-1,st:state.story?state.story.step:-1,tips:BOT.tipV,ev:d.ev||0,kq:+BOT.kq.toFixed(1),wq:+BOT.wq.toFixed(2),ml:+(state.menu.reduce((a,id)=>a+lvl(id),0)/state.menu.length).toFixed(1),eq:['stove','oven','prep'].map(k=>state.furn.filter(f=>kindOf(f)===k).length).join('')});
+window.botHook=function(){ if(BOT.hooked) return; BOT.hooked=1; BOT.sl={}; const _se=starsEnd; starsEnd=function(d){ const T=elTarget(), R=_se(d); BOT.sl[d.n]={st:R.n,ok:R.S.map(x=>x.ok?1:0).join(''),elB:d.elB||0,T,lost:d.lost||0,sN:d.sN||0,avg:d.sN?Math.round(d.sS/d.sN):0,rw:R.rw,tip:Math.round(100*(d.inc.tip||0)/Math.max(1,(d.inc.food||0)+(d.inc.drink||0)))}; return R; }; }
+window.botDayLog=function(){ botHook(); const d=dayOf(), h=d.hist[d.hist.length-1]; if(!h||h.n===BOT.lastN) return; BOT.lastN=h.n; BOT.full=BOT.occN?BOT.occS/BOT.occN:0; BOT.kq=BOT.kS/Math.max(1,BOT.occN); BOT.wq=BOT.wS/Math.max(1,BOT.occN);
+  BOT.log.push({n:h.n,rev:h.rev,cost:h.cost,net:h.net,served:h.served,coins:state.coins,lvl:state.level,xp:state.xp,rating:+rating.toFixed(2),sat:Math.round(state.sat),seats:botSeats(),staff:state.staff.map(s=>s.role[0]+(s.q===undefined?1:s.q)+(s.vet?'v':'')).join(''),S,menu:state.menu.length,occ:+BOT.full.toFixed(2),q:+(BOT.qS/Math.max(1,BOT.occN)).toFixed(2),debt:state.debt,ch:state.story?state.story.ch:-1,st:state.story?state.story.step:-1,tips:BOT.tipV,ev:d.ev||0,kq:+BOT.kq.toFixed(1),wq:+BOT.wq.toFixed(2),ml:+(state.menu.reduce((a,id)=>a+lvl(id),0)/state.menu.length).toFixed(1),eq:['stove','oven','prep'].map(k=>state.furn.filter(f=>kindOf(f)===k).length).join(''),sl:BOT.sl[h.n]||null,pdj:(state.tot&&state.tot.pdj)||0,cmd:(state.tot&&state.tot.cmd)||0,nbm:(state.tot&&state.tot.nbmeal)||0,stars:(state.stars&&state.stars.t)||0});
   BOT.occN=0; BOT.occS=0; BOT.qS=0; BOT.kS=0; BOT.wS=0; BOT.tipV=0; BOT.tipC=0; }

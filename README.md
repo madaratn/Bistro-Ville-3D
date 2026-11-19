@@ -1,6 +1,6 @@
 **Jouer en ligne : https://madaratn.github.io/Bistro-Ville-3D/**
 
-# Chez Odette — prototype v0.95
+# Chez Odette — prototype v0.96
 
 Jeu mobile de gestion de restaurant (Android + iOS), inspiré des mécaniques de Restaurant City,
 avec un nom, des graphismes et des personnages 100 % originaux.
@@ -23,6 +23,27 @@ avec un nom, des graphismes et des personnages 100 % originaux.
 | Quartier | Bar avec terrasse, cinéma, galerie marchande, immeubles (fenêtres éclairées la nuit). Passants qui vont au cinéma, au bar, font les boutiques ou traversent le trottoir d'en face ; les clients arrivent du quartier et y repartent |
 | Ambiance | Carnet de commandes compact et repliable, bulles discrètes, rien qui clignote, mode « Regarder » (interface masquée, caméra qui se promène) |
 | Divers | Sauvegarde automatique, gains hors-ligne (jusqu'à 8 h), sons, tutoriel, réglages |
+
+### Nouveautés v0.96 : l'histoire et le service
+- **Des scènes, plus des fenêtres** : chaque dialogue se joue en bandes cinéma, avec le portrait du personnage, ses expressions, le texte qui s'écrit, une carte de titre à chaque chapitre et une musique d'ambiance pour les moments forts. Le service se met en pause pendant qu'on lit.
+- **Des choix qui restent** : vingt décisions au fil des 28 chapitres (offrir le café au banquier, payer le loyer de Lucien, publier ou non l'article sur Belmont…). Les personnages s'en souviennent plus tard, et un épilogue raconte ce que chacun est devenu selon les réponses données. Le cœur ramène le quartier, le panache fait grimper les pourboires.
+- **Le registre** : le joueur signe de son prénom, et tout le monde s'adresse à lui correctement (« mon grand » ou « ma grande »).
+- **Les personnages viennent vraiment** : Albert, M. Pinson, Mme Fourchette et Victor Belmont s'assoient en salle quand l'histoire le demande ; le chapitre du duel se joue en direct, score contre score, pendant les coups de feu.
+- **L'élan** : une série de clients contents qui multiplie les pourboires (jusqu'à ×1,5) et se brise au premier client fâché.
+- **Les étoiles du service** : chaque bilan du soir note l'accueil, le régal et l'élan, avec une prime.
+- **L'ardoise** : un plat du jour à choisir chaque matin, commandé deux fois plus souvent et payé plus cher.
+- **Les commandes des voisins** : un habitué demande une grosse quantité d'un plat pour le lendemain soir.
+- **Sensations** : pièces qui volent jusqu'à la caisse, compteur qui défile, voix par personnage, tempête et fête de quartier selon le chapitre.
+- Les anciennes parties sont reprises telles quelles : Odette présente les nouveautés à la première ouverture.
+
+Code : `src/scene.js` (lecteur de scènes), `src/flow.js` (élan, étoiles, ardoise, commandes, duel), `src/saga.js` (les 28 chapitres, leurs choix et l'épilogue), et les correctifs `scene_patch.py`, `flow_patch.py`, `story2_patch.py`.
+
+### Ajouts récents (v0.91 à v0.95)
+- **De quoi s'occuper** : défis express pendant le service (5 par journée), cinq mini-jeux (3 parties chacun par journée) qui rendent de l'énergie.
+- **Le vaisselier d'Odette** : un meuble offert par Mamie Odette, où se pose un souvenir du quartier à chaque chapitre terminé (28 objets, +2 % de pourboires chacun).
+- **Les voisins à table** : dix personnages de l'histoire viennent manger à leur heure, laissent un cadeau et deviennent des amis (3 cœurs).
+- **Chapitres qui rapportent** : pièces à chaque étape, +2 % sur le prix des plats par page du carnet.
+- **Finition v0.95** : interface revue sur petit écran (barre du haut, équipe, carte, réglages, écran titre), messages lisibles plus longtemps, nombres à la française, fin de chapitre en une seule fenêtre, tutoriel à jour, bandeau d'événement qui se replie, récompenses qui attendent leur tour, et environ 37 % d'objets dessinés en moins (pièces fixes des personnages et des meubles soudées).
 
 Rendu **3D temps réel avec Three.js** : ombres douces, éclairage d'ambiance, cycle jour/nuit selon l'heure réelle, personnages animés, voitures, particules.
 
