@@ -1,6 +1,6 @@
 **Jouer en ligne : https://madaratn.github.io/Bistro-Ville-3D/**
 
-# Chez Odette — prototype v0.99
+# Chez Odette — prototype v0.99.1
 
 Jeu mobile de gestion de restaurant (Android + iOS), inspiré des mécaniques de Restaurant City,
 avec un nom, des graphismes et des personnages 100 % originaux.
@@ -23,6 +23,13 @@ avec un nom, des graphismes et des personnages 100 % originaux.
 | Quartier | Bar avec terrasse, cinéma, galerie marchande, immeubles (fenêtres éclairées la nuit). Passants qui vont au cinéma, au bar, font les boutiques ou traversent le trottoir d'en face ; les clients arrivent du quartier et y repartent |
 | Ambiance | Carnet de commandes compact et repliable, bulles discrètes, rien qui clignote, mode « Regarder » (interface masquée, caméra qui se promène) |
 | Divers | Sauvegarde automatique, gains hors-ligne (jusqu'à 8 h), sons, tutoriel, réglages |
+
+### v0.99.1 : l'histoire sans attente
+- La règle « un chapitre par jour » disparaît : dès qu'un chapitre est terminé, le suivant s'ouvre. Seuls ses objectifs en fixent le rythme.
+- Après la fenêtre « Chapitre terminé », l'ouverture du chapitre suivant arrive d'elle-même ; le panneau Histoire propose aussi un bouton « Commencer le chapitre ».
+- Dans la liste « Aujourd'hui », terminer un chapitre coche toujours la ligne Histoire pour la journée, mais elle reste ouverte et affiche l'objectif suivant.
+
+Code : `src/story3_patch.py`.
 
 ### Nouveautés v0.99 : La Ville (multijoueur)
 - **Une ville partagée** : une carte de six quartiers (Le Vieux-Port, Les Halles, La Gare, La Butte, Les Jardins, Le Belvédère), 120 emplacements. Chaque joueur y installe son bistrot ; on se promène sur la carte (glisser, pincer), on ouvre la fiche de n'importe quel bistrot.

@@ -170,6 +170,7 @@ body.watch #sJour,body.visit #sJour,body.watch #sideL,body.visit #sideL{opacity:
 .row.td .tdC{flex:none;width:30px;height:30px;border-radius:50%;border:2.5px solid #cdb284;background:#fff;display:flex;align-items:center;justify-content:center;font:700 17px Fredoka,system-ui,sans-serif;color:#fff}
 .row.td.done{opacity:.7;cursor:default}
 .row.td.done .tdC{background:#3fb56d;border-color:#17603a}
+.row.td.more .tdC,.row.td.more.ready .tdC{background:#3fb56d;border-color:#17603a;color:#fff}
 .row.td.done .t{text-decoration:line-through}
 .row.td.ready{border-color:#27a05c;box-shadow:0 3px 0 #27a05c}
 .row.td.ready .tdC{border-color:#27a05c;background:#e9ffe0}

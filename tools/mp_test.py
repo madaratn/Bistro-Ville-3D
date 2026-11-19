@@ -35,7 +35,7 @@ async def main():
       await asyncio.sleep(4)
       U={}
       for n in P:
-        r=json.loads(await D(n,"JSON.stringify({kind:NET.kind,uid:NET.uid,ready:NET.ready,err:NET.err})")); U[n]=r['uid']; check('connexion de '+n+' au serveur',r['kind']=='http',r)
+        r=await until(n,"{kind:NET.kind,uid:NET.uid,ready:NET.ready,err:NET.err}",lambda r:r['ready'],40); U[n]=r['uid']; check('connexion de '+n+' au serveur',r['kind']=='http',r)
       check('trois identités différentes',len(set(U.values()))==3)
       await D('A',"ACT.vjoin('1')"); await D('B',"ACT.vjoin('1')"); await D('C',"ACT.vjoin('2')"); await asyncio.sleep(3)
       for n in P:

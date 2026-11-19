@@ -2,7 +2,7 @@
    L'HÉRITAGE DE MAMIE ODETTE — l'histoire longue (4 saisons, 28 chapitres)
    v0.96 : des choix (['?',id,options]), des répliques qui s'en souviennent (3e élément : condition),
    le prénom du joueur ({{N}}) et ses accords ({{masculin|féminin}}), des invités (guest) et un duel.
-   Un chapitre par jour au maximum ; chaque chapitre = 3 étapes.
+   Chaque chapitre = 3 étapes ; depuis la v0.99.1, plus d'attente entre deux chapitres.
    Pour écrire la suite : ajouter des chapitres à SAGA (et une saison à SAGA_SEASONS).
    ========================================================= */
 const SAGA_WHO={
