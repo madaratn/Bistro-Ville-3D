@@ -2,7 +2,7 @@
 const FONT='Fredoka,"Trebuchet MS",sans-serif';
 const cv=$('#c');
 let LITE=false; try{ const ua=navigator.userAgent||'', q=new URLSearchParams(location.search), pref=localStorage.getItem('bv_lite'); LITE=q.get('lite')==='1'||pref==='1'||(pref!=='0'&&((navigator.deviceMemory&&navigator.deviceMemory<=3)||(navigator.hardwareConcurrency&&navigator.hardwareConcurrency<=4)||/Android [4-8][.;]/.test(ua))); }catch(e){}
-const PXR=()=>LITE?1:Math.min(2,window.devicePixelRatio||1);
+const PXR=()=>(LITE?1:Math.min(2,window.devicePixelRatio||1))*([1,.8,.6][optG('res',0)]||1);
 const renderer=new THREE.WebGLRenderer({canvas:cv,antialias:!LITE,powerPreference:'high-performance'});
 renderer.setPixelRatio(PXR());
 renderer.shadowMap.enabled=!LITE; renderer.shadowMap.type=THREE.PCFSoftShadowMap;
@@ -27,7 +27,19 @@ function rgbOf(c){ if(c[0]==='#'){ const n=parseInt(c.slice(1),16); return [n>>1
 const _sc={};
 function shade(c,amt){ const k=c+amt; if(_sc[k]) return _sc[k]; let [r,g,b]=rgbOf(c); const f=amt<0?0:255,p=Math.abs(amt); r=Math.round((f-r)*p+r); g=Math.round((f-g)*p+g); b=Math.round((f-b)*p+b); return _sc[k]='#'+((1<<24)|(r<<16)|(g<<8)|b).toString(16).slice(1); }
 const _m=new Map();
-function M(c,o){ const k=c+(o?JSON.stringify(o):''); let m=_m.get(k); if(!m){ m=new THREE.MeshStandardMaterial(Object.assign({color:c,roughness:.72,metalness:0},o||{})); _m.set(k,m);} return m; }
+// ----- v0.98 : la matière des meubles. Le bois a son veinage, le métal son brossé : calculés à l'affichage, sans aucune texture -----
+const _mdC=new THREE.Color(), _mdH={h:0,s:0,l:0};
+function matDetail(m,c,o){ if(LITE||(o&&(o.transparent||o.emissive||o.map||o.flatShading||o.side))) return; let kind=null;
+ if(o&&o.metalness>=.6) kind='mt'; else { try{ _mdC.set(c).getHSL(_mdH); }catch(e){ return; } if(_mdH.h>.035&&_mdH.h<.125&&_mdH.s>.22&&_mdH.l>.16&&_mdH.l<.74&&!(o&&o.roughness>.9)) kind='wd'; }
+ if(!kind) return; const wd=kind==='wd';
+ m.onBeforeCompile=sh=>{
+  sh.vertexShader=sh.vertexShader.replace('#include <common>','#include <common>\nvarying vec3 vMdP; varying vec3 vMdN;').replace('#include <begin_vertex>','#include <begin_vertex>\n vMdP=position; vMdN=normal;');
+  sh.fragmentShader=sh.fragmentShader.replace('#include <common>','#include <common>\nvarying vec3 vMdP; varying vec3 vMdN;\nfloat mdH(vec2 p){ return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453); }\nfloat mdN(vec2 p){ vec2 i=floor(p), f=fract(p); f=f*f*(3.-2.*f); return mix(mix(mdH(i),mdH(i+vec2(1.,0.)),f.x),mix(mdH(i+vec2(0.,1.)),mdH(i+vec2(1.,1.)),f.x),f.y); }')
+   .replace('#include <roughnessmap_fragment>','#include <roughnessmap_fragment>\n { vec3 an=abs(vMdN); '+(wd
+    ?'vec2 q=an.y>.7?vec2(vMdP.x*2.4,vMdP.z*44.):(an.x>an.z?vec2(vMdP.y*2.4,vMdP.z*44.):vec2(vMdP.y*2.4,vMdP.x*44.)); float k=1.-smoothstep(.3,1.,fwidth(q.y)), g=mdN(q)*.62+mdN(q*vec2(2.3,.37)+7.3)*.38; diffuseColor.rgb*=1.+(g-.52)*.26*k; roughnessFactor=clamp(roughnessFactor+(g-.5)*.22*k,.05,1.);'
+    :'vec2 q=an.y>.7?vec2(vMdP.x*1.6,vMdP.z*90.):vec2((an.x>an.z?vMdP.z:vMdP.x)*1.6,vMdP.y*90.); float k=1.-smoothstep(.3,1.,fwidth(q.y)), g=mdN(q); diffuseColor.rgb*=1.+(g-.5)*.07*k; roughnessFactor=clamp(roughnessFactor+(g-.5)*.34*k,.05,1.);')+' }'); };
+ m.customProgramCacheKey=()=>'md'+kind; }
+function M(c,o){ const k=c+(o?JSON.stringify(o):''); let m=_m.get(k); if(!m){ m=new THREE.MeshStandardMaterial(Object.assign({color:c,roughness:.72,metalness:0},o||{})); try{ matDetail(m,c,o); }catch(e){} _m.set(k,m);} return m; }
 const _g=new Map();
 const geo=(k,f)=>{ let g=_g.get(k); if(!g){ g=f(); _g.set(k,g);} return g; };
 const RB=(w,h,d,r)=>geo(`rb${w},${h},${d},${r}`,()=>new RoundedBoxGeometry(w,h,d,3,r));
@@ -231,8 +243,8 @@ function rebuildStatic(){
  staticRoot.add(mesh(new THREE.BoxGeometry(.07,.04,S),trim,.02,.49,S/2,false));
  staticRoot.add(mesh(new THREE.BoxGeometry(S+WT+.02,.05,WT+.04),cap,S/2-WT/2,WH+.02,-WT/2));
  staticRoot.add(mesh(new THREE.BoxGeometry(WT+.04,.05,S),cap,-WT/2,WH+.02,S/2));
- WL.N.forEach((t,i)=>{ if(!t) return; const o=wallObj3D(t); if(!o) return; o.position.set(i+.5,o.userData.y||.98,.006); staticRoot.add(o); });
- WL.W.forEach((t,j)=>{ if(!t) return; const o=wallObj3D(t); if(!o) return; o.position.set(.006,o.userData.y||.98,j+.5); o.rotation.y=Math.PI/2; staticRoot.add(o); });
+ WL.N.forEach((t,i)=>{ if(!t) return; const o=wallObj3D(t); if(!o) return; if(WOBJ[t]&&WOBJ[t].win&&!LITE) winDrapes(o,W,t); o.position.set(i+.5,o.userData.y||.98,.006); staticRoot.add(o); });
+ WL.W.forEach((t,j)=>{ if(!t) return; const o=wallObj3D(t); if(!o) return; if(WOBJ[t]&&WOBJ[t].win&&!LITE) winDrapes(o,W,t); o.position.set(.006,o.userData.y||.98,j+.5); o.rotation.y=Math.PI/2; staticRoot.add(o); });
  const mid=Math.floor(S/2);
  // carreaux posés un par un : un seul maillage par style, découpé dans la texture complète du sol
  { const by={}; const T=state.tiles||{}; for(const k in T){ const [x,y]=k.split(',').map(Number); if(x<S&&y<S&&FLOORS[T[k]]&&T[k]!==state.floor) (by[T[k]]=by[T[k]]||[]).push([x,y]); }
@@ -337,6 +349,7 @@ function buildFurn(t,f){
    const fk=mesh(new THREE.BoxGeometry(.012,.006,.2),sil,.02,.03,0,false); fk.rotation.y=.5; p.add(fk); const kn=mesh(new THREE.BoxGeometry(.012,.006,.2),sil,-.01,.034,0,false); kn.rotation.y=-.45; p.add(kn);
    const nap=mesh(SP(.045,7,5),M('#fff7ea',{roughness:.95,flatShading:true}),.15,.02,.09,false); nap.scale.set(1,.5,.8); p.add(nap);
    p.position.set(x,ud.top+.012,z); p.rotation.y=ry; p.visible=false; g.add(p); ud.plates.push(p); }
+  if(!LITE&&f) try{ tableSets(g,f,ud.top,F); }catch(e){ console.warn('couverts',e); }
   itemsGroup(g,ud.top+.1,8,0); ud.items.scale.setScalar(.88);
   break;}
  case 'chair':{
@@ -750,7 +763,7 @@ function syncFurn(T,n){
  const seen=new Set();
  for(const f of state.furn){
   let o=fObjs.get(f.id);
-  const key=f.t+(f.t==='odette'?'|'+souvN():'')+(kindOf(f)==='chair'?chairBackDir(f).join():kindOf(f)==='table'?tableJoin(f).join(''):'');
+  const key=f.t+(f.t==='odette'?'|'+souvN():'')+(kindOf(f)==='chair'?chairBackDir(f).join():kindOf(f)==='table'?tableJoin(f).join('')+'|'+tableSeats(f):'');
   if(o&&o.key!==key){ furnRoot.remove(o.g); disposeTree(o.g); o=null; }
   if(!o){ o={g:buildFurn(f.t,f),key}; try{ furnBake(o.g,key); }catch(e){ console.warn('bake',f.t,e); } furnRoot.add(o.g); fObjs.set(f.id,o); }
   const g=o.g, ud=g.userData; g.position.set(f.x+.5,0,f.y+.5);
@@ -1150,6 +1163,21 @@ function doorSign(T){
 }
 
 /* --- objets muraux : fenêtres, tableaux, miroir, horloge, étagère, applique, enseigne, ardoise --- */
+// ----- v0.98 : les places à table et les rideaux -----
+const _tSeat={t:0,m:new Map()};
+function tableSeats(f){ const now=performance.now(); if(now-_tSeat.t>400||!_tSeat.m.size){ _tSeat.t=now; _tSeat.m.clear(); for(const c of state.furn){ if(kindOf(c)!=='chair') continue; const t=seatTable(c); if(!t) continue; const k=(c.x-t.x)+':'+(c.y-t.y); _tSeat.m.set(t.id,(_tSeat.m.get(t.id)||[]).concat(k)); } }
+ const l=_tSeat.m.get(f.id); return l?l.sort().join(','):''; }
+function tableSets(g,f,top,F){ const S0=tableSeats(f); if(!S0) return; const dirs=S0.split(',').map(s=>s.split(':').map(Number)), has=(x,z)=>dirs.some(d=>d[0]===x&&d[1]===z);
+ const sil=M('#d9dde3',{metalness:.8,roughness:.25}), nap=M(F.runner||(F.cloth&&F.cloth!=='#fff0d6'&&F.cloth!=='#ffffff'?'#fffaf0':'#c8553d'),{roughness:.95}), gls=M('#e8f4f6',{roughness:.06,metalness:.25}), y=top+.004, rot=-(typeof furnRot==='function'?furnRot(f):0)*Math.PI/2;
+ for(const [dx,dz] of dirs){ if(Math.abs(dx)+Math.abs(dz)!==1) continue; const q=new THREE.Group(); q.position.set(dx*.132,y,dz*.132); q.rotation.y=Math.atan2(dx,dz);
+  const L=!has(-dz,dx), R=!has(dz,-dx);          // un voisin à angle droit : on laisse le coin libre
+  if(L){ q.add(mesh(new THREE.BoxGeometry(.046,.005,.086),nap,-.121,.0025,.0,false)); q.add(mesh(new THREE.BoxGeometry(.008,.003,.062),sil,-.121,.0065,.018,false)); q.add(mesh(new THREE.BoxGeometry(.02,.003,.03),sil,-.121,.0065,-.026,false)); }
+  if(R){ q.add(mesh(new THREE.BoxGeometry(.009,.003,.058),sil,.119,.0015,.02,false)); q.add(mesh(new THREE.BoxGeometry(.014,.0025,.05),sil,.119,.0013,-.03,false));
+   q.add(mesh(CY(.004,.019,.004,10),gls,.085,.002,-.088,false)); q.add(mesh(CY(.004,.004,.03,6),gls,.085,.017,-.088,false)); q.add(mesh(CY(.021,.013,.034,12),gls,.085,.048,-.088,false)); }
+  const w=new THREE.Group(); w.rotation.y=rot; w.add(q); g.add(w); } }
+function winDrapes(o,W,t){ const fab=M('#f6ecd8',{roughness:.96}), acc=M(shade(W.w,.12),{roughness:.9}), rod=M('#6b4a2e',{roughness:.5}), round=t==='winR', hh=round?.42:.46, w0=round?.36:.4;
+ const r=mesh(CY(.012,.012,w0*2+.2,8),rod,0,hh,.075,false); r.rotation.z=Math.PI/2; o.add(r); for(const s of [-1,1]) o.add(mesh(SP(.022,8,6),rod,s*(w0+.1),hh,.075,false));
+ for(const s of [-1,1]){ for(let i=0;i<3;i++){ const c=mesh(CY(.03,.036,.8,8),fab,s*(w0-.02+i*.046),hh-.41,.07+(i%2)*.012,false); c.scale.z=.55; o.add(c); } o.add(mesh(new THREE.BoxGeometry(.16,.03,.05),acc,s*(w0+.026),hh-.5,.078,false)); } }
 function wallObj3D(t){
  const white=M('#fffaf3',{roughness:.5}), gold=M('#c79a52',{roughness:.4,metalness:.3}), g=new THREE.Group();
  if(t==='win') return makeWindow();

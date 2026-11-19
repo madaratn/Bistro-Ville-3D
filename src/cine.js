@@ -115,6 +115,6 @@ function cineMusicTick(){ if(!CM.on||!AC) return; const c=CM.cur, g=CM.tg;
    else if(en>.3) cmPluck(f,t,Math.max(.5,d*1.5),.17,false);
    else if(st===0||n[1]>=3) cmPluck(f/2,t,Math.max(1.2,d*2),.16,false); }
   CM.next+=e8; CM.step++; if(CM.step%8===0) CM.bar++; } }
-function cineMusicStart(){ if(CM.on||!AC) return; try{ musicStop(); }catch(e){} CM.gain=AC.createGain(); CM.gain.gain.value=0; CM.gain.connect(AC.destination); CM.gain.gain.linearRampToValueAtTime(.6,AC.currentTime+.8); CM.on=true; CM.next=AC.currentTime+.1; CM.step=0; CM.bar=0; CM.cur={mn:CM.tg.mn,en:CM.tg.en,bpm:CM.tg.bpm}; CM.timer=setInterval(cineMusicTick,90); }
+function cineMusicStart(){ if(CM.on||!AC) return; try{ musicStop(); }catch(e){} CM.gain=AC.createGain(); CM.gain.gain.value=0; CM.gain.connect(volBus('m')); CM.gain.gain.linearRampToValueAtTime(.6,AC.currentTime+.8); CM.on=true; CM.next=AC.currentTime+.1; CM.step=0; CM.bar=0; CM.cur={mn:CM.tg.mn,en:CM.tg.en,bpm:CM.tg.bpm}; CM.timer=setInterval(cineMusicTick,90); }
 function cineMusicMood(m){ if(!m) return; Object.assign(CM.tg,m); }
 function cineMusicStop(){ if(!CM.on) return; CM.on=false; clearInterval(CM.timer); try{ CM.gain.gain.cancelScheduledValues(AC.currentTime); CM.gain.gain.setValueAtTime(CM.gain.gain.value,AC.currentTime); CM.gain.gain.linearRampToValueAtTime(0,AC.currentTime+1.4); }catch(e){} }

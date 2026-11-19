@@ -1,6 +1,6 @@
 **Jouer en ligne : https://madaratn.github.io/Bistro-Ville-3D/**
 
-# Chez Odette — prototype v0.97
+# Chez Odette — prototype v0.98
 
 Jeu mobile de gestion de restaurant (Android + iOS), inspiré des mécaniques de Restaurant City,
 avec un nom, des graphismes et des personnages 100 % originaux.
@@ -23,6 +23,18 @@ avec un nom, des graphismes et des personnages 100 % originaux.
 | Quartier | Bar avec terrasse, cinéma, galerie marchande, immeubles (fenêtres éclairées la nuit). Passants qui vont au cinéma, au bar, font les boutiques ou traversent le trottoir d'en face ; les clients arrivent du quartier et y repartent |
 | Ambiance | Carnet de commandes compact et repliable, bulles discrètes, rien qui clignote, mode « Regarder » (interface masquée, caméra qui se promène) |
 | Divers | Sauvegarde automatique, gains hors-ligne (jusqu'à 8 h), sons, tutoriel, réglages |
+
+### Nouveautés v0.98 : la mise en scène, la carte, les options
+- **Des dialogues joués par les personnages** : deux acteurs 3D en pied se font face au-dessus du texte. Celui qui parle est dans la lumière, fait des gestes selon son humeur (il salue, croise les bras, lève les mains), l'autre l'écoute dans l'ombre. Une petite bulle marque l'émotion du moment.
+- **Le confort de lecture** : le texte reprend son souffle à la ponctuation, un **journal** permet de relire les répliques de la scène, et un mode **auto** fait avancer le dialogue tout seul.
+- **Mes scènes** : depuis le panneau Histoire, on revoit l'ouverture de chaque chapitre vécu, avec ses propres choix.
+- **Précédemment…** : après quelques heures d'absence, une carte rappelle la saison, le chapitre et l'objectif en cours.
+- **La carte en fiches illustrées** : chaque plat a sa grande photo, son prix en étiquette, ses services, sa maîtrise ; les recettes montrent le niveau, les étoiles et les ingrédients manquants.
+- **Un vrai écran d'options**, en cinq onglets : *Image* (qualité Haute / Équilibrée / Légère, effets, ombres de contact, flou, personnages détaillés, acteurs 3D, finesse de l'image, 60 ou 30 images par seconde), *Son* (volumes séparés des effets et de la musique, voix des personnages, vibrations), *Confort* (taille du texte, vitesse du texte, avance automatique, contraste renforcé, animations réduites), *Jeu*, *Partie* (code de sauvegarde à copier pour changer de téléphone, reprise d'une partie par son code).
+- **La déco** : veinage du bois et métal brossé sur tous les meubles, tables dressées (serviette, fourchette, couteau et verre à chaque place), rideaux aux fenêtres.
+- **L'interface** : le contenu des fenêtres arrive en cascade à l'ouverture.
+
+Code : `src/bust.js` (acteurs 3D), `src/scene.js` (journal, auto, rythme du texte), `src/opts.js` et `src/opt_patch.py` (options, volumes, Mes scènes, Précédemment), `src/menu2.js` (la carte), `src/render3d.js` (`matDetail`, `tableSets`, `winDrapes`).
 
 ### Nouveautés v0.97 : les personnages et l'image
 - **Des personnages refaits de la tête aux pieds** : chaque client, chaque employé et les onze personnages de l'histoire sont maintenant de vraies figurines articulées (épaules, coudes, genoux, pieds), avec un visage détaillé (yeux brillants, paupières, sourcils, bouche qui parle et qui mâche), des coiffures peignées mèche par mèche, des tenues complètes (gilets, tabliers, foulards, lunettes, moustaches, chapeaux). Un seul maillage par personnage : c'est plus beau, et il y a moins d'objets à afficher qu'avant.
