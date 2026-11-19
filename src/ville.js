@@ -2,7 +2,7 @@
 // Chaque joueur installe son bistrot dans un des six quartiers. Sa fiche publique (nom, niveau, points de la semaine, confrérie)
 // est le seul document qu'il écrit ; classements, quartiers tenus et messages se calculent en lisant les fiches des autres.
 // Des voisins « du jeu » peuplent la ville : ils sont signalés comme tels, et laissent leur place aux vrais joueurs.
-const MP={on:false,real:[],all:[],byId:new Map(),G:[],gById:new Map(),sel:null,view:null,bg:null,sub:'j',t:0,snapT:0,snapH:'',cloudT:0,cloudH:'',npcK:'',npc:[],note:'',unsub:[],started:false,drag:null,lateT:0};
+const MP={on:false,real:[],all:[],byId:new Map(),G:[],gById:new Map(),sel:null,view:null,bg:null,sub:'j',t:0,snapT:0,snapH:'',cloudT:0,cloudH:'',npcK:'',npc:[],note:'',unsub:[],started:false,drag:null,lateT:0,fix:0,fixT:0,gOk:false};
 const MP_D=[['Le Vieux-Port','#3f7fbf',[36,452,300,272]],['Les Halles','#c8553d',[356,452,290,272]],['La Gare','#6b7280',[666,452,298,272]],['La Butte','#8a5cf0',[36,36,290,270]],['Les Jardins','#3f9f6a',[346,36,300,270]],['Le Belvédère','#d4a53a',[666,36,298,270]]];
 const MP_SLOTS=20, MP_W=1000, MP_H=760;
 const MP_NPC_N=['Le Petit Zinc','Chez Lulu','La Mie Dorée','Le Fou du Roi','Au Bon Coin','La Table Ronde','Le Vieux Fourneau','Chez Paulette','Le Chat Gourmand','L’Assiette Bleue','La Cocotte','Le Comptoir','Au Fil de l’Eau','La Belle Époque','Le Pot au Feu','Chez Marius','La Bonne Étoile','Le Tablier','L’Entre-Deux','Le Grain de Sel','La Tête de Lard','Au Petit Bonheur','Le Bouchon','La Casserole','Chez Fernand','Le Moulin','La Dînette','Le Rendez-Vous','L’Ardoise','La Marmite','Le Café des Arts','Chez Suzon','Le Phare','La Guinguette','Le Zeste','La Louche d’Or'];
@@ -37,7 +37,8 @@ function mpBuild(){ const wk=mpWk(), L=[], used=new Set(), mine=mpJoined()?mpDoc
  const mp0=state.mp, meP=L.find(p=>p.me); if(mp0&&meP&&(mp0.sl!==meP.sl||mp0.d!==meP.d)){ mp0.sl=meP.sl; mp0.d=meP.d; MP.fix=1; }
  for(const n of mpNPC()){ const p=Object.assign({},n); if(place(p)) L.push(p); }
  const G=[]; for(const g of MP_NPC_G) G.push({id:g[0],n:g[1],tag:g[2],em:g[3],col:g[4],desc:'Une confrérie du jeu, pour te mesurer à quelqu’un même en solitaire.',open:false,npc:1,ban:[]}); for(const g of MP.Graw||[]) G.push(g);
- MP.G=G; MP.gById=new Map(G.map(g=>[g.id,g])); for(const p of L){ if(p.g&&(!MP.gById.has(p.g)||MP.gById.get(p.g).ban.includes(p.id))) p.g=''; }
+ MP.G=G; MP.gById=new Map(G.map(g=>[g.id,g])); for(const p of L){ if(p.g&&(!MP.gById.has(p.g)||MP.gById.get(p.g).ban.includes(p.id))){ if(p.me&&mp0&&mp0.g===p.g&&MP.gOk&&NET.kind!=='local'){ const ban=MP.gById.has(p.g); mp0.g=''; mp0.hp=null; mp0.ms=[]; mp0.gc=null; MP.fix=1; try{ toast(ban?'Tu as été exclu de ta confrérie.':'Ta confrérie a été dissoute.'); }catch(e){} } p.g=''; } }
+ if(MP.fix&&!MP.fixT) MP.fixT=setTimeout(()=>{ MP.fixT=0; MP.fix=0; try{ save(); }catch(e){} try{ mpSync(true); }catch(e){} mpLive(); },0);
  MP.all=L; MP.byId=new Map(L.map(p=>[p.id,p])); return L; }
 const mpGPts=(gid,last)=>MP.all.reduce((s,p)=>s+(last?(p.lw&&p.lw[3]===gid&&p.lw[0]===mpWk(Date.now()-7*864e5)?p.lw[1]:0):(p.g===gid?p.p:0)),0);
 // qui tient un quartier : la confrérie qui y a marqué le plus de points (cette semaine : en cours ; la semaine passée : acquis)
@@ -63,8 +64,8 @@ function mpSnapRead(x){ if(!x||!Array.isArray(x.furn)) return null; const size=M
 function mpStart(){ if(MP.started) return; MP.started=true; netInit().then(()=>{ MP.on=true;
   const sub=()=>{ for(const u of MP.unsub) try{ u(); }catch(e){} MP.unsub=[];
    MP.note=''; clearTimeout(MP.lateT); if(NET.kind!=='local') MP.lateT=setTimeout(()=>{ MP.note='La ville tarde à répondre : en attendant, voici les voisins du jeu.'; mpLive(); },10000);
-   MP.unsub.push(NET.drv.watch('players',L=>{ clearTimeout(MP.lateT); MP.note=''; MP.real=L.map(mpClean).filter(Boolean); mpBuild(); if(MP.fix){ MP.fix=0; try{ save(); }catch(e){} mpSync(true); } mpLive(); },e=>{ clearTimeout(MP.lateT); MP.note='La ville ne répond plus : recharge la page pour la retrouver.'; mpLive(); }));
-   MP.unsub.push(NET.drv.watch('guilds',L=>{ MP.Graw=L.map(mpCleanG).filter(Boolean); mpBuild(); mpLive(); },()=>{})); };
+   MP.unsub.push(NET.drv.watch('players',L=>{ clearTimeout(MP.lateT); MP.note=''; MP.real=L.map(mpClean).filter(Boolean); mpBuild(); mpLive(); },e=>{ clearTimeout(MP.lateT); MP.note='La ville ne répond plus : recharge la page pour la retrouver.'; mpLive(); }));
+   MP.gOk=false; MP.unsub.push(NET.drv.watch('guilds',L=>{ MP.Graw=L.map(mpCleanG).filter(Boolean); MP.gOk=true; mpBuild(); mpLive(); },()=>{})); };
   MP.sub0=sub; sub(); mpBuild(); if(mpJoined()) mpSync(true);
   setInterval(()=>{ try{ mpSync(); }catch(e){ console.warn(e); } },45000);
   if(NET.kind!=='local'&&!(state.served>0)&&state.level<=1){ NET.drv.pget('save').then(c=>{ if(c&&typeof c.s==='string'&&c.lv>1){ MP.cloud=c; try{ toast('Une partie sauvegardée t’attend : La Ville, onglet Moi.'); }catch(e){} } }).catch(()=>{}); }

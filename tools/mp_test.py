@@ -51,7 +51,8 @@ async def main():
       # entraide
       await D('A',"(()=>{ energyTick(); state.en.v=3; ACT.gask(); return 1; })()")
       r=await until('B',"mpAsks().map(a=>a.p.n)",['Bistrot A']); check('B voit la demande de A',r==['Bistrot A'],r)
-      await D('B',"ACT.ghelp('%s')"%U['A']); await until('A',"mpHelpers()",1)
+      r=await D('B',"(()=>{ const c0=state.coins, p0=state.mp.p||0; ACT.ghelp('%s'); ACT.ghelp('%s'); return [state.coins-c0,(state.mp.p||0)-p0]; })()"%(U['A'],U['A'])); check('aider deux fois de suite ne paie qu’une fois',r==[30,10],r)
+      await until('A',"mpHelpers()",1)
       r=json.loads(await D('A',"(()=>{ const n=mpHelpers(); ACT.ggot(); return JSON.stringify({n,en:state.en.v}); })()")); check('A reçoit le coup de main (+2 énergie)',r['n']==1 and r['en']==5,r)
       # points, classements, quartiers
       await D('A',"(()=>{ state.served+=50; mpSync(true); return 1; })()"); await D('B',"(()=>{ state.served+=20; mpSync(true); return 1; })()")
@@ -71,6 +72,9 @@ async def main():
       # exclusion
       await D('A',"mpSync(true)"); await D('B',"ACT.gkick('%s')"%U['A'])
       r=await until('C',"mpMembers('%s').map(p=>p.n)"%U['B'],['Bistrot B']); check('A, exclu, n’est plus compté dans la confrérie',r==['Bistrot B'],r)
+      r=await until('A',"[state.mp.g,(state.mp.ms||[]).length,!!mpG()]",['',0,False]); check('A, exclu, n’a plus de confrérie sur sa propre fiche',r==['',0,False],r)
+      await D('A',"ACT.gjoin('%s')"%U['B']); r=await D('A',"state.mp.g"); check('A, exclu, ne peut pas revenir',r=='',r)
+      await D('A',"ACT.gjoin('npcg1')"); r=await until('C',"(MP.byId.get('%s')||{}).g"%U['A'],'npcg1'); check('A rejoint une autre confrérie',r=='npcg1',r)
       # deux bistrots sur la même place : tout le monde doit voir le même plan, et chacun corrige sa propre fiche
       for n in 'AB': await D(n,"(()=>{ state.mp.d=3; state.mp.sl=7; mpBuild(); mpSync(true); return 1; })()")
       pos="MP.all.filter(p=>!p.npc&&p.d===3).map(p=>[p.id,p.sl]).sort()"
@@ -88,6 +92,11 @@ async def main():
       await D('A',"(()=>{ ui.gq=false; openPanel('ville','carte'); MP.sel=NET.uid; renderPanel(); return 1; })()"); await asyncio.sleep(1.5); await P['A'].screenshot(path=os.path.join(OUT,'MP_A_carte.png'))
       await D('B',"(()=>{ openPanel('ville','guilde'); return 1; })()"); await asyncio.sleep(1.5); await P['B'].screenshot(path=os.path.join(OUT,'MP_B_guilde.png'))
       await D('C',"(()=>{ openPanel('ville','rang'); return 1; })()"); await asyncio.sleep(1.5); await P['C'].screenshot(path=os.path.join(OUT,'MP_C_rang.png'))
+      # dissolution : C rejoint, B dissout, C est libéré
+      await D('C',"ACT.gjoin('%s')"%U['B']); await until('B',"mpMembers('%s').length"%U['B'],2)
+      await D('C',"(()=>{ ui.panel='ville'; ui.tab='guilde'; renderPanel(); document.querySelector('#gmsg').value='Un mot de C'; state.mp.mt=0; ACT.gsend(); return 1; })()")
+      await D('B',"(()=>{ ui.gq=true; ACT.gleave(); return 1; })()")
+      r=await until('C',"[state.mp.g,(state.mp.ms||[]).length,MP.G.filter(g=>!g.npc).length]",['',0,0]); check('confrérie dissoute : C est libéré, ses messages effacés',r==['',0,0],r)
       # départ
       await D('C',"(()=>{ ui.vq2=true; ACT.vquit(); return 1; })()")
       r=await until('A',"MP.all.filter(p=>!p.npc).map(p=>p.n).sort()",['Bistrot A','Bistrot B']); check('C a quitté la ville : sa fiche a disparu chez les autres',r==['Bistrot A','Bistrot B'],r)

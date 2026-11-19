@@ -49,6 +49,8 @@ function netFail(path,e){ const c=(e&&e.code)||'', m=String((e&&e.message)||e||'
 function netPut(path,obj,key){ if(!NET.ready||!NET.can||NET.bad[path]||Date.now()<NET.hold) return; const js=key||JSON.stringify(obj); if(NET.last[path]===js&&!NET.pend[path]) return; if(NET.fly[path]){ NET.pend[path]=[obj,key]; return; }
  NET.fly[path]=true; NET.last[path]=js; Promise.resolve().then(()=>NET.drv.set(path,obj)).then(()=>{ NET.err=''; if(path.startsWith('players/')) NET.wrote=true; },e=>{ NET.last[path]=null; netFail(path,e); })
   .then(()=>{ NET.fly[path]=false; const p=NET.pend[path]; if(p){ delete NET.pend[path]; netPut(path,p[0],p[1]); } }); }
+// effacer un de mes documents, sans jamais remonter d'erreur au jeu
+function netDel(path){ NET.last[path]=null; delete NET.pend[path]; if(!NET.ready||!NET.drv) return; Promise.resolve().then(()=>NET.drv.del(path)).catch(e=>{ console.warn('net',path,e&&e.code||e); }); }
 // la sauvegarde privée du joueur : même prudence, sans jamais remonter d'erreur au jeu
 function netKeep(k,o){ if(!NET.ready||!NET.can||NET.kind==='local'||NET.bad['@'+k]||Date.now()<NET.hold) return; Promise.resolve().then(()=>NET.drv.pset(k,o)).catch(e=>{ const c=(e&&e.code)||''; if(c==='resource_exhausted') NET.hold=Date.now()+18e4; else if(c!=='unavailable') NET.bad['@'+k]=1; }); }
 function netLabel(){ return NET.kind==='claude'?(NET.can?'Ville en ligne (claude.ai)':'Ville en ligne, en simple visite'):NET.kind==='http'?'Ville en ligne (serveur)':'Hors ligne : voisins du jeu'; }

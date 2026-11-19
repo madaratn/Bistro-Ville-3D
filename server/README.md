@@ -27,7 +27,11 @@ Il faut un hébergeur qui garde un petit disque (les données tiennent dans un s
    - pour tous les joueurs : reconstruis le jeu avec l'adresse inscrite d'office,
      `MP_SERVER=https://ton-serveur.example python3 src/build3d.py`, puis republie le site et l'application.
 
-L'application Android n'accepte que les adresses **https**.
+L'application Android n'accepte que les adresses **https**, et une version web elle-même servie en https aussi
+(seule exception : `http://localhost`, pour les essais sur son ordinateur).
+
+La page du jeu publiée sur claude.ai n'utilise pas ce serveur : elle ne peut joindre aucune adresse extérieure et
+s'appuie sur la base de données de la page.
 
 ## Ce que le serveur garantit, et ce qu'il ne fait pas encore
 
