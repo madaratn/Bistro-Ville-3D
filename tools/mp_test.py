@@ -59,12 +59,15 @@ async def main():
       r=await until('C',"{a:MP.byId.get('%s').p,g:mpGPts('%s'),top:mpDistrict(1,false).map(x=>[MP.gById.get(x[0]).tag,x[1]]).slice(0,3),rk:mpRank().filter(p=>!p.npc).map(p=>p.n)}"%(U['A'],U['B']),lambda r:r['a']==50 and r['g']==80); check('C voit les points de A, de la confrérie et du quartier',r['a']==50 and r['g']==80 and ['COP',80] in r['top'],r)
       # visite et coup de cœur
       na=json.loads(await D('A',"JSON.stringify({n:state.furn.length,size:state.size})"))
-      await D('A',"(()=>{ state.furn=state.furn.slice(0,-3); rebuildOcc(); MP.snapT=0; mpSync(true); return state.furn.length; })()"); await asyncio.sleep(2.5)
+      # A a aussi un sol récent, un objet mural et des tapis (dont deux qui ne tiennent pas debout : modèle inconnu, hors de la salle)
+      await D('C',"(()=>{ state.rugs=[{t:'mat',x:2,y:8,r:0}]; return 1; })()")
+      await D('A',"(()=>{ state.furn=state.furn.slice(0,-3); rebuildOcc(); state.floor=FLOORS.length-1; state.wallObj={N:{},W:{6:'triptych'}}; state.rugs=[{t:'persR',x:3,y:6,r:0},{t:'faux',x:1,y:5,r:0},{t:'jute',x:99,y:2,r:0}]; MP.snapT=0; mpSync(true); return state.furn.length; })()"); await asyncio.sleep(2.5)
       await D('C',"ACT.vvisit('%s')"%U['A']); await asyncio.sleep(3.5)
       r=json.loads(await D('C',"JSON.stringify({mode,vis:!!MP.vis,n:state.furn.length,name:state.name,crew:crew.length})")); check('C visite le bistrot de A (son aménagement, pas le sien)',r['mode']=='show' and r['n']==na['n']-3 and r['name']=='Bistrot A',r)
+      r=json.loads(await D('C',"JSON.stringify({rugs:(state.rugs||[]).map(r=>r.t),floor:state.floor===FLOORS.length-1,wo:(state.wallObj.W||{})[6]})")); check('C voit le sol, l’objet mural et le tapis de A (les tapis invalides sont écartés)',r['rugs']==['persR'] and r['floor'] and r['wo']=='triptych',r)
       await P['C'].screenshot(path=os.path.join(OUT,'MP_visit.png'))
       await D('C',"(()=>{ mpLike(MP.vis.id); mpVisExit(); return 1; })()"); await asyncio.sleep(2.5)
-      r=json.loads(await D('C',"JSON.stringify({mode,n:state.furn.length,name:state.name,crew:crew.length})")); check('C retrouve son bistrot intact',r['mode']=='play' and r['n']==na['n'] and r['name']=='Bistrot C' and r['crew']>0,r)
+      r=json.loads(await D('C',"JSON.stringify({mode,n:state.furn.length,name:state.name,crew:crew.length,rugs:(state.rugs||[]).map(r=>r.t)})")); check('C retrouve son bistrot intact',r['mode']=='play' and r['n']==na['n'] and r['name']=='Bistrot C' and r['crew']>0 and r['rugs']==['mat'],r)
       r=await until('B',"mpLikes('%s')"%U['A'],1); check('B voit le coup de cœur donné à A',r==1,r)
       # triche : écrire la fiche d'un autre
       r=await D('A',"NET.drv.set('players/%s',{n:'Pirate',p:99999}).then(()=> 'accepté',e=>'refusé')"%U['B']); check('écrire la fiche d’un autre est refusé',r=='refusé',r)

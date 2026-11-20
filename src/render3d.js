@@ -68,7 +68,7 @@ function chairBackDir(f){ if(!f) return [0,-1]; const t=seatTable(f); if(!t) ret
 function seeded(n){ let s=n; return ()=>{ s=(s*9301+49297)%233280; return s/233280; }; }
 
 /* --- textures --- */
-function floorTex(F,flat){
+function floorTex(F,flat){ if(isNewPat(F.pat)) return floorTex2(F,flat);
  return canvasTex(S*64,S*64,(x)=>{
   const T=64;
   for(let j=0;j<S;j++) for(let i=0;i<S;i++){ x.fillStyle=F.pat==='checker'?((i+j)%2?F.a:F.b):F.a; x.fillRect(i*T,j*T,T,T); }
@@ -95,8 +95,10 @@ function floorDet(F){ if(LITE) return null; const key=F.pat; if(floorDetC[key]) 
  const N=128, G=32, H=new Float32Array(N*N), R=new Float32Array(N*N), rnd0=seeded(77), gn=[]; for(let i=0;i<G*G;i++) gn.push(rnd0());
  const noise=(u,v,fu,fv)=>{ const x=u*fu, y=v*fv, xi=Math.floor(x), yi=Math.floor(y), fx=x-xi, fy=y-yi, sx=fx*fx*(3-2*fx), sy=fy*fy*(3-2*fy), g=(a,b)=>gn[(a%fu)+(b%fv)*G]; return (g(xi,yi)*(1-sx)+g(xi+1,yi)*sx)*(1-sy)+(g(xi,yi+1)*(1-sx)+g(xi+1,yi+1)*sx)*sy; };
  const sm=(a,b,x)=>{ const t=Math.min(1,Math.max(0,(x-a)/(b-a))); return t*t*(3-2*t); };
+ const MK=fpMask(F,N);
  for(let j=0;j<N;j++) for(let i=0;i<N;i++){ const u=(i+.5)/N, v=(j+.5)/N, k=j*N+i; let h, ro;
-  if(F.pat==='plank'){ const rr=Math.min(2,Math.floor(v*3)), vv=v*3-rr, o=rr/3, du=Math.min(Math.abs(u-o),1-Math.abs(u-o)), dv=Math.min(vv,1-vv)/3, gr=noise(u,v,4,32)*.65+noise(u,v,8,16)*.35, e=sm(0,.013,dv)*sm(0,.011,du);
+  if(MK){ if(MK.flat){ h=MK.fz?.7+.3*noise(u,v,32,32):1; ro=MK.fz?.97:MK.ro+.05*noise(u,v,8,8); } else { const e=MK.e[k]; h=e*(.94+.06*noise(u,v,4,4)); ro=MK.rel?MK.ro:(e<.6?.9:MK.ro+.1*noise(u,v,8,8)); } }
+  else if(F.pat==='plank'){ const rr=Math.min(2,Math.floor(v*3)), vv=v*3-rr, o=rr/3, du=Math.min(Math.abs(u-o),1-Math.abs(u-o)), dv=Math.min(vv,1-vv)/3, gr=noise(u,v,4,32)*.65+noise(u,v,8,16)*.35, e=sm(0,.013,dv)*sm(0,.011,du);
    h=e*(.86+.14*gr); ro=e<.6?.92:.48+.18*gr; }
   else { const d=Math.min(u,1-u,v,1-v), w=F.pat==='tile'?.034:.021, e=sm(0,w,d), wv=noise(u,v,4,4);
    h=e*(.93+.07*wv); ro=e<.6?.9:.42+.12*noise(u,v,8,8)+.04*wv; }
@@ -110,7 +112,7 @@ function floorDet(F){ if(LITE) return null; const key=F.pat; if(floorDetC[key]) 
 function floorMat(F,flat){ const D=floorDet(F), m=new THREE.MeshStandardMaterial({map:floorTex(F,flat),roughness:.55});
  if(D){ D.n.repeat.set(S,S); D.r.repeat.set(S,S); m.normalMap=D.n; m.normalScale=new THREE.Vector2(.85,.85); m.roughnessMap=D.r; m.roughness=1; }
  return m; }
-function wallTex(W){
+function wallTex(W){ if(W.pt&&WPAT[W.pt]) return wallTex2(W);
  return canvasTex(128,128,(x)=>{
   x.fillStyle=W.c; x.fillRect(0,0,128,128);
   if(W.s){ x.fillStyle=W.s; for(let i=0;i<128;i+=32) x.fillRect(i,0,12,128); }
@@ -233,7 +235,7 @@ function rebuildStatic(){
  const upper=new THREE.MeshStandardMaterial({map:wt,roughness:.85}); upper.userData={};
  const wt2=wt.clone(); wt2.needsUpdate=true; wt2.repeat.set(S/1.5,1);
  const upperL=new THREE.MeshStandardMaterial({map:wt2,roughness:.85,color:'#eeeeee'});
- const wains=M(W.w,{roughness:.6}), trim=M(shade(W.w,.4)), cap=M('#fff1dc');
+ const wains=W.wn&&WNPAT[W.wn]?wainsMat(W):M(W.w,{roughness:.6}), trim=M(shade(W.w,.4)), cap=M('#fff1dc');
  const hU=WH-.48;
  staticRoot.add(ownMesh(new THREE.BoxGeometry(S+WT,hU,WT),upper,S/2-WT/2,.48+hU/2,-WT/2));
  staticRoot.add(ownMesh(new THREE.BoxGeometry(WT,hU,S),upperL,-WT/2,.48+hU/2,S/2));
@@ -243,14 +245,17 @@ function rebuildStatic(){
  staticRoot.add(mesh(new THREE.BoxGeometry(.07,.04,S),trim,.02,.49,S/2,false));
  staticRoot.add(mesh(new THREE.BoxGeometry(S+WT+.02,.05,WT+.04),cap,S/2-WT/2,WH+.02,-WT/2));
  staticRoot.add(mesh(new THREE.BoxGeometry(WT+.04,.05,S),cap,-WT/2,WH+.02,S/2));
- WL.N.forEach((t,i)=>{ if(!t) return; const o=wallObj3D(t); if(!o) return; if(WOBJ[t]&&WOBJ[t].win&&!LITE) winDrapes(o,W,t); o.position.set(i+.5,o.userData.y||.98,.006); staticRoot.add(o); });
- WL.W.forEach((t,j)=>{ if(!t) return; const o=wallObj3D(t); if(!o) return; if(WOBJ[t]&&WOBJ[t].win&&!LITE) winDrapes(o,W,t); o.position.set(.006,o.userData.y||.98,j+.5); o.rotation.y=Math.PI/2; staticRoot.add(o); });
+ const wg=new THREE.Group(); staticRoot.add(wg);
+ WL.N.forEach((t,i)=>{ if(!t) return; const o=wallObj3D(t); if(!o) return; if(WOBJ[t]&&WOBJ[t].win&&!WOBJ[t].nd&&!LITE) winDrapes(o,W,t); o.position.set(i+.5,o.userData.y||.98,.006); wg.add(o); });
+ WL.W.forEach((t,j)=>{ if(!t) return; const o=wallObj3D(t); if(!o) return; if(WOBJ[t]&&WOBJ[t].win&&!WOBJ[t].nd&&!LITE) winDrapes(o,W,t); o.position.set(.006,o.userData.y||.98,j+.5); o.rotation.y=Math.PI/2; wg.add(o); });
+ try{ bakeByMat(wg,null,null); }catch(e){ console.warn('murs',e); }
  const mid=Math.floor(S/2);
  // carreaux posés un par un : un seul maillage par style, découpé dans la texture complète du sol
  { const by={}; const T=state.tiles||{}; for(const k in T){ const [x,y]=k.split(',').map(Number); if(x<S&&y<S&&FLOORS[T[k]]&&T[k]!==state.floor) (by[T[k]]=by[T[k]]||[]).push([x,y]); }
   for(const fi in by){ const cells=by[fi], pos=[], uv=[], idx=[], nor=[]; cells.forEach(([x,y],n)=>{ pos.push(x,0,y, x+1,0,y, x+1,0,y+1, x,0,y+1); uv.push(x/S,1-y/S,(x+1)/S,1-y/S,(x+1)/S,1-(y+1)/S,x/S,1-(y+1)/S); nor.push(0,1,0,0,1,0,0,1,0,0,1,0); idx.push(n*4,n*4+2,n*4+1,n*4,n*4+3,n*4+2); });
    const g=new THREE.BufferGeometry(); g.setAttribute('position',new THREE.Float32BufferAttribute(pos,3)); g.setAttribute('uv',new THREE.Float32BufferAttribute(uv,2)); g.setAttribute('normal',new THREE.Float32BufferAttribute(nor,3)); g.setIndex(idx);
    const m=ownMesh(g,floorMat(FLOORS[fi],true),0,.0025,0,false); staticRoot.add(m); } }
+ try{ rugsBuild(staticRoot); }catch(e){ console.warn('tapis',e); }
  // haies
  const planter=M('#e9cfa8'), b1=M('#86bf45',{roughness:.9}), b2=M('#73ad3c',{roughness:.9});
  const hedge=(x,z,alongX)=>{ const g=new THREE.Group(); g.add(mesh(RB(alongX?.98:.24,.2,alongX?.24:.98,.04),planter,0,.1,0)); for(let k=0;k<2;k++){ const o=k?.24:-.24; g.add(mesh(SP(.19,12,10),k?b1:b2,alongX?o:0,.3,alongX?0:o)); } g.position.set(x,0,z); staticRoot.add(g); };
@@ -1097,7 +1102,7 @@ function tap(sx,sy){
  if(visit.on){ $('#vcard').classList.add('hide'); visit.sel=null; return; }
  if(mode==='play'&&!picked&&city.ready&&near(sx,sy,S+7.2,1.5,S,Math.max(46,innerHeight*.07))){ enterVisit(); return; }
  const [gx,gy]=screenToGrid(sx,sy);
- if(mode==='edit'){ if(!placing&&!(etab==='sols'&&tileMode)){ const pf=pickFurn(sx,sy); if(pf&&!(sel&&pf!==sel&&!fAt(gx,gy)&&inRest(gx,gy)&&canPlace(gx,gy,sel,sel.t))) return editTap(pf.x,pf.y); } if(!placing&&!(etab==='sols'&&tileMode)&&!(inRest(gx,gy)&&fAt(gx,gy))){ const h=wallHit(sx,sy); if(h) return wallPick(h.sd,h.i); } return editTap(gx,gy); }
+ if(mode==='edit'){ if(!placing&&!(etab==='sols'&&(tileMode||rugMode))){ const pf=pickFurn(sx,sy); if(pf&&!(sel&&pf!==sel&&!fAt(gx,gy)&&inRest(gx,gy)&&canPlace(gx,gy,sel,sel.t))) return editTap(pf.x,pf.y); } if(!placing&&!(etab==='sols'&&(tileMode||rugMode))&&!(inRest(gx,gy)&&fAt(gx,gy))){ const h=wallHit(sx,sy); if(h) return wallPick(h.sd,h.i); } return editTap(gx,gy); }
  if(picked&&(simT-picked.t>12||picked.o.cancel||picked.o.st!=='ready')) picked=null;
  if(picked){ const c=picked.o.c, hit=custs.find(k=>k.sitting&&k.table&&near(sx,sy,k.fx+.5,.6,k.fy+.5,42));
   if(hit===c){ if(!spendHelp()){ picked=null; return; } const it=picked.o; picked=null; if(it.k) serveDrink(it); else serve(it); it.w=null; sparkle(c.fx,c.fy,8); floatAt(c.fx,c.fy,'👍 +1 XP','#2f9e63'); addXP(1); return; }
@@ -1129,7 +1134,8 @@ let thumbsReady=false;
 function makeThumbs(){ const g=makeThumbsGen(); let auto=false; try{ auto=!!navigator.webdriver; }catch(e){}
  const fin=()=>{ thumbsReady=true; try{ bustShots(); }catch(e){} try{ icoRe=null; }catch(e){} try{ if(typeof hud==='function'&&state) hud(); }catch(e){} };
  if(auto){ try{ for(const _ of g){} }catch(e){ console.warn(e); } return fin(); }
- const step=()=>{ const t0=performance.now(); try{ while(performance.now()-t0<16){ if(g.next().done) return fin(); } }catch(e){ console.warn(e); return fin(); } setTimeout(step,4); }; step(); }
+ let rdy=false; const fin1=()=>{ if(!rdy){ rdy=true; fin(); } };
+ const step=()=>{ const t0=performance.now(); try{ while(performance.now()-t0<16){ const n=g.next(); if(n.value==='rdy') fin1(); if(n.done) return fin1(); } }catch(e){ console.warn(e); return fin1(); } setTimeout(step,rdy?24:4); }; step(); }
 function* makeThumbsGen(){
  try{ portraitsInit(); }catch(e){}
  const TS=LITE?112:192, c=document.createElement('canvas'); c.width=c.height=TS; let r;
@@ -1145,9 +1151,16 @@ function* makeThumbsGen(){
    if(DISHM[id]){ g.add(mesh(CY(.125,.09,.02,24),M('#ffffff',{roughness:.3}),0,-.011,0,false)); }
    sc.add(g); box.setFromObject(g); box.getCenter(cen); box.getSize(sz);
    const rad=sz.length()/2, dist=rad/Math.sin(13*Math.PI/180)*.92; cm.position.set(cen.x+dist*.25,cen.y+dist*.8,cen.z+dist*.55); cm.lookAt(cen); r.render(sc,cm); foodThumbs[e]=c.toDataURL(); sc.remove(g); yield; } }
- try{ const bx=new THREE.Box3(), cn=new THREE.Vector3(), sz2=new THREE.Vector3(); if(!winMat) winMat=new THREE.MeshStandardMaterial({color:'#ffe7c2',roughness:.08,emissive:'#ffd79a',emissiveIntensity:.35}); for(const k in WOBJ){ const o=wallObj3D(k); if(!o) continue; sc.add(o); bx.setFromObject(o); bx.getCenter(cn); bx.getSize(sz2); const d=sz2.length()/2/Math.sin(13*Math.PI/180)*1.05; cm.position.set(cn.x+d*.3,cn.y+d*.18,cn.z+d*.93); cm.lookAt(cn); r.render(sc,cm); thumbs['wo:'+k]=c.toDataURL(); sc.remove(o); yield; } }catch(e){}
  yield; try{ gourmetThumbs(r,sc,cm,c); }catch(e){}
+ yield 'rdy';
+ { const bx=new THREE.Box3(), cn=new THREE.Vector3(), sz2=new THREE.Vector3(); if(!winMat) winMat=new THREE.MeshStandardMaterial({color:'#ffe7c2',roughness:.08,emissive:'#ffd79a',emissiveIntensity:.35});
+  for(const k in WOBJ){ try{ const o=wallObj3D(k); if(o){ sc.add(o); bx.setFromObject(o); bx.getCenter(cn); bx.getSize(sz2); const d=sz2.length()/2/Math.sin(13*Math.PI/180)*1.05; cm.position.set(cn.x+d*.3,cn.y+d*.18,cn.z+d*.93); cm.lookAt(cn); r.render(sc,cm); thumbs['wo:'+k]=c.toDataURL(); sc.remove(o); } }catch(e){ console.warn('vignette',k,e); } yield; } }
+ try{ if(mode==='edit') editUI(); }catch(e){}
  yield; r.dispose(); if(r.forceContextLoss) r.forceContextLoss();
+ // les vignettes des sols, des murs et des tapis se préparent ensuite, quelques-unes par image : l'atelier s'ouvre sans à-coup
+ for(let i=0;i<FLOORS.length;i++){ try{ swF(i); }catch(e){} if(i%2) yield; }
+ for(let i=0;i<WALLS.length;i++){ try{ swW(i); }catch(e){} if(i%3===2) yield; }
+ { let i=0; for(const k in RUGS){ try{ swR(k); }catch(e){} if(i++%2) yield; } }
 }
 
 /* --- l'écriteau « Ouvert / Fermé » suspendu à l'auvent : on le touche pour ouvrir ou fermer --- */
@@ -1189,7 +1202,7 @@ function wallObj3D(t){
  if(t==='shelf'){ g.add(mesh(RB(.72,.04,.2,.012),M('#b8743f',{roughness:.55}),0,-.12,.1,false)); for(const s of [-1,1]) g.add(mesh(new THREE.BoxGeometry(.03,.12,.14),M('#8a5730'),s*.28,-.2,.07,false)); for(const [x,c,h] of [[-.2,'#5fa84f',.16],[.03,'#7fc46a',.11],[.23,'#4a9a3c',.14]]){ g.add(mesh(CY(.05,.04,.08,10),M('#c8553d',{roughness:.8}),x,-.06,.1,false)); const l=mesh(IC(.07,0),M(c,{flatShading:true,roughness:.8}),x,.02+h*.3,.1,false); l.scale.y=h/.1; g.add(l); } g.userData.y=.95; return g; }
  if(t==='lampW'){ g.add(mesh(CY(.05,.05,.02,12).clone().rotateX(Math.PI/2),gold,0,0,.012,false)); const arm=mesh(CY(.012,.012,.14,6),gold,0,.03,.08,false); arm.rotation.x=1.1; g.add(arm); g.add(mesh(CY(.09,.05,.11,14),M('#fff1c9',{emissive:'#ffd98a',emissiveIntensity:1.1,roughness:.6}),0,.1,.15,false)); g.userData.y=1.02; return g; }
  if(/^sign/.test(t)){ const st=t.slice(4), neon=st==='N'; const m=ownMesh(new THREE.PlaneGeometry(1.9,.48),new THREE.MeshStandardMaterial(Object.assign({map:signTex(st),transparent:true,roughness:.5},neon?{emissive:'#ffffff',emissiveMap:signTex(st),emissiveIntensity:.9}:{})),0,0,.024,false); g.add(m); g.userData.y=1.02; return g; }
- if(WALL3D[t]) return WALL3D[t](g,white,gold);
+ if(WALL3D[t]){ try{ return WALL3D[t](g,white,gold); }catch(e){ console.warn('mural',t,e); return null; } }
  if(t==='board'){ const m=ownMesh(new THREE.PlaneGeometry(1.25,.78),new THREE.MeshStandardMaterial({map:boardTex(),roughness:.8}),0,0,.024,false); g.add(m); return g; }
  return null;
 }
@@ -1201,7 +1214,7 @@ function wallMarks(){
  if(!box){ box=document.createElement('div'); box.id='wov'; document.body.appendChild(box); box.addEventListener('click',e=>{ const b=e.target.closest('button'); if(!b) return; audioInit(); if(wsel){ wallSet(b.dataset.s,+b.dataset.i,wsel==='x'?null:wsel); editUI(); } else wallPick(b.dataset.s,+b.dataset.i); }); }
  box.style.display='';
  const L=wallLayout(); let n=0;
- for(const sd of ['N','W']) for(let i=0;i<S;i++){ if(!wallSlotOK(sd,i)) continue; const isSel=!!wslot&&wslot.sd===sd&&wslot.i===i; if(wsel==='x'&&!L[sd][i]) continue; if(!wsel&&L[sd][i]&&!isSel) continue; if(!wsel&&wslot&&!isSel) continue; let el=wallEls[n]; if(!el){ el=document.createElement('button'); el.className='whot'; box.appendChild(el); wallEls[n]=el; } n++;
+ for(const sd of ['N','W']) for(let i=0;i<S;i++){ if(!wallSlotOK(sd,i)) continue; const isSel=!!wslot&&wslot.sd===sd&&wslot.i===i; if(wsel==='x'&&!L[sd][i]) continue; if(!L[sd][i]&&!isSel&&!isSign(wsel)&&(isSign(L[sd][i-1])||isSign(L[sd][i+1]))) continue; if(!wsel&&L[sd][i]&&!isSel) continue; if(!wsel&&wslot&&!isSel) continue; let el=wallEls[n]; if(!el){ el=document.createElement('button'); el.className='whot'; box.appendChild(el); wallEls[n]=el; } n++;
   const hy=isSel?.98:1.42, p=sd==='N'?toScreen(i+.5,hy,.02):toScreen(.02,hy,i+.5), hw=isSel?17:12; el.style.display=''; el.style.transform=`translate(${p[0]-hw}px,${p[1]-hw}px)`; el.dataset.s=sd; el.dataset.i=i; el.classList.toggle('has',!!L[sd][i]&&!isSel); el.classList.toggle('sel',isSel); el.textContent=isSel?'':wsel==='x'?'×':L[sd][i]?'↺':'+'; }
  for(let k=n;k<wallEls.length;k++) wallEls[k].style.display='none';
 }

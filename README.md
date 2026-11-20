@@ -1,6 +1,6 @@
 **Jouer en ligne : https://madaratn.github.io/Bistro-Ville-3D/**
 
-# Chez Odette — prototype v0.99.1
+# Chez Odette — prototype v0.99.2
 
 Jeu mobile de gestion de restaurant (Android + iOS), inspiré des mécaniques de Restaurant City,
 avec un nom, des graphismes et des personnages 100 % originaux.
@@ -18,11 +18,24 @@ avec un nom, des graphismes et des personnages 100 % originaux.
 | Équipe | Cuisiniers, serveurs (service, boissons, débarrassage), barmans, agents d'entretien. Ils prennent de l'XP et accélèrent (niveau 1 à 5) |
 | Menu | 15 recettes (entrées, plats, desserts), de 3 à 6 places au menu, niveaux 1 à 10 améliorés avec des ingrédients |
 | Ingrédients | Potager en temps réel (10 graines, parcelles en plus), marché, ingrédients bonus à ramasser sur le trottoir, quiz gourmand (5 questions/jour) |
-| Déco | Catalogue intégré au mode déco (tables, chaises, équipement, bar, déco, sols et murs, réserve), glisser-déposer, une table emmène ses chaises, pivoter, copier, ranger dans la réserve, vendre, annuler, cases valides en surbrillance, contrôle qui empêche de bloquer le passage |
+| Déco | Catalogue intégré au mode déco (tables, chaises, équipement, bar, déco, 53 sols, 22 tapis, 64 murs, 151 objets muraux, réserve), glisser-déposer, une table emmène ses chaises, pivoter, copier, ranger dans la réserve, vendre, annuler, cases valides en surbrillance, contrôle qui empêche de bloquer le passage |
 | Progression | Pièces, XP et niveaux avec déblocages, note ★ du resto (déco + menu + satisfaction − saleté) qui fait varier l'affluence et la patience |
 | Quartier | Bar avec terrasse, cinéma, galerie marchande, immeubles (fenêtres éclairées la nuit). Passants qui vont au cinéma, au bar, font les boutiques ou traversent le trottoir d'en face ; les clients arrivent du quartier et y repartent |
 | Ambiance | Carnet de commandes compact et repliable, bulles discrètes, rien qui clignote, mode « Regarder » (interface masquée, caméra qui se promène) |
 | Divers | Sauvegarde automatique, gains hors-ligne (jusqu'à 8 h), sons, tutoriel, réglages |
+
+### v0.99.2 : murs et sols
+- **40 nouveaux sols** (53 en tout), avec de vrais motifs et un léger relief : bâtons rompus, point de Hongrie, chevrons, parquet tressé, parquet Versailles, pont de bateau, bambou, tomettes hexagonales, cabochons, damier en diagonale, mosaïques, terrazzo, marbres, carreaux de ciment, écailles, moquettes, tatami, tôle larmée, dalles de pierre, pavés, gazon, sable fin.
+- **51 nouveaux murs** (64 en tout) : dix teintes unies, pois, vichy, arlequin, carrelage métro, briques, lambris, bardage, rondins, pierre apparente, tôle ondulée, boiseries, damas, fleurs, jungle, vagues japonaises, cerisier, bambous, Art déco, zellige, tartan, cannage, velours capitonné, mur ardoise, et six fresques panoramiques (sommets, Paris, le large, zen, campagne, ciel). Le soubassement a lui aussi ses motifs (panneaux, métro, planches, damier).
+- **111 nouveaux objets muraux** (151 en tout) : 30 tableaux et affiches, 6 fenêtres (hublot, shoji, verrière d’atelier, fenêtre fleurie, fenêtre palace, store rayé), appliques, lanternes et lampions, cinq néons et des lettres lumineuses, horloges, miroirs, étagères garnies, plantes et mur végétal, et des objets par style (bord de mer, diner, chalet, industriel, japonais, palace, guinguette).
+- **Les tapis, une nouveauté** : 22 modèles de 1×1 à 4×3 cases (paillasson, jute, kilim, persans, berbère, patchwork, marin, tatami, jardin de sable, peau de vache, nappe de pique-nique, marelle…). Ils se déroulent sous les meubles, ne gênent personne, se tournent d’un toucher, et comptent dans la note de déco. 14 tapis au plus par salle ; la gomme en rend la moitié du prix.
+- **L’atelier déco rangé** : l’onglet Sols a trois modes (toute la salle, carreau par carreau, tapis) ; l’onglet Murs a trois rayons (papiers peints, fenêtres et enseignes, déco murale). Le filtre par style s’applique partout, et chaque vignette montre le vrai motif.
+- Les huit restaurants témoins reçoivent chacun un tapis et six objets muraux de leur style. En ville, les visiteurs voient les tapis des autres joueurs.
+- Corrigé au passage : le « + » ne se propose plus sur les deux pans de mur que l’enseigne recouvre ; une cuisine qu’on agrandit reprend (et rembourse) les tapis qu’elle recouvre.
+
+Limites : un objet par pan de mur ; les objets muraux n’entrent pas dans la note (les sols, les murs et les tapis, si) ; les tapis ne se rangent pas dans la réserve ; essayé sur navigateur de bureau en taille téléphone, pas sur un vrai téléphone.
+
+Code : `src/deco3_sols.js`, `src/deco3_murs.js`, `src/deco3_objets.js`, `src/deco3_tapis.js` (contenu), `src/deco3_patch.py` (atelier, annulation, restaurants témoins, note).
 
 ### v0.99.1 : l'histoire sans attente
 - La règle « un chapitre par jour » disparaît : dès qu'un chapitre est terminé, le suivant s'ouvre. Seuls ses objectifs en fixent le rythme.

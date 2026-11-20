@@ -129,6 +129,11 @@ body.watch #sJour,body.visit #sJour,body.watch #sideL,body.visit #sideL{opacity:
 .emode{display:flex;flex-direction:column;gap:6px;justify-content:center;flex:none;margin-right:4px}
 .emode button{border:2px solid #d9bf94;border-radius:12px;background:linear-gradient(180deg,#f3e2c2,#e6cfa6);color:#7a5a3a;font:700 12.5px Fredoka,system-ui,sans-serif;padding:8px 10px;white-space:nowrap;cursor:pointer;box-shadow:0 3px 0 #c9aa7a}
 .emode button.on{background:linear-gradient(180deg,#63d98f,#27a05c);color:#fff;border-color:#17603a;box-shadow:0 3px 0 #17603a}
+.emode{position:sticky;left:-12px;z-index:3;align-self:stretch;margin:-5px 2px -10px -12px;padding:5px 8px 10px 12px;background:#f9ecd0;box-shadow:6px 0 8px -5px rgba(120,80,30,.3)}
+.emode.e3{gap:4px}
+.emode.e3 button{padding:4px 6px;font-size:11.5px;line-height:1.08;white-space:normal;width:96px}
+.enone{flex:none;align-self:center;padding:0 18px;color:#8a6a4a;font:600 13px Fredoka,system-ui,sans-serif;white-space:nowrap}
+.ecard .eim.sw{background-size:cover}
 #wov{position:fixed;inset:0;z-index:4;pointer-events:none;overflow:hidden}
 .whot{position:absolute;left:0;top:0;width:34px;height:34px;border-radius:50%;border:2.5px solid #fff;background:linear-gradient(180deg,#63d98f,#27a05c);color:#fff;font:700 19px/1 Fredoka,system-ui,sans-serif;display:flex;align-items:center;justify-content:center;padding:0;pointer-events:auto;cursor:pointer;box-shadow:0 3px 0 #17603a,0 6px 10px rgba(0,0,0,.25);will-change:transform}
 .whot.has{background:linear-gradient(180deg,#ffa84d,#f2651f);box-shadow:0 3px 0 #9c3a0c,0 6px 10px rgba(0,0,0,.25)}
@@ -211,7 +216,7 @@ body.showroom #top,body.showroom #bottom,body.showroom #side,body.showroom #side
 #showbar .shT small{display:block;font-size:11px;opacity:.8;text-transform:uppercase;letter-spacing:.05em}
 #showbar .shT b{font-size:20px}
 #showbar .shT button{width:42px;height:42px;border-radius:50%;border:2.5px solid #3e2412;background:linear-gradient(180deg,#fff6e0,#f0dcb4);color:#5e3719;font:700 26px/1 Fredoka,system-ui,sans-serif;cursor:pointer;padding:0 0 4px}
-#showbar .shB button{border:2.5px solid #17603a;border-radius:16px;background:linear-gradient(180deg,#63d98f,#27a05c);color:#fff;font:700 15px Fredoka,system-ui,sans-serif;padding:11px 14px;box-shadow:0 4px 0 #17603a,0 8px 14px rgba(0,0,0,.25);cursor:pointer;display:flex;align-items:center;gap:5px}
+#showbar .shB button{border:2.5px solid #17603a;border-radius:16px;background:linear-gradient(180deg,#63d98f,#27a05c);color:#fff;font:700 15px Fredoka,system-ui,sans-serif;padding:11px 14px;box-shadow:0 4px 0 #17603a,0 8px 14px rgba(0,0,0,.25);cursor:pointer;display:flex;align-items:center;gap:5px;justify-content:center;text-align:center;line-height:1.12}
 #showbar .shB button.q{background:linear-gradient(180deg,#fff6e0,#f0dcb4);color:#5e3719;border-color:#5e3719;box-shadow:0 4px 0 #5e3719,0 8px 14px rgba(0,0,0,.25)}
 .shG{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .shC{border:2.5px solid #d9bf94;border-radius:16px;background:linear-gradient(180deg,#fffaf0,#f6e8cc);padding:8px 6px 9px;cursor:pointer;font:700 15px Fredoka,system-ui,sans-serif;color:#5a3a20;box-shadow:0 4px 0 #cdb284}
