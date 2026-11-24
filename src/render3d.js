@@ -912,7 +912,7 @@ function updOverlay(){
   if(c.st==='look'&&c.grp&&c.grp.lead!==c){}
   else if(c.st==='look'){ ovPut('c'+c.id,c.fx+.5,1.18,c.fy+.5,'ob','<div class="th">'+(c.t>.6?'🤔':'👀')+'</div>'); }
   else if(c.st==='order'&&!c.orderBy&&c.ordT>2.5){ const e=ovPut('c'+c.id,c.fx+.5,1.3,c.fy+.5,'ob',`<div class="bb"><span>📝</span></div>`); if(e){ e.style.setProperty('--p',c.pat.toFixed(0)+'%'); e.style.setProperty('--c',`hsl(${c.pat*1.2},62%,52%)`); } }
-  else if(c.st==='bill'&&!c.billBy&&c.billT>2){ const e=ovPut('c'+c.id,c.fx+.5,1.3,c.fy+.5,'ob',`<div class="bb"><span>🧾</span></div>`); if(e){ e.style.setProperty('--p','100%'); e.style.setProperty('--c','#c9b79c'); } }
+  else if(c.st==='bill'&&!c.billBy&&c.billT>2&&!incCash()){ const e=ovPut('c'+c.id,c.fx+.5,1.3,c.fy+.5,'ob',`<div class="bb"><span>🧾</span></div>`); if(e){ e.style.setProperty('--p','100%'); e.style.setProperty('--c','#c9b79c'); } }
   else if(c.st==='queue'&&c.pat<55){ const e=ovPut('c'+c.id,c.fx+.5,h,c.fy+.5,'ob',`<div class="bb"><span>⏳</span></div>`); if(e){ e.style.setProperty('--p',c.pat.toFixed(0)+'%'); e.style.setProperty('--c',`hsl(${c.pat*1.2},72%,48%)`); } }
  }
  for(const a of (ED?[]:crew)) if(a.job&&a.job.s==='work'&&a.job.st){ const s=a.job.st, o=a.job.o, pr=1-a.job.t/a.job.T; const e=ovPut('k'+s.id,s.x+.5,1.3,s.y+.5,'ob',`<div class="ck"><span>${foodIcon(DISHM[o.dish].e)}</span><i class="si">${STEP_IC[o.steps[o.si].k]||''}</i></div>`); if(e) e.style.setProperty('--p',(pr*100).toFixed(0)+'%'); }
@@ -1113,7 +1113,7 @@ function tap(sx,sy){
   if(c){ const grp=c.grp?c.grp.m.filter(m=>!m.dead):[c];
    if(c.st==='host'||c.st==='look'){ if(!spendHelp()) return; grp.filter(m=>m.st==='host'||m.st==='look').forEach((m,i)=>goSeat(m,i*.4)); c.say='👋'; c.sayT=1; sfx('pop'); floatAt(c.fx,c.fy,'👍 +1 XP','#2f9e63'); addXP(1); return; }
    if(c.st==='order'){ const ps=grp.filter(m=>m.st==='order'&&!m.orderBy&&m.sitting); if(grp.some(m=>m.sitting&&m.st==='menu')){ toast('Ils n’ont pas encore choisi…'); return; } if(!spendHelp()) return; ps.forEach(m=>placeOrder(m)); sfx('send'); floatAt(c.fx,c.fy,'📝 +1 XP','#2f9e63'); addXP(1); return; }
-   if(c.st==='bill'){ if(!spendHelp()) return; grp.filter(m=>m.st==='bill'&&!m.billBy).forEach(m=>finishMeal(m)); return; } } }
+   if(c.st==='bill'){ if(incCash()) return incCashTap(c); if(!spendHelp()) return; grp.filter(m=>m.st==='bill'&&!m.billBy).forEach(m=>finishMeal(m)); return; } } }
  for(const f of state.furn){ const k=kindOf(f); if(k!=='counter'&&k!=='bar') continue; if(!near(sx,sy,f.x+.5,.72,f.y+.5,38)) continue;
   const it=orders.find(o=>o.st==='ready'&&o.at===f&&!o.cancel)||drinkOrders.find(d=>d.st==='ready'&&d.at===f&&!d.cancel);
   if(it){ picked={o:it,t:simT}; sfx('pop'); toast((it.k?DRINKM[it.k].e:DISHM[it.dish].e)+' Touche maintenant le client qui l’attend'); return; } }

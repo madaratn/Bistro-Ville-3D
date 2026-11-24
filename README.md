@@ -1,6 +1,6 @@
 **Jouer en ligne : https://madaratn.github.io/Bistro-Ville-3D/**
 
-# Chez Odette — prototype v0.99.3
+# Chez Odette — prototype v0.99.4
 
 Jeu mobile de gestion de restaurant (Android + iOS), inspiré des mécaniques de Restaurant City,
 avec un nom, des graphismes et des personnages 100 % originaux.
@@ -23,6 +23,14 @@ avec un nom, des graphismes et des personnages 100 % originaux.
 | Quartier | Bar avec terrasse, cinéma, galerie marchande, immeubles (fenêtres éclairées la nuit). Passants qui vont au cinéma, au bar, font les boutiques ou traversent le trottoir d'en face ; les clients arrivent du quartier et y repartent |
 | Ambiance | Carnet de commandes compact et repliable, bulles discrètes, rien qui clignote, mode « Regarder » (interface masquée, caméra qui se promène) |
 | Divers | Sauvegarde automatique, gains hors-ligne (jusqu'à 8 h), sons, tutoriel, réglages |
+
+### v0.99.4 : la caisse, c’est toi
+- **Le joueur tient la caisse** (difficultés normale et chef) : l’équipe n’encaisse plus et les clients ne paient plus tout seuls. Quand une table veut payer, une bulle verte apparaît avec un cercle qui se vide ; sans toi, la table part sans payer et fâchée. Encaisser vite (cercle encore à moitié plein) rapporte un pourboire de 25 % du repas, sinon 10 %.
+- **La réputation** : chaque client parti fâché ou sans payer, chaque imprévu raté fait baisser la note (jusqu’à −1,5 ★), donc l’affluence et la patience des clients. Elle remonte d’elle-même quand le service est bien tenu, et une médaille d’or en efface une partie. Elle apparaît dans le détail de la note.
+- **Les heures de pointe** : de 12 h à 13 h 30 et de 19 h 30 à 21 h, les clients arrivent en masse (+45 %, +60 % en chef) et les imprévus se rapprochent. La pastille du jour affiche « Affluence ».
+- **Plus serré partout** : imprévus deux fois plus fréquents (toutes les 25 à 50 secondes en normale, 20 à 40 en chef), jusqu’à 3 ou 4 en même temps, cercles plus courts (feu 4,5 à 7 s, réclamation 6 à 10 s, panne 25 à 32 s), resquilleurs plus rapides, clients 20 à 70 % moins patients en normale (45 à 90 % en chef).
+- Une piqûre de rappel d’Odette explique la caisse, la réputation et les heures de pointe aux joueurs qui ont déjà vu la v0.99.3.
+- Équilibrage (simulation de 6 jours, du niveau 3 au niveau 7) : sans rien toucher, le bistrot ne gagne plus rien et la note tombe sous 1,5 ★ ; un joueur moyen gagne environ deux fois moins qu’avant avec une note autour de 2,5 ★ ; un joueur très attentif (300 à 400 gestes par jour) gagne environ 20 % de moins qu’avant et décroche l’or presque à chaque service.
 
 ### v0.99.3 : la salle a besoin de toi
 - **Les imprévus** : le service ne tourne plus tout seul. Une poêle qui flambe (trois coups pour l’éteindre, sinon le plat brûle et la fumée agace la salle), une machine en panne (quatre coups de clé, sinon le dépanneur passe et c’est cher), une flaque (un serveur qui glisse casse l’assiette, un client qui glisse râle), un client qui se plaint (sans excuses, il part fâché sans payer), un resquilleur qui file vers la porte. Chaque imprévu a sa bulle et son cercle qui se vide ; une flèche au bord de l’écran montre ceux qu’on ne voit pas, et la toucher y emmène la caméra.

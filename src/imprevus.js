@@ -5,12 +5,22 @@
 // Difficulté (Réglages → Jeu) : 0 détente (le service d'avant), 1 normale (par défaut), 2 chef.
 
 const incDiff=()=>{ const v=optG('diff',1); return v===0||v===2?v:1; };
-function incP(){ const L=(state&&state.level)||1, D=incDiff(); return D===0?0:D===2?Math.min(1.4,.45+(L-1)*.07):clamp((L-2)/13,0,1); }
-const incPatMul=()=>{ const D=incDiff(); if(D===0) return 1; const p=Math.min(1,incP()); return D===2?1.22+.35*p:1.08+.35*p; };
-const incFlowMul=()=>{ const D=incDiff(); if(D===0) return 1; return 1+.1*Math.min(1,incP())+(D===2?.08:0); };
+function incP(){ const L=(state&&state.level)||1, D=incDiff(); return D===0?0:D===2?Math.min(1.4,.5+(L-1)*.08):clamp((L-2)/12,0,1); }
+const incPatMul=()=>{ const D=incDiff(); if(D===0) return 1; const p=Math.min(1,incP()); return D===2?1.45+.45*p:1.2+.5*p; };
+// heures de pointe : midi pile et le début de soirée, les clients arrivent en masse
+const incPkOK=()=>incDiff()>0&&!!state.tuto&&dayOf().n>=2&&!dayOf().night&&!dayOf().closing;
+const incPeak=()=>{ if(!incPkOK()) return false; const h=gameHour(); return (h>=12&&h<13.5)||(h>=19.5&&h<21); };
+const incFlowMul=()=>{ const D=incDiff(); if(D===0) return 1; return (1+.15*Math.min(1,incP())+(D===2?.1:0))*(incPeak()?(D===2?1.6:1.45):1); };
+// la caisse : en normal et en chef, c'est le joueur qui encaisse (l'équipe n'y touche plus)
+const incCash=()=>incDiff()>0&&incOn();
+const incCashTime=()=>{ const p=Math.min(1,incP()); return incDiff()===2?Math.max(8,12-4*p):Math.max(11,18-7*p); };
+// la réputation : chaque client parti fâché, chaque imprévu raté la fait baisser ; elle pèse sur la note
+const incRepV=()=>incDiff()>0?Math.min(1.5,Math.max(0,state.rep||0)):0;
+function incRepAdd(v){ if(warming||cine||incDiff()===0) return; state.rep=Math.min(1.5,(state.rep||0)+v*(incDiff()===2?1.3:1)); }
 const INC_U={spill:2,complain:2,fire:3,vip:3,broke:4,dash:5};          // niveau où chaque imprévu apparaît (difficulté normale)
 const incUnl=k=>incDiff()===2||((state&&state.level)||1)>=INC_U[k];
 const INC_TAPS={fire:3,broke:4,spill:1,complain:1,dash:1};
+let incCashing=0, incPkOn=false;
 const INC_N={fire:'Ça brûle !',broke:'Panne',spill:'Flaque',complain:'Réclamation',dash:'Resquilleur'};
 const INC_COMP=['C’est froid !','Trop salé !','Il y a un cheveu !','J’avais dit sans oignons !','On a oublié mon pain !','Ma fourchette est sale !','C’est pas assez cuit !','J’attends mon verre !'];
 const INC_TEACH={
@@ -19,6 +29,7 @@ const INC_TEACH={
  spill:'Une flaque ! Touche-la pour éponger avant que quelqu’un glisse : un serveur qui glisse peut casser l’assiette.',
  complain:'Un client se plaint. Touche la bulle violette pour t’excuser et lui offrir le café, sinon il part fâché sans payer.',
  dash:'Ce client file sans payer ! Touche la bulle orange avant qu’il passe la porte.',
+ cash:'Une table veut payer : touche sa bulle verte avant que le cercle se vide. Ton équipe ne touche pas à la caisse : sans toi, ils partent sans payer. Plus tu es rapide, plus le pourboire est gros.',
  vip:'Un client pressé, badge doré au-dessus de la tête. Place-le, prends sa commande et sers-le vite : s’il repart content, il paie presque double.'};
 const INC_SVG={
  fire:'<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 1.500c1.300 4.200 5.800 5.900 5.800 11.800A5.800 5.800 0 0 1 6.200 13.300c0-2.400 1.200-4.100 2.400-5.200.300 2.300 1.200 3.400 2.300 4 .200-3.900.700-7.400 1.100-10.600z"/><path d="M12 13c.700 1.700 2.400 2.500 2.400 4.700a2.400 2.400 0 0 1-4.800 0c0-1.200.600-1.900 1.200-2.400.100 1 .500 1.400 1 1.600 0-1.500.100-2.800.200-3.900z" fill="#ffd23f"/></svg>',
@@ -26,6 +37,7 @@ const INC_SVG={
  spill:'<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.300c-3 4.500-6.200 8-6.200 11.700a6.200 6.200 0 0 0 12.400 0C18.200 10.300 15 6.800 12 2.300z"/><path d="M9.300 14.200a2.900 2.900 0 0 0 2.700 2.900" stroke="#bfe9ff" stroke-width="1.700" fill="none" stroke-linecap="round"/></svg>',
  complain:'<svg viewBox="0 0 24 24" fill="currentColor"><path fill-rule="evenodd" d="M4.500 2.800h15a2.300 2.300 0 0 1 2.300 2.300v9.800a2.300 2.300 0 0 1-2.300 2.300H10l-5 4.100v-4.100h-.500a2.300 2.300 0 0 1-2.300-2.300V5.100a2.300 2.300 0 0 1 2.300-2.300zM10.800 5.600v6.200h2.400V5.600zm0 7.700v2.300h2.400v-2.300z"/></svg>',
  dash:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.300" stroke-linecap="round" stroke-linejoin="round"><circle cx="15.500" cy="4.300" r="2.200" fill="currentColor" stroke="none"/><path d="M14 8.300l-2.800 5 3.400 2.600-1.200 5.300M11.200 13.300l-4.300 1.800M14 8.300l3.200 3.500 3.200-.6M14 8.300l-4.100-.4-2 3.200M2.500 9h3.500M1.500 12.500h3"/></svg>',
+ cash:'<svg viewBox="0 0 24 24" fill="currentColor"><path fill-rule="evenodd" d="M5 2h11v17.500l-1.800-1.300-1.800 1.300-1.800-1.300-1.800 1.300-1.900-1.300L5 19.500zm2.500 3.500v1.600h6V5.500zm0 3.500v1.600h6V9zm0 3.500v1.600h3.800v-1.600z"/><circle cx="17.500" cy="17" r="4.800" fill="#ffd23f" stroke="#a8740f" stroke-width="1.300"/><path d="M17.500 14.300v5.400M15.900 15.600h2.400a1 1 0 0 1 0 2h-1.600a1 1 0 0 0 0 2h2.400" stroke="#a8740f" stroke-width="1.200" fill="none" stroke-linecap="round"/></svg>',
  vip:'<svg viewBox="0 0 24 24" fill="currentColor"><path fill-rule="evenodd" d="M10 1.500h4v2h-1v1.600a8.200 8.200 0 1 1-2 0V3.500h-1zm2 5.400a6.300 6.300 0 1 0 0 12.600 6.300 6.300 0 0 0 0-12.600zm-.9 1.800h1.800v4.700l3 1.800-.9 1.500-3.900-2.400z"/></svg>',
  medal:'<svg viewBox="0 0 24 24"><path d="M7 1.500h3.400l1.600 5-2.800 2.200zM17 1.500h-3.400l-1.600 5 2.800 2.200z" fill="#d6453d"/><circle cx="12" cy="15" r="7.300" fill="currentColor" stroke="rgba(0,0,0,.25)" stroke-width="1"/><path d="M12 10.300l1.400 2.900 3.200.4-2.300 2.200.6 3.200-2.900-1.600-2.900 1.600.6-3.200-2.300-2.200 3.200-.4z" fill="rgba(255,255,255,.75)"/></svg>'};
 
@@ -40,16 +52,20 @@ function incTick(dt){
  if(warming) return;
  if(incDiff()===0){ if(incs.length) incClear(); return; }
  const on=incOn(), live=on&&incLive(), rt=dt/gameSpeed();
- if(on&&live&&!incS().intro){ incS().intro=1; incIntro(); }
+ if(on&&live&&!incS().intro){ incS().intro=1; incS().intro2=1; incIntro('La salle a besoin de toi'); }
+ else if(on&&live&&!incS().intro2){ incS().intro2=1; incIntro('La caisse, c’est toi'); }
+ if(live&&isOpen()) state.rep=Math.max(0,(state.rep||0)-rt*(.08/60));
+ { const pk=incPeak(); if(pk&&!incPkOn&&live&&isOpen()){ incPkOn=true; toast('Heure de pointe ! Les clients arrivent en masse : ouvre l’œil.'); incSfx('alarm'); vib([20,30,20]); } else if(!pk) incPkOn=false; }
+ incCashTick(rt,live);
  if(incs.length){ for(const I of incs) if(!I.done) incStep(I,dt,rt,live); incs=incs.filter(I=>!I.done); }
  for(const s of incSmoke){ if(live) s.t-=rt; if(s.t>0||incBroken.has(s.f.id)) stoveBusy.add(s.f.id); else stoveBusy.delete(s.f.id); } incSmoke=incSmoke.filter(s=>s.t>0);
  incSlipTick(); incVipTick(dt);
  try{ incSvTick(); }catch(e){ console.warn(e); }
  if(!live||!isOpen()||rush) return;
  incT-=dt*(typeof ev!=='undefined'&&ev?.5:1); if(incT>0) return;
- const p=Math.min(1,incP()), D=incDiff(), base=D===2?55-25*p:80-40*p;
- incT=base/Math.max(.6,svcNow().flow)*rnd(.75,1.25);
- const cap=1+Math.round(1.6*p)+(D===2?1:0); if(incs.filter(I=>I.k!=='spill').length>=cap){ incT=6; return; }
+ const p=Math.min(1,incP()), D=incDiff(), base=D===2?40-20*p:50-25*p;
+ incT=base/Math.max(.6,svcNow().flow)/(incPeak()?1.3:1)*rnd(.75,1.25);
+ const cap=2+Math.round(1.6*p)+(D===2?1:0); if(incs.filter(I=>I.k!=='spill').length>=cap){ incT=6; return; }
  if(!incSpawn()) incT=8;
 }
 function incStep(I,dt,rt,live){
@@ -93,12 +109,12 @@ function incSpawn(){
  for(const w of W) if(w[0]===incLastK) w[1]*=.4;
  let r=Math.random()*W.reduce((s,w)=>s+w[1],0), w=W[0]; for(const x of W){ r-=x[1]; if(r<=0){ w=x; break; } }
  const k=w[0], L=w[2], p=Math.min(1,incP());
- if(k==='fire'){ const a=pick(L); incFlame(incAdd('fire',{a,j:a.job,f:a.job.st,T:Math.max(5,8-2.4*p)})); }
+ if(k==='fire'){ const a=pick(L); incFlame(incAdd('fire',{a,j:a.job,f:a.job.st,T:Math.max(4.5,7-2.5*p)})); }
  else if(k==='broke'){ let t=Math.random()*L.reduce((s,f)=>s+INC_MK[kindOf(f)],0), f=L[0]; for(const x of L){ t-=INC_MK[kindOf(x)]; if(t<=0){ f=x; break; } }
-  incBroken.add(f.id); incBlock(f); incAdd('broke',{f,T:incDiff()===2?32:40}); }
+  incBroken.add(f.id); incBlock(f); incAdd('broke',{f,T:incDiff()===2?25:32}); }
  else if(k==='spill'){ const [c,x,y]=pick(L); c.say='Oups !'; c.sayT=1.3; const I=incAdd('spill',{x,y,T:crew.some(a=>a.s.role==='cleaner')?30:90}); incPuddle(I); }
- else if(k==='complain'){ const c=pick(L); c.ix=1; c.say=pick(INC_COMP); c.sayT=2.6; c.mood='angry'; incAdd('complain',{c,T:Math.max(7,12-3*p)}); }
- else if(k==='dash'){ const c=pick(L), first=!incS().seen.dash; c.dash=1; if(!first) c.speed=(c.speed||1)*1.35; c.billBy=null; leave(c); incAdd('dash',{c,T:10}); }
+ else if(k==='complain'){ const c=pick(L); c.ix=1; c.say=pick(INC_COMP); c.sayT=2.6; c.mood='angry'; incAdd('complain',{c,T:Math.max(6,10-3*p)}); }
+ else if(k==='dash'){ const c=pick(L), first=!incS().seen.dash; c.dash=1; if(!first) c.speed=(c.speed||1)*1.5; c.billBy=null; leave(c); incAdd('dash',{c,T:10}); }
  return true;
 }
 let incCone=null;
@@ -138,7 +154,7 @@ function incFail(I){ if(I.done) return; I.done=true; I.lost=true; incFinish(I);
  else if(I.k==='spill'){ floatAt(gx,gy,'La flaque a séché','#5a8fb0'); }
  else if(I.k==='complain'){ const c=I.c; c.say='Je m’en vais !'; c.sayT=1.6; floatAt(gx,gy-.4,'Mauvais avis','#e5484d'); angry(c); }
  else if(I.k==='dash'){ const c=I.c, v=incPrice(c); D.dash++; if(c) c.order=null; floatAt(c?c.fx:DX,c?Math.min(c.fy,S-1):S-1,'Parti sans payer ! −'+v,'#e5484d'); }
- if(I.k!=='spill'){ incSfx('fail'); vib([25,40,25]); rateHit(); }
+ if(I.k!=='spill'){ incSfx('fail'); vib([25,40,25]); rateHit(); incRepAdd(.05); } else incRepAdd(.02);
  hud();
 }
 function incPrice(c){ if(!c) return 0; const d=c.order?DISHM[c.order.dish]:null; return (d?(pdjIs(d)?pdjPrice(d):dishPrice(d)):0)+drinkPay(c); }
@@ -169,6 +185,19 @@ function incPuddle(I){ if(!incPG) incPG=new THREE.CircleGeometry(.5,24);
  const hl=new THREE.Mesh(incPG,new THREE.MeshBasicMaterial({color:'#e8f7ff',transparent:true,opacity:.55,depthWrite:false,polygonOffset:true,polygonOffsetFactor:-5,polygonOffsetUnits:-5})); hl.rotation.x=-Math.PI/2; hl.scale.set(.22,.07,1); hl.position.set(-.1,.002,-.08); hl.renderOrder=3; g.add(hl);
  g.rotation.y=Math.random()*6.28; g.position.set(I.x+.5,.012,I.y+.5); fxRoot.add(g); I.g=g; }
 
+// ---------- la caisse : le joueur encaisse ----------
+function incCashTick(rt,live){ if(!incCash()) return; for(const c of custs){ if(c.st!=='bill'||c.dead||c.nb||c.dash) continue;
+  if(c.cashT===undefined){ c.cashT=c.cashT0=incCashTime()*(incS().seen.cash?1:1.8); incTeach('cash'); }
+  if(!live) continue; c.cashT-=rt; if(c.cashT<=0) incUnpaid(c); } }
+function incUnpaid(c){ const v=incPrice(c), D=incDay(); c.cashT=undefined; D.unp=(D.unp||0)+1; floatAt(c.fx,c.fy-.5,'Parti sans payer ! −'+v,'#e5484d'); c.say='Personne pour encaisser ?'; c.sayT=1.6; angry(c); }
+function incCashTap(c){ if(!c||!incLive()) return; const grp=(c.grp?c.grp.m:[c]).filter(m=>!m.dead&&m.st==='bill'); if(!grp.length) return;
+ const fast=grp.every(m=>m.cashT===undefined||m.cashT>(m.cashT0||10)*.5);
+ if(rush){ try{ spendHelp(); }catch(e){} }
+ incCashing=fast?2:1; try{ for(const m of grp){ m.billBy=null; m.cashT=undefined; finishMeal(m); } }catch(e){ console.warn(e); } finally{ incCashing=0; }
+ dailyAdd('help',1); incGest(c.fx,c.fy); vib(8); hud(); try{ goalDraw(true); }catch(e){} }
+// le pourboire du patron qui encaisse lui-même : plus gros s'il est rapide (remplace la bulle de pourboire)
+function incCashTip(c,price){ const b=Math.max(1,Math.round(price*(incCashing===2?.25:.1))); earn(b); dayAdd('tip',b); dailyAdd('earned',b); floatAt(c.fx,c.fy-.6,(incCashing===2?'Rapide ! +':'+')+b,null,true); }
+
 // ---------- le client pressé ----------
 function incVipTick(dt){ for(const c of custs){
   if(c.vk){ if(c.vip&&!c.vipDone&&(c.st==='wait'||c.st==='order')) c.pat-=dt*patRate()*.8; continue; }
@@ -176,7 +205,7 @@ function incVipTick(dt){ for(const c of custs){
   if(Math.random()<.05+.06*Math.min(1,incP())+(incDiff()===2?.04:0)){ c.vip=1; incTeach('vip'); } } }
 function incMeal(c,price,sat){ if(warming||cine) return; incSvAdd('meal',sat);
  if(c&&c.vip&&!c.vipDone){ c.vipDone=1; if(sat>=65){ const b=Math.max(2,Math.round(price*.8*(incDiff()===2?1.25:1))); earn(b); dayAdd('tip',b); dailyAdd('earned',b); floatAt(c.fx,c.fy-.9,'Client pressé ravi ! +'+b,null,true); incSvAdd('vip'); } else floatAt(c.fx,c.fy-.9,'Le client pressé a trop attendu','#8a8f96'); } }
-function incLost(c){ if(warming||cine) return; incSvAdd('lost'); rateHit(); if(c&&c.vip) c.vipDone=1; }
+function incLost(c){ if(warming||cine) return; incSvAdd('lost'); rateHit(); incRepAdd(.035); if(c&&c.vip) c.vipDone=1; }
 
 // ---------- la médaille de chaque service ----------
 function incSvOn(){ return incDiff()>0&&!!state.tuto&&dayOf().n>=2&&!dayOf().night; }
@@ -193,7 +222,7 @@ function incSvEnd(s){ const tot=s.n+s.lost; if(tot<4) return;
           {ok:avg>=75,t:'Régal',s:'clients ravis à '+avg+' %'}];
  const n=C.filter(x=>x.ok).length, L=state.level||1, rw=Math.round([0,1,2,4][n]*(8+3*L)*(incDiff()===2?1.5:1));
  if(rw) earn(rw); if(n) addXP([0,2,4,8][n]);
- const D=incDay(), S2=incS(); if(n===3){ D.o++; S2.gold++; S2.gs++; S2.gb=Math.max(S2.gb,S2.gs); dailyAdd('gold',1); } else { if(n===2) D.a++; else if(n===1) D.b++; S2.gs=0; }
+ const D=incDay(), S2=incS(); if(n>=2) state.rep=Math.max(0,(state.rep||0)-(n===3?.25:.1)); if(n===3){ D.o++; S2.gold++; S2.gs++; S2.gb=Math.max(S2.gb,S2.gs); dailyAdd('gold',1); } else { if(n===2) D.a++; else if(n===1) D.b++; S2.gs=0; }
  incReport={sv:SV.n,n,C,rw,gs:S2.gs,shown:false}; }
 const INC_MED=['Service à revoir','Médaille de bronze','Médaille d’argent','Médaille d’or'], INC_MEDC=['#9aa0a6','#c8834a','#b9c3cc','#f2b33d'];
 function incRepShow(){ const R=incReport; if(!R) return; R.shown=true; let e=document.getElementById('svr');
@@ -202,8 +231,8 @@ function incRepShow(){ const R=incReport; if(!R) return; R.shown=true; let e=doc
  e.innerHTML=`<span class="svM">${INC_SVG.medal}</span><span class="svT"><b>${R.sv}</b><span>${INC_MED[R.n]}${R.rw?' · +'+fmt(R.rw)+' <i class="coin sm"></i>':''}${R.n===3&&R.gs>1?' · '+R.gs+' d’affilée':''}</span><em>${R.C.map(x=>`<i class="${x.ok?'ok':''}">${x.ok?'✓':'✗'} ${x.t}</i>`).join('')}</em></span>`;
  const evOn=!!document.querySelector('#evb:not(.hide)'); e.className='on'+(evOn?' low':'')+' m'+R.n; sfx(R.n===3?'level':'pop'); if(R.n===3) vib([15,30,15]);
  clearTimeout(e._t); e._t=setTimeout(()=>e.classList.remove('on'),7500); }
-function incDayHTML(d){ const X=d.ix; if(!X||!(X.ok+X.ko+X.o+X.a+X.b)) return ''; const r=(l,v)=>`<div class="bl"><span>${l}</span><b>${v}</b></div>`;
- return (X.ok+X.ko?r('Imprévus réglés',X.ok+' / '+(X.ok+X.ko)):'')+(X.o+X.a+X.b?r('Médailles de service',[[X.o,'or'],[X.a,'argent'],[X.b,'bronze']].filter(x=>x[0]).map(x=>x[0]+' '+x[1]).join(' · ')):''); }
+function incDayHTML(d){ const X=d.ix; if(!X||!(X.ok+X.ko+X.o+X.a+X.b+(X.unp||0))) return ''; const r=(l,v)=>`<div class="bl"><span>${l}</span><b>${v}</b></div>`;
+ return (X.unp?r('Partis sans payer (caisse)',X.unp):'')+(X.ok+X.ko?r('Imprévus réglés',X.ok+' / '+(X.ok+X.ko)):'')+(X.o+X.a+X.b?r('Médailles de service',[[X.o,'or'],[X.a,'argent'],[X.b,'bronze']].filter(x=>x[0]).map(x=>x[0]+' '+x[1]).join(' · ')):''); }
 
 // ---------- la note qui baisse se voit ----------
 let rateHitT=0;
@@ -218,11 +247,12 @@ function incSfx(k){ if(!state.sound||!AC) return; try{
 }catch(e){} }
 
 // ---------- la première fois : Odette prévient ----------
-function incIntro(){ queueModal(()=>({title:'La salle a besoin de toi',html:`<div class="dlg"><div class="dlgA" style="width:64px;height:64px;border-color:${SAGA_WHO.o[1]}">${whoImg('o')}</div><div class="dlgT">${scT('« Le bistrot tourne bien, {{N}}. Mais un bistrot, ce n’est jamais tranquille : une poêle qui flambe, un verre renversé, un client qui râle… Ton équipe ne peut pas tout faire. Ça, c’est pour toi. »')}</div></div>
- <div class="incL"><div><span class="incI fire">${INC_SVG.fire}</span><p><b>Les bulles rouges, violettes, bleues…</b> Touche-les avant que leur cercle se vide. Certaines demandent plusieurs coups.</p></div>
- <div><span class="incI en">⚡</span><p><b>Chaque imprévu réglé</b> te rend 1 d’énergie pour tes coups de main en salle.</p></div>
- <div><span class="incI med">${INC_SVG.medal}</span><p><b>À la fin de chaque service</b>, une médaille : personne de fâché, imprévus réglés, clients ravis.</p></div></div>
- <p class="center sub">Plus ton bistrot grandit, plus ça bouge. Trop de pression ? Réglages → Jeu → Difficulté.</p><p class="center"><button class="b green" data-a="close">C’est parti !</button></p>`})); }
+function incIntro(T){ queueModal(()=>({title:T,html:`<div class="dlg"><div class="dlgA" style="width:64px;height:64px;border-color:${SAGA_WHO.o[1]}">${whoImg('o')}</div><div class="dlgT">${scT('« À partir d’aujourd’hui, {{N}}, la caisse, c’est toi. Et un bistrot, ce n’est jamais tranquille : une poêle qui flambe, un verre renversé, un client qui râle… Ton équipe ne peut pas tout faire. »')}</div></div>
+ <div class="incL"><div><span class="incI cash">${INC_SVG.cash}</span><p><b>La caisse.</b> Quand une table veut payer, touche sa bulle verte avant que le cercle se vide, sinon elle part sans payer. Plus tu es rapide, plus le pourboire est gros.</p></div>
+ <div><span class="incI fire">${INC_SVG.fire}</span><p><b>Les imprévus.</b> Touche-les avant que leur cercle se vide. Certains demandent plusieurs coups. Chacun réglé te rend 1 d’énergie.</p></div>
+ <div><span class="incI rep">★</span><p><b>Ta réputation.</b> Chaque client parti fâché, chaque imprévu raté fait baisser ta note. Elle remonte quand le service est bien tenu.</p></div>
+ <div><span class="incI med">${INC_SVG.medal}</span><p><b>Heures de pointe</b> à midi et en début de soirée : les clients arrivent en masse. À la fin de chaque service, une médaille.</p></div></div>
+ <p class="center sub">Trop dur, ou pas assez ? Réglages → Jeu → Difficulté.</p><p class="center"><button class="b green" data-a="close">C’est parti !</button></p>`})); }
 
 // ---------- dessin : bulles, flèches vers les imprévus hors de l'écran, badges dorés ----------
 const incEls=new Map(); let incBox=null, incHud=null, incHudT=0;
@@ -240,7 +270,7 @@ function incCell(I){ const a=incAnchor(I); return [a[0]-.5,a[2]-.5]; }
 function incGo(id){ const I=incs.find(x=>x.id===id); if(!I) return; const a=incAnchor(I); incPan=[a[0],a[2]]; sfx('pop'); }
 function incDraw(){
  if(!incBox){ incBox=document.createElement('div'); incBox.id='incov'; document.body.appendChild(incBox);
-  incBox.addEventListener('pointerdown',e=>{ const b=e.target.closest('button'); if(!b) return; e.preventDefault(); e.stopPropagation(); try{ audioInit(); }catch(_){} if(b.dataset.go) incGo(+b.dataset.go); else incTap(+b.dataset.id); }); }
+  incBox.addEventListener('pointerdown',e=>{ const b=e.target.closest('button'); if(!b) return; e.preventDefault(); e.stopPropagation(); try{ audioInit(); }catch(_){} if(b.dataset.go) incGo(+b.dataset.go); else if(b.dataset.goc){ const c=custs.find(c=>c.id===+b.dataset.goc); if(c){ incPan=[c.fx+.5,c.fy+.5]; sfx('pop'); } } else if(b.dataset.cash){ const id=+b.dataset.cash; incCashTap(custs.find(c=>c.id===id)); } else incTap(+b.dataset.id); }); }
  if(incReport&&!incReport.shown&&mode==='play'&&!scOn&&!cine&&!ui.panel) incRepShow();
  const vis=mode==='play'&&!ui.panel&&!(typeof visit!=='undefined'&&visit.on)&&!document.body.classList.contains('watch')&&!cine&&!scOn&&!titleOn;
  const used=new Set(), W=innerWidth, H=innerHeight, HU=incHudRects(), L=Math.min(W*.4,Math.max(30,HU.l+28)), R=Math.max(W*.6,Math.min(W-30,HU.r-28)), T=Math.min(H*.4,Math.max(110,HU.t+34)), B=Math.max(H*.55,Math.min(H-150,HU.b-34));
@@ -258,6 +288,15 @@ function incDraw(){
     if(!ar){ ar=document.createElement('button'); ar.className='incA '+I.k; ar.dataset.go=I.id; ar.setAttribute('aria-label','Aller voir : '+INC_N[I.k]); ar.innerHTML='<u></u><i>'+INC_SVG[I.k]+'</i>'; incBox.appendChild(ar); incEls.set(ak,ar); }
     used.add(ak); AS.push({el:ar,x:ax,y:ay}); ar.style.setProperty('--a',(Math.atan2(dy,dx)*180/Math.PI).toFixed(0)+'deg'); }
   }
+  if(incCash()) for(const c of custs){ if(c.st!=='bill'||c.dead||c.nb||c.dash||c.cashT===undefined) continue; if(c.grp&&c.grp.m.find(m=>!m.dead&&m.st==='bill'&&!m.nb)!==c) continue;
+   const [sx,sy,sz]=toScreen(c.fx+.5,1.42,c.fy+.5);
+   if(sz>1||sx<16||sx>W-16||sy<24||sy>H-24||incUnder(HU,sx,sy)){ const cx=(L+R)/2, cy=(T+B)/2; let dx=sx-cx, dy=sy-cy; if(sz>1){ dx=-dx; dy=-dy; } const k=Math.min(Math.abs((dx>0?R-cx:cx-L)/(dx||1e-6)),Math.abs((dy>0?B-cy:cy-T)/(dy||1e-6))), ak='ac'+c.id;
+    let ar=incEls.get(ak); if(!ar){ ar=document.createElement('button'); ar.className='incA cash'; ar.dataset.goc=c.id; ar.setAttribute('aria-label','Aller encaisser'); ar.innerHTML='<u></u><i>'+INC_SVG.cash+'</i>'; incBox.appendChild(ar); incEls.set(ak,ar); }
+    used.add(ak); AS.push({el:ar,x:cx+dx*k,y:cy+dy*k}); ar.style.setProperty('--a',(Math.atan2(dy,dx)*180/Math.PI).toFixed(0)+'deg'); continue; }
+   const key='c'+c.id;
+   let el=incEls.get(key); if(!el){ el=document.createElement('button'); el.className='inc cash'; el.dataset.cash=c.id; el.setAttribute('aria-label','Encaisser'); el.innerHTML='<i>'+INC_SVG.cash+'</i>'; incBox.appendChild(el); incEls.set(key,el); }
+   used.add(key); const p=Math.max(0,Math.min(100,100*c.cashT/(c.cashT0||10))), urg=c.cashT<3.5, pk=Math.round(p)+'|'+urg; if(el._k!==pk){ el._k=pk; el.style.setProperty('--p',p.toFixed(0)+'%'); el.classList.toggle('urg',urg); el.classList.toggle('fast',p>50); }
+   PS.push({el,x:sx,y:sy}); }
   // deux bulles voisines (deux fourneaux côte à côte) ne se cachent pas l'une l'autre
   for(let it=0;it<4;it++) for(let i=0;i<PS.length;i++) for(let j=i+1;j<PS.length;j++){ const A=PS[i], B=PS[j]; let dx=B.x-A.x, dy=B.y-A.y; const d=Math.hypot(dx,dy); if(d>=56) continue; if(d<.5){ dx=1; dy=0; } const k=(56-Math.max(d,.5))/2/Math.max(d,.5); A.x-=dx*k; A.y-=dy*k; B.x+=dx*k; B.y+=dy*k; }
   for(const P of PS) P.el.style.transform=`translate(${(P.x-27).toFixed(1)}px,${(P.y-27).toFixed(1)}px)`;
@@ -291,4 +330,4 @@ function incFx(dt){
 }
 
 // réglages → Jeu : la difficulté
-function incDiffHTML(){ const d=incDiff(); return `<h3>Difficulté</h3><div class="row col"><div class="info"><div class="t">Le rythme du service</div><div class="sub">${['Détente : pas d’imprévus, des clients patients. Ton équipe gère tout, comme avant.','Normale : des imprévus que toi seul peux régler, de plus en plus souvent à mesure que le bistrot grandit.','Chef : des imprévus dès le début et plus souvent, des clients pressés et moins patients. Les médailles rapportent 50 % de plus.'][d]}</div></div>${oSeg('diff',[[0,'Détente'],[1,'Normale'],[2,'Chef']],d)}</div>`; }
+function incDiffHTML(){ const d=incDiff(); return `<h3>Difficulté</h3><div class="row col"><div class="info"><div class="t">Le rythme du service</div><div class="sub">${['Détente : pas d’imprévus, des clients patients. Ton équipe encaisse et gère tout, comme avant.','Normale : tu tiens la caisse et tu règles les imprévus, avec des heures de pointe à midi et le soir. Ça se corse à mesure que le bistrot grandit.','Chef : caisse pressée, imprévus en rafale, clients impatients, réputation fragile. Pour ceux qui trouvent ça encore trop facile. Les médailles rapportent 50 % de plus.'][d]}</div></div>${oSeg('diff',[[0,'Détente'],[1,'Normale'],[2,'Chef']],d)}</div>`; }

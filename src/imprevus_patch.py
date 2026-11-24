@@ -28,3 +28,14 @@ RX("Ton équipe s’en occupe, mais tu peux donner un coup de main (1 d’énerg
 RX("{q:'#sEn',t:'Ton énergie. Elle sert aux coups de feu et aux coups de main. Elle revient toute seule (1 toutes les 20 secondes) et fait le plein chaque matin.'}","{q:'#sEn',t:'Ton énergie. Elle sert aux coups de feu et aux coups de main. Elle revient toute seule (1 toutes les 20 secondes), chaque imprévu réglé en rend 1, et elle fait le plein chaque matin.'}")
 # une machine en panne n'est pas une machine qui manque : le conseiller se tait tant qu'elle n'est pas réparée
 RX("if(advE.b>.55) say('La cuisine attend son tour","if(advE.b>.55&&!incBroken.size&&!incSmoke.length) say('La cuisine attend son tour")
+# v0.99.4 : la caisse, c'est le joueur (l'équipe n'encaisse plus, et les clients ne paient plus tout seuls)
+RX("if(greetJob(a)||orderJob(a)||billJob(a)) return;","if(greetJob(a)||orderJob(a)||(!incCash()&&billJob(a))) return;")
+RX("   if(!c.billBy&&(c.billT>16||!hostOn())) finishMeal(c);\n   else if(c.billT>30){ c.billBy=null; finishMeal(c); }","   if(!incCash()){ if(!c.billBy&&(c.billT>16||!hostOn())) finishMeal(c);\n   else if(c.billT>30){ c.billBy=null; finishMeal(c); } }")
+RX("function momTip(c,price,sat){ if(warming||rush||sat<=55||mode!=='play') return;","function momTip(c,price,sat){ if(incCashing){ incCashTip(c,price); return; } if(warming||rush||sat<=55||mode!=='play') return;")
+# la réputation pèse sur la note
+RX("rating=clamp(.8+d+m+s-dirt,.5,5); rParts={d,m,s,dirt};","const rep=incRepV(); rating=clamp(.8+d+m+s-dirt-rep,.5,5); rParts={d,m,s,dirt,rep};")
+RX('html+=`<div class="row"><div class="emo">🧹</div><div class="info"><div class="t">Propreté</div>','html+=rParts.rep>=.05?`<div class="row"><div class="emo">😢</div><div class="info"><div class="t">Réputation</div><div class="sub">Malus : −${rParts.rep.toFixed(1).replace(\'.\',\',\')} (clients partis fâchés ou sans payer, imprévus ratés). Elle remonte toute seule quand le service est bien tenu, et une médaille d’or en efface une partie.</div></div></div>`:\'\';\n  html+=`<div class="row"><div class="emo">🧹</div><div class="info"><div class="t">Propreté</div>')
+# la pastille du jour annonce l'heure de pointe
+RX("d.closing?'Fermeture':svcNow().s)+'</em>'","d.closing?'Fermeture':incPeak()?'Affluence':svcNow().s)+'</em>'")
+# l'aide du jeu
+RX("Ton équipe s’en occupe, mais les imprévus","Ton équipe s’en occupe, sauf la caisse (en difficulté normale ou chef) : quand une table veut payer, touche sa bulle verte avant que le cercle se vide, sinon elle part sans payer. Les imprévus")

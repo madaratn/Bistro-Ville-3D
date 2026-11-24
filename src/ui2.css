@@ -916,3 +916,11 @@ body.rm .scEm{display:none}
 .incI.med svg{width:30px;height:30px}
 body.showroom #incov,body.cine #incov,body.scn #incov,body.watch #incov,body.visit #incov{opacity:0!important;pointer-events:none!important}
 body.scn #svr,body.cine #svr{opacity:0!important;pointer-events:none!important}
+/* v0.99.4 : la caisse */
+.inc.cash{--g:linear-gradient(180deg,#45c97f,#1f8f55)}
+.inc.cash::after{display:none}
+.inc.cash.fast{background:conic-gradient(#ffe066 var(--p,100%),rgba(255,255,255,.3) 0)}
+.inc.cash svg{width:29px;height:29px}
+.incI.cash{background:linear-gradient(180deg,#45c97f,#1f8f55)}
+.incI.rep{background:linear-gradient(180deg,#ff9a6b,#e5484d);font-size:22px;font-weight:900}
+.incA.cash{--g:linear-gradient(180deg,#45c97f,#1f8f55)}
