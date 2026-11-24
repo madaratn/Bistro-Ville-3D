@@ -756,7 +756,7 @@ function updFx(dt){
  for(const p of parts){ p.t-=dt; p.sp.position.x+=p.vx*dt; p.sp.position.y+=p.vy*dt; p.sp.position.z+=p.vz*dt; p.vy-=p.grow?-.1*dt:3*dt; const k=p.t/p.T; p.sp.material.opacity=Math.min(1,k*2)*(p.grow?.6:1); p.sp.scale.setScalar(p.size*(p.grow?1+(1-k)*p.grow:1)); if(p.t<=0){ fxRoot.remove(p.sp); p.sp.material.dispose(); } }
  parts=parts.filter(p=>p.t>0);
  steamAcc+=dt; if(steamAcc>.22){ steamAcc=0; for(const a of crew) if(a.job&&a.job.s==='work'&&a.job.st){ const S2=a.job.st, o=fObjs.get(S2.id); if(o&&o.g.userData.steamAt){ const v=o.g.localToWorld(_sv.copy(o.g.userData.steamAt)); spawnPart(GLOW,'#ffffff',v.x+rnd(-.04,.04),v.y,v.z+rnd(-.04,.04),rnd(-.05,.05),.45,rnd(-.05,.05),1.1,.18,2.2,false); } } }
- updCars(dt);
+ try{ incFx(dt); }catch(e){} updCars(dt);
 }
 
 /* --- synchronisation scène / jeu --- */
@@ -1035,7 +1035,7 @@ function render(){
  for(const l of streetLights){ l.userData.L.intensity=n*10; l.userData.head.material.emissiveIntensity=n*2.5; }
  headMat.emissiveIntensity=.2+n*2.5;
  if(vis){ scene.background.set('#120f1a'); scene.fog.color.copy(scene.background); hemi.intensity=.42; hemi.color.set('#ffe2c0'); sun.intensity=.9; sun.color.set('#ffd9a8'); scene.environmentIntensity=.4; inLight.intensity=0; belLight.intensity=75; } else belLight.intensity=0;
- edgePan(dt); viewShift(dt); watchCam(dt); updCam(); doorSign(T); viewUpdate(); gfxRender(); updOverlay(); wallMarks(); momDraw(); cineTick(); try{ evFxTick(dt); lifeTick(dt,T); }catch(e){ console.warn(e); } if(vis) belHot(); updRail(dt); updHandle(); kdsT-=dt; if(kdsT<=0){ kdsT=.4; drawKDS(); }
+ edgePan(dt); viewShift(dt); watchCam(dt); updCam(); doorSign(T); viewUpdate(); gfxRender(); updOverlay(); wallMarks(); momDraw(); try{ incDraw(); }catch(e){ console.warn(e); } cineTick(); try{ evFxTick(dt); lifeTick(dt,T); }catch(e){ console.warn(e); } if(vis) belHot(); updRail(dt); updHandle(); kdsT-=dt; if(kdsT<=0){ kdsT=.4; drawKDS(); }
 }
 
 /* --- entrées --- */

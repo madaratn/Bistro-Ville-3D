@@ -1,6 +1,6 @@
 **Jouer en ligne : https://madaratn.github.io/Bistro-Ville-3D/**
 
-# Chez Odette — prototype v0.99.2
+# Chez Odette — prototype v0.99.3
 
 Jeu mobile de gestion de restaurant (Android + iOS), inspiré des mécaniques de Restaurant City,
 avec un nom, des graphismes et des personnages 100 % originaux.
@@ -23,6 +23,19 @@ avec un nom, des graphismes et des personnages 100 % originaux.
 | Quartier | Bar avec terrasse, cinéma, galerie marchande, immeubles (fenêtres éclairées la nuit). Passants qui vont au cinéma, au bar, font les boutiques ou traversent le trottoir d'en face ; les clients arrivent du quartier et y repartent |
 | Ambiance | Carnet de commandes compact et repliable, bulles discrètes, rien qui clignote, mode « Regarder » (interface masquée, caméra qui se promène) |
 | Divers | Sauvegarde automatique, gains hors-ligne (jusqu'à 8 h), sons, tutoriel, réglages |
+
+### v0.99.3 : la salle a besoin de toi
+- **Les imprévus** : le service ne tourne plus tout seul. Une poêle qui flambe (trois coups pour l’éteindre, sinon le plat brûle et la fumée agace la salle), une machine en panne (quatre coups de clé, sinon le dépanneur passe et c’est cher), une flaque (un serveur qui glisse casse l’assiette, un client qui glisse râle), un client qui se plaint (sans excuses, il part fâché sans payer), un resquilleur qui file vers la porte. Chaque imprévu a sa bulle et son cercle qui se vide ; une flèche au bord de l’écran montre ceux qu’on ne voit pas, et la toucher y emmène la caméra.
+- **Les clients pressés** : badge doré, patience courte. Placés, servis et encaissés vite (coups de main), ils paient presque le double.
+- **La médaille du service** : à la fin du petit-déjeuner, du midi, de l’après-midi et de la soirée, une médaille de bronze, d’argent ou d’or selon trois critères : personne de fâché, 80 % des imprévus réglés, clients ravis à 75 %. Elle rapporte des pièces et de l’expérience. Le bilan du soir compte les imprévus réglés et les médailles.
+- **La pression monte avec le bistrot** : flaques et réclamations au niveau 2, feux et clients pressés au niveau 3, pannes au niveau 4, resquilleurs au niveau 5. Plus le niveau grimpe, plus les imprévus sont fréquents et plus les clients sont impatients et nombreux.
+- Chaque imprévu réglé rend 1 d’énergie et compte comme un petit geste ; la note qui baisse se met à trembler ; deux nouvelles missions du jour (régler des imprévus, décrocher l’or) ; la bulle « cuisson parfaite » change d’icône pour ne pas ressembler à un feu.
+- **Réglages → Jeu → Difficulté** : Détente (le service d’avant, sans imprévus), Normale (par défaut), Chef (tout dès le début, plus souvent, clients moins patients, médailles +50 %).
+- Équilibrage (simulation de 6 jours) : un joueur qui règle 9 imprévus sur 10 gagne environ 20 % de plus qu’avant ; un joueur qui ne touche à rien gagne environ 5 % de moins, perd 3 à 40 clients fâchés par jour au lieu de 0 à 4, et ne décroche jamais l’or.
+
+Limites : les imprévus n’existent pas pendant le tutoriel du premier jour ; ils se mettent en pause quand un menu est ouvert ou en mode « Regarder » ; en vitesse ×2 ou ×3, ils arrivent deux ou trois fois plus souvent. Essayé sur navigateur en taille téléphone, pas sur un vrai téléphone.
+
+Code : `src/imprevus.js` (imprévus, clients pressés, médailles, bulles et flèches), `src/imprevus_patch.py` (branchements dans la boucle du jeu, réglages, bilan, missions).
 
 ### v0.99.2 : murs et sols
 - **40 nouveaux sols** (53 en tout), avec de vrais motifs et un léger relief : bâtons rompus, point de Hongrie, chevrons, parquet tressé, parquet Versailles, pont de bateau, bambou, tomettes hexagonales, cabochons, damier en diagonale, mosaïques, terrazzo, marbres, carreaux de ciment, écailles, moquettes, tatami, tôle larmée, dalles de pierre, pavés, gazon, sable fin.
