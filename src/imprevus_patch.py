@@ -39,3 +39,5 @@ RX('html+=`<div class="row"><div class="emo">🧹</div><div class="info"><div cl
 RX("d.closing?'Fermeture':svcNow().s)+'</em>'","d.closing?'Fermeture':incPeak()?'Affluence':svcNow().s)+'</em>'")
 # l'aide du jeu
 RX("Ton équipe s’en occupe, mais les imprévus","Ton équipe s’en occupe, sauf la caisse (en difficulté normale ou chef) : quand une table veut payer, touche sa bulle verte avant que le cercle se vide, sinon elle part sans payer. Les imprévus")
+# v0.99.6 : filet de sécurité, un voisin qui attend l'addition depuis trop longtemps paie au lieu de partir (sinon le chapitre ne se termine jamais)
+RX("c.age=(c.age||0)+dt; if(c.age>260&&!['leave','pass','queue','standUp'].includes(c.st)){","c.age=(c.age||0)+dt; if(c.age>260&&c.nb&&c.st==='bill'){ c.age=-999; c.billBy=null; c.cashT=undefined; finishMeal(c); return; } if(c.age>260&&!['leave','pass','queue','standUp'].includes(c.st)){")

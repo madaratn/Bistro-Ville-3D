@@ -186,9 +186,11 @@ function incPuddle(I){ if(!incPG) incPG=new THREE.CircleGeometry(.5,24);
  g.rotation.y=Math.random()*6.28; g.position.set(I.x+.5,.012,I.y+.5); fxRoot.add(g); I.g=g; }
 
 // ---------- la caisse : le joueur encaisse ----------
-function incCashTick(rt,live){ if(!incCash()) return; for(const c of custs){ if(c.st!=='bill'||c.dead||c.nb||c.dash) continue;
+function incCashTick(rt,live){ if(!incCash()) return; for(const c of custs){ if(c.st!=='bill'||c.dead||c.dash) continue;
   if(c.cashT===undefined){ c.cashT=c.cashT0=incCashTime()*(incS().seen.cash?1:1.8); incTeach('cash'); }
-  if(!live) continue; c.cashT-=rt; if(c.cashT<=0) incUnpaid(c); } }
+  if(!live) continue; c.cashT-=rt; if(c.cashT<=0){ if(c.nb) incNbPays(c); else incUnpaid(c); } } }
+// un voisin (ou l'invité d'un chapitre) ne part jamais sans payer : il laisse l'argent sur la table, simplement sans le pourboire du patron rapide
+function incNbPays(c){ c.cashT=undefined; c.billBy=null; try{ finishMeal(c); }catch(e){ console.warn(e); } }
 function incUnpaid(c){ const v=incPrice(c), D=incDay(); c.cashT=undefined; D.unp=(D.unp||0)+1; floatAt(c.fx,c.fy-.5,'Parti sans payer ! −'+v,'#e5484d'); c.say='Personne pour encaisser ?'; c.sayT=1.6; angry(c); }
 function incCashTap(c){ if(!c||!incLive()) return; const grp=(c.grp?c.grp.m:[c]).filter(m=>!m.dead&&m.st==='bill'); if(!grp.length) return;
  const fast=grp.every(m=>m.cashT===undefined||m.cashT>(m.cashT0||10)*.5);
@@ -289,7 +291,7 @@ function incDraw(){
     if(!ar){ ar=document.createElement('button'); ar.className='incA '+I.k; ar.dataset.go=I.id; ar.setAttribute('aria-label','Aller voir : '+INC_N[I.k]); ar.innerHTML='<u></u><i>'+INC_SVG[I.k]+'</i>'; incBox.appendChild(ar); incEls.set(ak,ar); }
     used.add(ak); AS.push({el:ar,x:ax,y:ay}); ar.style.setProperty('--a',(Math.atan2(dy,dx)*180/Math.PI).toFixed(0)+'deg'); }
   }
-  if(incCash()) for(const c of custs){ if(c.st!=='bill'||c.dead||c.nb||c.dash||c.cashT===undefined) continue; if(c.grp&&c.grp.m.find(m=>!m.dead&&m.st==='bill'&&!m.nb)!==c) continue;
+  if(incCash()) for(const c of custs){ if(c.st!=='bill'||c.dead||c.dash||c.cashT===undefined) continue; if(c.grp&&c.grp.m.find(m=>!m.dead&&m.st==='bill')!==c) continue;
    const [sx,sy,sz]=toScreen(c.fx+.5,1.42,c.fy+.5);
    if(sz>1||sx<16||sx>W-16||sy<24||sy>H-24||incUnder(HU,sx,sy)){ const cx=(L+R)/2, cy=(T+B)/2; let dx=sx-cx, dy=sy-cy; if(sz>1){ dx=-dx; dy=-dy; } const k=Math.min(Math.abs((dx>0?R-cx:cx-L)/(dx||1e-6)),Math.abs((dy>0?B-cy:cy-T)/(dy||1e-6))), ak='ac'+c.id;
     let ar=incEls.get(ak); if(!ar){ ar=document.createElement('button'); ar.className='incA cash'; ar.dataset.goc=c.id; ar.setAttribute('aria-label','Aller encaisser'); ar.innerHTML='<u></u><i>'+INC_SVG.cash+'</i>'; incBox.appendChild(ar); incEls.set(ak,ar); }

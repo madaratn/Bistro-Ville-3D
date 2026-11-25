@@ -1,6 +1,6 @@
 **Jouer en ligne : https://madaratn.github.io/Bistro-Ville-3D/**
 
-# Chez Odette — prototype v0.99.5
+# Chez Odette — prototype v0.99.6
 
 Jeu mobile de gestion de restaurant (Android + iOS), inspiré des mécaniques de Restaurant City,
 avec un nom, des graphismes et des personnages 100 % originaux.
@@ -23,6 +23,11 @@ avec un nom, des graphismes et des personnages 100 % originaux.
 | Quartier | Bar avec terrasse, cinéma, galerie marchande, immeubles (fenêtres éclairées la nuit). Passants qui vont au cinéma, au bar, font les boutiques ou traversent le trottoir d'en face ; les clients arrivent du quartier et y repartent |
 | Ambiance | Carnet de commandes compact et repliable, bulles discrètes, rien qui clignote, mode « Regarder » (interface masquée, caméra qui se promène) |
 | Divers | Sauvegarde automatique, gains hors-ligne (jusqu'à 8 h), sons, tutoriel, réglages |
+
+### v0.99.6 : les voisins paient leur addition
+- **Corrigé** : depuis la v0.99.4 (le joueur tient la caisse), les voisins et les invités des chapitres n’avaient pas de bulle d’addition. Ils restaient assis trois minutes, repartaient sans payer, et revenaient sans cesse : le serveur les accueillait et leur resservait à boire en boucle. Les chapitres « La table de Monsieur Albert », « La première échéance », « La critique » et « La veille » ne pouvaient plus se terminer en difficulté normale ou chef, et l’amitié des voisins n’avançait plus.
+- Les voisins ont maintenant leur bulle verte comme les autres clients (encaisser vite donne le pourboire). Si personne ne les encaisse à temps, ils laissent l’argent sur la table et repartent contents : un voisin ne part jamais sans payer.
+- Vérifié sur les quatre chapitres à invité : chaque étape se termine, l’invité ne revient plus en boucle.
 
 ### v0.99.5 : les succès
 - **40 succès à quatre paliers** (bronze, argent, or, diamant), rangés en cinq familles : Service, Imprévus, Cuisine, Déco, Quartier. Exemples : clients servis, tables encaissées, encaissements rapides, séries de gestes, feux éteints, pannes réparées, médailles d’or (et d’affilée), plats maîtrisés, recettes au niveau 10, sols et murs achetés, tapis posés, note maximale, habitués conquis, chapitres de l’histoire, journées terminées.
