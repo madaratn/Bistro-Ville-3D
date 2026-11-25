@@ -133,7 +133,7 @@ function incTap(id){ const I=incs.find(x=>x.id===id); if(!I||I.done||!incLive())
  if(I.n<I.need){ incSfx('tap'); if(I.k==='fire') sparkle(gx,gy,4,'#9fe0ff'); else if(I.k==='broke') sparkle(gx,gy,3,'#d8dde3'); return; }
  incWin(I,gx,gy);
 }
-function incWin(I,gx,gy){ I.done=true; I.won=true; incFinish(I);
+function incWin(I,gx,gy){ I.done=true; I.won=true; incFinish(I); try{ achIncWin(I); }catch(e){}
  const S2=incS(), D=incDay(); S2.ok++; D.ok++; (S2.t[I.k]||(S2.t[I.k]=[0,0]))[0]++; incSvAdd('ok'); dailyAdd('inc',1);
  try{ energyTick(); state.en.v=Math.min(EN_MAX,state.en.v+1); }catch(e){}
  addXP(2);
@@ -162,7 +162,7 @@ function incDashPay(c,gx,gy){ const price=incPrice(c); if(!price){ floatAt(gx,gy
  const dp=drinkPay(c), bonus=Math.max(1,Math.round(price*.25)); earn(price+bonus); dayAdd('food',price-dp); dayAdd('drink',dp); dayAdd('tip',bonus);
  state.day.served++; state.served++; dailyAdd('served',1); dailyAdd('earned',price+bonus); addXP(3+Math.round(price/12));
  c.order=null; c.dash=2; c.say='Oups… pardon !'; c.sayT=1.6; c.mood='happy'; try{ coinFly(c.fx,c.fy,price+bonus); }catch(e){} floatAt(gx,gy,'Rattrapé ! +'+(price+bonus)+' · +1 ⚡',null,true); sfx('coin'); }
-function incGest(gx,gy){ momCombo.n=simT-momCombo.t<10*gameSpeed()?momCombo.n+1:1; momCombo.t=simT;
+function incGest(gx,gy){ momCombo.n=simT-momCombo.t<10*gameSpeed()?momCombo.n+1:1; momCombo.t=simT; try{ achCombo(momCombo.n); }catch(e){}
  if(momCombo.n>=3&&momCombo.n%3===0){ const b=momCombo.n/3; earn(b); dayAdd('tip',b); floatAt(gx,gy-.7,'Série ×'+momCombo.n+'  +'+b,null,true); }
  dailyAdd('gest',1); xqAdd('gest'); const D=dailyCheck(); if((D.c.gest||0)>=GEST_N&&!D.gestR){ D.gestR=true; earn(20); toast('12 petits gestes : +20 pièces. Tes clients adorent ça !'); } }
 
@@ -194,6 +194,7 @@ function incCashTap(c){ if(!c||!incLive()) return; const grp=(c.grp?c.grp.m:[c])
  const fast=grp.every(m=>m.cashT===undefined||m.cashT>(m.cashT0||10)*.5);
  if(rush){ try{ spendHelp(); }catch(e){} }
  incCashing=fast?2:1; try{ for(const m of grp){ m.billBy=null; m.cashT=undefined; finishMeal(m); } }catch(e){ console.warn(e); } finally{ incCashing=0; }
+ try{ achCash(fast); }catch(e){}
  dailyAdd('help',1); incGest(c.fx,c.fy); vib(8); hud(); try{ goalDraw(true); }catch(e){} }
 // le pourboire du patron qui encaisse lui-même : plus gros s'il est rapide (remplace la bulle de pourboire)
 function incCashTip(c,price){ const b=Math.max(1,Math.round(price*(incCashing===2?.25:.1))); earn(b); dayAdd('tip',b); dailyAdd('earned',b); floatAt(c.fx,c.fy-.6,(incCashing===2?'Rapide ! +':'+')+b,null,true); }
@@ -204,7 +205,7 @@ function incVipTick(dt){ for(const c of custs){
   c.vk=1; if(!incOn()||!incUnl('vip')||c.grp||c.nb||c.kidF||c.st==='pass'||!['enter','queue','walkIn','look','host'].includes(c.st)) continue;
   if(Math.random()<.05+.06*Math.min(1,incP())+(incDiff()===2?.04:0)){ c.vip=1; incTeach('vip'); } } }
 function incMeal(c,price,sat){ if(warming||cine) return; incSvAdd('meal',sat);
- if(c&&c.vip&&!c.vipDone){ c.vipDone=1; if(sat>=65){ const b=Math.max(2,Math.round(price*.8*(incDiff()===2?1.25:1))); earn(b); dayAdd('tip',b); dailyAdd('earned',b); floatAt(c.fx,c.fy-.9,'Client pressé ravi ! +'+b,null,true); incSvAdd('vip'); } else floatAt(c.fx,c.fy-.9,'Le client pressé a trop attendu','#8a8f96'); } }
+ if(c&&c.vip&&!c.vipDone){ c.vipDone=1; if(sat>=65){ const b=Math.max(2,Math.round(price*.8*(incDiff()===2?1.25:1))); earn(b); dayAdd('tip',b); dailyAdd('earned',b); floatAt(c.fx,c.fy-.9,'Client pressé ravi ! +'+b,null,true); incSvAdd('vip'); try{ stAdd('vip'); }catch(e){} } else floatAt(c.fx,c.fy-.9,'Le client pressé a trop attendu','#8a8f96'); } }
 function incLost(c){ if(warming||cine) return; incSvAdd('lost'); rateHit(); incRepAdd(.035); if(c&&c.vip) c.vipDone=1; }
 
 // ---------- la médaille de chaque service ----------
@@ -223,7 +224,7 @@ function incSvEnd(s){ const tot=s.n+s.lost; if(tot<4) return;
  const n=C.filter(x=>x.ok).length, L=state.level||1, rw=Math.round([0,1,2,4][n]*(8+3*L)*(incDiff()===2?1.5:1));
  if(rw) earn(rw); if(n) addXP([0,2,4,8][n]);
  const D=incDay(), S2=incS(); if(n>=2) state.rep=Math.max(0,(state.rep||0)-(n===3?.25:.1)); if(n===3){ D.o++; S2.gold++; S2.gs++; S2.gb=Math.max(S2.gb,S2.gs); dailyAdd('gold',1); } else { if(n===2) D.a++; else if(n===1) D.b++; S2.gs=0; }
- incReport={sv:SV.n,n,C,rw,gs:S2.gs,shown:false}; }
+ incReport={sv:SV.n,n,C,rw,gs:S2.gs,shown:false}; try{ achSv(s,n); }catch(e){} }
 const INC_MED=['Service à revoir','Médaille de bronze','Médaille d’argent','Médaille d’or'], INC_MEDC=['#9aa0a6','#c8834a','#b9c3cc','#f2b33d'];
 function incRepShow(){ const R=incReport; if(!R) return; R.shown=true; let e=document.getElementById('svr');
  if(!e){ e=document.createElement('button'); e.id='svr'; document.body.appendChild(e); e.addEventListener('click',()=>{ e.classList.remove('on'); }); }

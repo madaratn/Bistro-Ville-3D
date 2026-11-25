@@ -20,7 +20,7 @@ function mpNPC(){ const wk=mpWeekN(), prog=Math.min(1,Math.max(.02,((Date.now()/
  return MP.npc=L; }
 // ---------- lire la fiche d'un autre joueur : on ne fait confiance à rien ----------
 function mpClean(x){ if(!x||typeof x.id!=='string'||x.id.length>80) return null; const num=(v,a,b,d)=>typeof v==='number'&&isFinite(v)?Math.min(b,Math.max(a,Math.floor(v))):d, o={id:x.id};
- o.n=mpTxt(x.n,18)||'Bistrot'; o.b=mpTxt(x.b,12); o.lv=num(x.lv,1,99,1); o.st=num(x.st,0,50,30); o.sv=num(x.sv,0,1e9,0); o.d=num(x.d,0,5,0); o.sl=num(x.sl,0,MP_SLOTS-1,0); o.p=num(x.p,0,1e7,0); o.wk=mpTxt(x.wk,12); o.g=mpTxt(x.g,80); o.on=num(x.on,0,4e12,0);
+ o.n=mpTxt(x.n,18)||'Bistrot'; o.b=mpTxt(x.b,12); o.lv=num(x.lv,1,99,1); o.rk=num(x.rk,0,9,0); o.st=num(x.st,0,50,30); o.sv=num(x.sv,0,1e9,0); o.d=num(x.d,0,5,0); o.sl=num(x.sl,0,MP_SLOTS-1,0); o.p=num(x.p,0,1e7,0); o.wk=mpTxt(x.wk,12); o.g=mpTxt(x.g,80); o.on=num(x.on,0,4e12,0);
  o.ft=Array.isArray(x.ft)?[num(x.ft[0],0,FLOORS.length-1,0),num(x.ft[1],0,WALLS.length-1,0)]:[0,0];
  o.lw=Array.isArray(x.lw)&&x.lw.length>=4?[mpTxt(x.lw[0],12),num(x.lw[1],0,1e7,0),num(x.lw[2],0,5,0),mpTxt(x.lw[3],80)]:null;
  o.ms=Array.isArray(x.ms)?x.ms.slice(-6).filter(m=>Array.isArray(m)&&typeof m[0]==='number').map(m=>[m[0],mpTxt(m[1],140)]).filter(m=>m[1]):[];
@@ -46,7 +46,7 @@ function mpDistrict(d,last){ const T={}, lw=mpWk(Date.now()-7*864e5); for(const 
  return Object.keys(T).map(g=>[g,T[g]]).filter(x=>x[1]>0&&MP.gById.has(x[0])).sort((a,b)=>b[1]-a[1]); }
 function mpTip(){ try{ const m=state.mp; if(!m||!m.in||!m.g||!MP.all.length) return 1; const o=mpDistrict(m.d,true)[0]; return o&&o[0]===m.g?1.05:1; }catch(e){ return 1; } }
 // ---------- ma fiche ----------
-function mpDoc(){ const m=mpS(); return {v:1,n:mpTxt(state.name,18),b:mpTxt(state.me&&state.me.n,12),lv:state.level,st:Math.round((typeof rating==='number'?rating:(state.sat||70)/20)*10),sv:state.served||0,ft:[state.floor,state.wall],d:m.d||0,sl:m.sl||0,g:m.g||'',wk:m.wk||mpWk(),p:m.p||0,lw:m.lw||null,ms:m.ms||[],hp:m.hp||null,hd:m.hd||{},lk:m.lk||{},on:Math.floor(Date.now()/3e5)*3e5}; }
+function mpDoc(){ const m=mpS(); return {v:1,n:mpTxt(state.name,18),b:mpTxt(state.me&&state.me.n,12),lv:state.level,rk:(typeof achRk==='function'?achRk():0),st:Math.round((typeof rating==='number'?rating:(state.sat||70)/20)*10),sv:state.served||0,ft:[state.floor,state.wall],d:m.d||0,sl:m.sl||0,g:m.g||'',wk:m.wk||mpWk(),p:m.p||0,lw:m.lw||null,ms:m.ms||[],hp:m.hp||null,hd:m.hd||{},lk:m.lk||{},on:Math.floor(Date.now()/3e5)*3e5}; }
 function mpTick(){ const m=state.mp; if(!m||!m.in) return; const wk=mpWk(); if(m.wk!==wk){ if(m.wk===mpWk(Date.now()-7*864e5)) m.lw=[m.wk,m.p||0,m.d||0,m.g||'']; m.wk=wk; m.p=0; m.hp=null; }
  const sv=state.served||0; if(typeof m.s0!=='number'||m.s0>sv) m.s0=sv; if(sv>m.s0){ m.p=(m.p||0)+(sv-m.s0); m.s0=sv; } }
 function mpSync(now){ if(!NET.ready||!mpJoined()||MP.vis||showBak) return; mpTick(); const d=mpDoc(), on=d.on; delete d.on; const key=JSON.stringify(d); d.on=on; netPut('players/'+NET.uid,d,key); const t=Date.now();
@@ -90,7 +90,7 @@ function mpVisit(id){ const p=MP.byId.get(id); if(!p||mode!=='play'||visit.on||M
 function mpVisExit(){ const B=showBak; if(!B||!MP.vis) return; Object.assign(state,{furn:B.furn,floor:B.floor,wall:B.wall,tiles:B.tiles,wallObj:B.wallObj,rugs:B.rugs||[],size:B.size,kz:B.kz,name:B.name}); crew=B.crew; custs=B.custs; showBak=null; MP.vis=null; setSize(); state.tv=(state.tv||0)+1; mode='play'; document.body.classList.remove('showroom','mpvis'); const b=$('#vbar'); if(b) b.classList.add('hide'); try{ centerCam(); }catch(e){} hud(); try{ mpSync(); }catch(e){} openPanel('ville','carte'); }
 function mpVisBar(){ let b=$('#vbar'); if(!b){ b=document.createElement('div'); b.id='vbar'; document.body.appendChild(b); b.addEventListener('click',e=>{ const t=e.target.closest('[data-vb]'); if(!t) return; audioInit(); if(t.dataset.vb==='quit') mpVisExit(); else if(t.dataset.vb==='like'){ mpLike(MP.vis.id); mpVisBar(); } }); }
  const p=MP.vis.p, g=p.g&&MP.gById.get(p.g), liked=mpLiked(p.id); b.classList.remove('hide');
- b.innerHTML=`<div class="vbT"><small>${p.npc?'Un voisin du jeu':'En visite chez'}</small><b>${mpEsc(p.n)}</b><span>Niveau ${p.lv}${g?' · '+mpEsc(g.n):''}</span></div><div class="vbB">${p.me?'':`<button data-vb="like" class="${liked?'on':''}" ${liked?'disabled':''}>♥ ${liked?'Coup de cœur donné':'Coup de cœur'}</button>`}<button data-vb="quit" class="q">Rentrer chez moi</button></div>`; }
+ b.innerHTML=`<div class="vbT"><small>${p.npc?'Un voisin du jeu':'En visite chez'}</small><b>${mpEsc(p.n)}</b><span>Niveau ${p.lv}${p.rk?' · '+ACH_RK[p.rk][0]:''}${g?' · '+mpEsc(g.n):''}</span></div><div class="vbB">${p.me?'':`<button data-vb="like" class="${liked?'on':''}" ${liked?'disabled':''}>♥ ${liked?'Coup de cœur donné':'Coup de cœur'}</button>`}<button data-vb="quit" class="q">Rentrer chez moi</button></div>`; }
 const mpDay=()=>Math.floor(Date.now()/864e5);
 const mpLiked=id=>{ const m=state.mp; return !!(m&&m.lk&&m.lk[id]===mpDay()); };
 const mpLikes=id=>MP.all.reduce((s,p)=>s+(p.lk&&p.lk[id]?1:0),0)+(MP.byId.get(id)&&MP.byId.get(id).npc?(+String(id).replace(/\D/g,'')*7)%23:0);

@@ -1,6 +1,6 @@
 **Jouer en ligne : https://madaratn.github.io/Bistro-Ville-3D/**
 
-# Chez Odette — prototype v0.99.4
+# Chez Odette — prototype v0.99.5
 
 Jeu mobile de gestion de restaurant (Android + iOS), inspiré des mécaniques de Restaurant City,
 avec un nom, des graphismes et des personnages 100 % originaux.
@@ -23,6 +23,18 @@ avec un nom, des graphismes et des personnages 100 % originaux.
 | Quartier | Bar avec terrasse, cinéma, galerie marchande, immeubles (fenêtres éclairées la nuit). Passants qui vont au cinéma, au bar, font les boutiques ou traversent le trottoir d'en face ; les clients arrivent du quartier et y repartent |
 | Ambiance | Carnet de commandes compact et repliable, bulles discrètes, rien qui clignote, mode « Regarder » (interface masquée, caméra qui se promène) |
 | Divers | Sauvegarde automatique, gains hors-ligne (jusqu'à 8 h), sons, tutoriel, réglages |
+
+### v0.99.5 : les succès
+- **40 succès à quatre paliers** (bronze, argent, or, diamant), rangés en cinq familles : Service, Imprévus, Cuisine, Déco, Quartier. Exemples : clients servis, tables encaissées, encaissements rapides, séries de gestes, feux éteints, pannes réparées, médailles d’or (et d’affilée), plats maîtrisés, recettes au niveau 10, sols et murs achetés, tapis posés, note maximale, habitués conquis, chapitres de l’histoire, journées terminées.
+- **12 succès secrets**, cachés derrière un indice : éteindre un feu en moins d’une seconde, rattraper un resquilleur au ras de la porte, encaisser 6 tables en 10 secondes, régler 6 imprévus en 30 secondes, une journée sans un seul client fâché, quatre médailles d’or le même jour, la salle comble…
+- **Le moment du déblocage** : une bannière tombe du haut de l’écran avec le badge qui tourne, des rayons, des confettis et une petite fanfare (plus grande pour l’or, le diamant et les secrets). Quand il ne manque presque rien (90 %), un petit « Presque ! » montre ce qu’il reste.
+- **Récupérer** : chaque palier se récupère d’un toucher dans le panneau Succès (bouton doré sur le côté, avec le nombre de récompenses en attente, et dans « Plus »). Les pièces s’envolent vers le compteur ; « Tout récupérer » les enchaîne en cascade. Bronze 60 pièces, argent 150, or 400, diamant 1 000, secret 300, plus de l’expérience.
+- **Le rang de chef** : chaque palier rapporte des points (5, 10, 20, 40 ; 25 pour un secret). Dix rangs, de Commis à Immortel. Chaque nouveau rang ouvre un coffre (pièces, expérience, 10 d’énergie) et une **déco exclusive** introuvable autrement : diplôme d’apprenti, tapis d’honneur, toque dorée, extincteur d’or, plaque des trois étoiles, tapis étoilé d’or, néon « Légende », coupe de Paris, tapis de diamant. Elles apparaissent verrouillées dans l’atelier pour donner envie.
+- En ville, le rang de chef s’affiche sur la fiche des autres joueurs et dans le bandeau de visite.
+- Les parties en cours reçoivent d’un coup tous les paliers déjà mérités, à récupérer.
+- Rythme mesuré en simulation (6 jours) : environ 7 paliers le premier jour, 10 à 13 les deux jours suivants, puis 4 à 7 par jour ; le rang 4 (Sous-chef) vers le cinquième jour pour un joueur attentif. Les récompenses ajoutent environ 10 à 20 % aux recettes d’un joueur actif après les premiers jours.
+
+Code : `src/succes.js` (succès, secrets, rangs, bannière, panneau, décos exclusives), `src/succes_patch.py` (branchements).
 
 ### v0.99.4 : la caisse, c’est toi
 - **Le joueur tient la caisse** (difficultés normale et chef) : l’équipe n’encaisse plus et les clients ne paient plus tout seuls. Quand une table veut payer, une bulle verte apparaît avec un cercle qui se vide ; sans toi, la table part sans payer et fâchée. Encaisser vite (cercle encore à moitié plein) rapporte un pourboire de 25 % du repas, sinon 10 %.
